@@ -40,10 +40,10 @@ Vue.component('blog-context',{
 			console.log(href);
 			axios.get(href?`./${href}/post.md`:'./index.md')
 				.then(function(result){
-					console.log(result);
+					this.context=marked(result);
 				})
 				.catch(function(reason){
-					console.log(reason);
+					this.context=`<h1>GG!</h1><p>reason:${reason}</p>`;
 				});
 			console.log(`href => ${href}`);
 		}
