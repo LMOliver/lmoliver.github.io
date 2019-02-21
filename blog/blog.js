@@ -157,7 +157,7 @@ Vue.component('demo-button',{
 	data:function(){
 		return {
 			moCount:0,
-			moValue:1e9,
+			moValue:0,
 			advancedMoLevel:0,
 			moers:0,
 			churchs:0,
