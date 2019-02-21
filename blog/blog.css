@@ -10,4 +10,11 @@ header{
 	border:solid darkblue;
 	border-width: 0 0 2px;
 	box-shadow: 0 0 3px black;
+	z-index: 1;
+}
+img{
+	max-width: 100%;
+}
+#page{
+	padding: 30px 0;
 }
