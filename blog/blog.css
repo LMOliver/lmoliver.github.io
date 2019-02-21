@@ -1,0 +1,13 @@
+body{
+	margin: 0;
+}
+header{
+	width: 100%;
+	position: -webkit-sticky;
+	position: sticky;
+	top:0;
+	background-color: white;
+	border:solid darkblue;
+	border-width: 0 0 2px;
+	box-shadow: 0 0 3px black;
+}
