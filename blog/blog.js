@@ -75,18 +75,23 @@ Vue.component('demo-button',{
 	template:`
 		<div style="display:inline;">
 			<button @click="moZZD" style="color:red">{{moText}}</button>
-			<span>{{moValueText}}</span>
-			<div>
-				<button @click="buyAdvancedMo" v-if="moCount>=10"
+			<span>{{moValueTag}}</span>
+			<div v-if="moCount>=10">
+				<button @click="buyAdvancedMo"
 				:disabled="moValue<advancedMoCost">{{advancedMoText}}</button>
 			</div>
-			<div>
-				<button @click="buyMoer" v-if="advancedMoLevel>=10"
+			<div v-if="advancedMoLevel>=10">
+				<button @click="buyMoer"
 				:disabled="moValue<moerCost">{{moerText}}</button>
 			</div>
-			<div>
-				<button @click="buyChurch" v-if="advancedMoLevel>=20"
+			<div v-if="advancedMoLevel>=20">
+				<button @click="buyChurch"
 				:disabled="moers<churchCost">{{churchText}}</button>
+			</div>
+			<div v-if="churchs>=5">
+				<button @click="buyXY"
+				:disabled="moValue<=XYCost">{{XYText}}</button>
+				<span>{{XYTag}}</span>
 			</div>
 		</div>`,
 	methods:{
@@ -106,6 +111,10 @@ Vue.component('demo-button',{
 			this.moers-=this.churchCost;
 			this.churchs+=1;
 		},
+		buyXY(){
+			this.moValue-=this.XYCost;
+			this.XY+=1;
+		},
 	},
 	computed:{
 		moDelta(){
@@ -114,20 +123,20 @@ Vue.component('demo-button',{
 		moText(){
 			return '膜拜ZZD'+(this.moDelta>1?(this.moDelta+'次'):'');
 		},
-		moValueText(){
+		moValueTag(){
 			return this.moValue>0?('您已膜拜'+this.moValue+'次'):'';
 		},
 		advancedMoText(){
 			return `真诚膜拜${this.advancedMoLevel>0?`Lv.${this.advancedMoLevel}`:''} [${this.advancedMoCost}次膜拜]`;
 		},
 		advancedMoCost(){
-			return Math.floor(10*Math.pow(1.3,this.advancedMoLevel)/Math.pow(4,this.churchs));
+			return Math.floor(10*Math.pow(1.3,this.advancedMoLevel)/Math.pow(5,this.churchs));
 		},
 		moerText(){
 			return `信徒${this.moers>0?`*${this.moers}`:''} [${this.moerCost}次膜拜]`;
 		},
 		moerCost(){
-			return Math.floor(100*Math.pow(1.8,this.moers));
+			return Math.floor(100*Math.pow(1.6,this.moers)*Math.pow((1e3)/(1e3+this.XY),2.5));
 		},
 		churchText(){
 			return `教堂${this.churchs>0?`*${this.churchs}`:''} [${this.churchCost}位信徒]`;
@@ -135,14 +144,24 @@ Vue.component('demo-button',{
 		churchCost(){
 			return Math.floor(5+Math.pow(this.churchs,1.2));
 		},
+		XYText(){
+			return `转化信仰[${this.XYCost}次膜拜]`;
+		},
+		XYTag(){
+			return this.XY>0?(`信仰:${this.XY}`):'';
+		},
+		XYCost(){
+			return Math.ceil(10000/this.churchs);
+		},
 	},
 	data:function(){
 		return {
 			moCount:0,
-			moValue:0,
+			moValue:1e9,
 			advancedMoLevel:0,
 			moers:0,
 			churchs:0,
+			XY:0,
 		};
 	},
 });
