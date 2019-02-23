@@ -2,7 +2,7 @@
 
 [洛谷模板题](https://www.luogu.org/problemnew/show/P3690)
 
-```
+```cpp
 #include<bits/stdc++.h>
 using namespace std;
 #define OK (printf("%s %d OK\n",__FUNCTION__,__LINE__))

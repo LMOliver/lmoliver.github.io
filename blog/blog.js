@@ -18,6 +18,7 @@ Vue.component('side-bar',{
 		return {
 			style:{
 				width:'15%',
+				margin:'0 1.5%',
 				float:this.pos,
 			},
 		};
@@ -30,7 +31,7 @@ Vue.component('side-block',{
 	data:function(){
 		return {
 			style:{
-				width:'calc(100% - 20px)',
+				width:'calc(100% - 24px)',
 			},
 			classObj:{
 				contains:true,
@@ -70,9 +71,6 @@ Vue.component('post-refence',{
 					middle:'inline-block',
 					large:'block',
 				}[this.size]||'inline-block'),
-				margin: 0,
-				border:'2px solid black',
-				'border-radius':'5px',
 			},
 			data:{
 				title:'Loading...',
@@ -100,24 +98,21 @@ Vue.component('post-refence',{
 });
 
 Vue.component('blog-context',{
-	template:'<article :style="style"><div></div></article>',
+	template:'<article :style="style" :class="classObj"><div></div></article>',
 	props:['href'],
 	data:function(){
 		return {
 			style:{
-				width:'64%',
-				position:'relative',
-				left:'calc((100% - 64%) / 2 - 12px)',
-				border:'2px solid black',
-				'border-radius':'5px',
-				padding:'10px',
+			},
+			classObj:{
+				contains:true,
 			},
 			context:'',
 			vue:null,
 		};
 	},
-	watch:{
-		href(href){
+	methods:{
+		onHrefUpdate(href){
 			this.context='<p>Loading...</p>';
 			makeTitle('Loading...');
 			console.log(`href => ${href}`);
@@ -142,6 +137,12 @@ Vue.component('blog-context',{
 				makeTitle('Error!')
 				this.context=`<h1>Error!</h1><p>${reason}</p><a href="#!">back</a>`;
 			});
+		}
+	},
+	watch:{
+		href(href){
+			console.log(this);
+			this.onHrefUpdate(href);
 		},
 		context(text){
 			var res=Vue.compile('<div>'+text+'</div>');
@@ -153,7 +154,10 @@ Vue.component('blog-context',{
 				parent:this,
 			})
 		},
-	}
+	},
+	mounted(){
+		this.onHrefUpdate(this.href);
+	},
 });
 function loadInfo(href){
 	return axios({
@@ -172,22 +176,19 @@ function loadContext(href){
 function makeTitle(title){
 	document.title=(title?title+' - ':'')+'LMOliver\'s Blog';
 }
+function getBlogHref(){
+	var c=window.location.hash;
+	return c.indexOf('#!')===0?c.slice(2):c;
+}
 var app = new Vue({
 	el: '#app',
 	data:{
-		blogHref:null,
-	},
-	methods:{
-		getBlogHref(){
-			var c=window.location.hash;
-			return c.indexOf('#!')===0?c.slice(2):c;
-		}
+		blogHref:getBlogHref(),
 	},
 	mounted(){
-		console.log('ok',this.getBlogHref());
-		window.onhashchange=function(){
-			app.blogHref=app.getBlogHref();
+		console.log('ok',getBlogHref());
+		window.onhashchange=()=>{
+			this.blogHref=getBlogHref();
 		}
-		this.blogHref=this.getBlogHref();
 	},
 });
