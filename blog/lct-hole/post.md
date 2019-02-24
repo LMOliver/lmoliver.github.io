@@ -2,6 +2,8 @@
 
 [洛谷模板题](https://www.luogu.org/problemnew/show/P3690)
 
+<fold-block title="LCT" initshow>
+
 ```cpp
 #include<bits/stdc++.h>
 using namespace std;
@@ -152,3 +154,5 @@ int main(){
 	return 0;
 }
 ```
+
+</fold-block>

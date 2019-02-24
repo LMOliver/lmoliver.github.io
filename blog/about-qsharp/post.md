@@ -2,6 +2,46 @@
 
 以下是一个U3的爆搜，并没有跑出结果。
 
+又写了一个假做法QAQ…… U3弃疗
+
+<fold-block title="假做法">
+
+```qs
+namespace Solution{
+    open Microsoft.Quantum.Primitive;
+    open Microsoft.Quantum.Canon;
+	operation Doit(a:Qubit,b:Qubit,c:Qubit):Unit{
+		H(b);
+		CCNOT(a,b,c);
+		X(a);
+		H(b);
+		X(b);
+		CCNOT(a,b,c);
+		CCNOT(a,c,b);
+		X(a);
+		H(c);
+		X(c);
+		CCNOT(a,c,b);
+		X(c);
+		H(c);
+		CNOT(c,b);
+		CNOT(b,c);
+	}
+    operation Solve (qs : Qubit[]) : Unit {
+		let N=Length(qs);
+		using (c = Qubit()) {
+			for(i in 0..N-2){
+				Doit(qs[N-1],qs[i],c);
+			}
+		}
+    }
+}
+```
+
+</fold-block>
+
+<fold-block title="爆搜">
+
 ```cpp
 #include<bits/stdc++.h>
 using namespace std;
@@ -118,6 +158,8 @@ int main(){
 	return 0;
 }
 ```
+
+</fold-block>
 
 [CF Announcement](https://codeforces.com/blog/entry/65063)
 

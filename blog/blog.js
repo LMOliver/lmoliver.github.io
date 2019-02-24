@@ -40,6 +40,33 @@ Vue.component('side-block',{
 	},
 });
 
+Vue.component('fold-block',{
+	props:['title','initshow'],
+	template:`
+		<div :class="classObj" style="">
+			<strong v-if="title" style="display:inline-block">{{title}}</strong>
+			<button @click="show = !show" :style="btnStyle">{{show?'收起':'展开'}}</button>
+			<div v-if="show"><slot></slot></div>
+		</div>`,
+	data:function(){
+		return {
+			classObj:{
+				contains:true,
+			},
+			btnStyle:{
+				'margin-left':'auto',
+			},
+			show:false,
+		};
+	},
+	mounted(){
+		if(!this.title)this.title="";
+		if(typeof this['initshow']!=='undefined'){
+			this.show=true;
+		}
+	},
+})
+
 Vue.component('post-refence',{
 	template:`
 		<a :href="'#!'+href" :style="style" :class="classObj">
@@ -61,7 +88,7 @@ Vue.component('post-refence',{
 				<br>
 				<span>{{data.description}}</span>
 			</div>
-	</a>`,
+		</a>`,
 	props:['href','size'],
 	data:function(){
 		return {
