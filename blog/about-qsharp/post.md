@@ -1,7 +1,5 @@
 [U3](https://codeforces.com/contest/1115/problem/U3)怎么做啊QAQ
 
-以下是一个U3的爆搜，并没有跑出结果。
-
 又写了一个假做法QAQ…… U3弃疗
 
 <fold-block title="假做法">
@@ -39,6 +37,8 @@ namespace Solution{
 ```
 
 </fold-block>
+
+以下是一个U3的爆搜，并没有跑出结果。
 
 <fold-block title="爆搜">
 
@@ -160,6 +160,8 @@ int main(){
 ```
 
 </fold-block>
+
+等比赛结束后的题解了qwq
 
 [CF Announcement](https://codeforces.com/blog/entry/65063)
 

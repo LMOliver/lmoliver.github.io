@@ -46,7 +46,7 @@ Vue.component('fold-block',{
 		<div :class="classObj" style="">
 			<strong v-if="title" style="display:inline-block">{{title}}</strong>
 			<button @click="show = !show" :style="btnStyle">{{show?'收起':'展开'}}</button>
-			<div v-if="show"><slot></slot></div>
+			<div v-show="show"><slot></slot></div>
 		</div>`,
 	data:function(){
 		return {
@@ -123,6 +123,74 @@ Vue.component('post-refence',{
 		})
 	},
 });
+
+Vue.component('life-canvas',{
+	template:'<canvas id="x" height="600" width="600"></canvas>',
+	mounted(){
+		const H=200;
+		const W=200;
+		const R=3;
+		const MAX_VAL=10;
+		var ctx=this.$el.getContext("2d");
+		ctx.fillStyle='#000000';
+		ctx.fillRect(0,0,W,H);
+		function draw(x,y,color){
+			// console.log(color);
+			ctx.fillStyle=color;
+			ctx.fillRect(y*R,x*R,R,R);
+		}
+		var life=Array(H).fill(0).map(()=>Array(W).fill(0));
+		var last=Array(H).fill(0).map(()=>Array(W).fill(0).map(()=>[0,0,0]));
+		function set(x,y,val){
+			life[x][y]=val;
+			var rp=val/MAX_VAL;
+			last[x][y].shift();
+			last[x][y].push(rp);
+			var [r,g,b]=last[x][y];
+
+			draw(x,y,'#'+
+			[b,g,r].map(
+				x=>Math.floor(x*255).toString(16).padStart(2,'0')
+			).join(''));
+		}
+		function rand(n){
+			return Math.floor(Math.random()*n);
+		}
+		function rndStep(){
+			function loop(x,p){
+				while(x<0)x+=p;
+				while(x>=p)x-=p;
+				return x;
+			}
+			var x=rand(H);
+			var y=rand(W);
+			var sum=0;
+			var lf=life[x][y];
+			for(let i=-1;i<=1;i++){
+				for(let j=-1;j<=1;j++){
+					if(i||j)sum+=life[loop(x+i,H)][loop(y+j,W)];
+				}
+			}
+			var val=lf;
+			if(sum<20||sum>=40)val=Math.max(lf-3,0);
+			if(sum>=30&&sum<40)val=Math.min(lf+5,10);
+			var ans=lf==val;
+			set(x,y,val);
+			return ans;
+		}
+		for(let i=0;i<H;i++){
+			for(let j=0;j<W;j++){
+				set(i,j,rand(MAX_VAL+1));
+			}
+		}
+		setInterval(()=>{
+			for(let _=0;_<1000;_++){
+				while(!rndStep())
+					;
+			}
+		});
+	}
+})
 
 Vue.component('blog-context',{
 	template:'<article :style="style" :class="classObj"><div></div></article>',

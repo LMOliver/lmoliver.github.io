@@ -3,7 +3,6 @@ body{
 }
 header{
 	width: 100%;
-	position: -webkit-sticky;
 	position: sticky;
 	top:0;
 	background-color: white;
@@ -17,6 +16,7 @@ img{
 }
 #page{
 	padding: 30px 0;
+	min-height: 100%;
 }
 .contains{
 	padding:10px;
@@ -27,6 +27,8 @@ img{
 #main{
 	width:64%;
 	margin: 0 auto; 
-	/* position:relative; */
-	/* left:calc( ( 100% - 64% ) / 2 - 12px); */
+}
+footer{
+	text-align: center;
+	background-color: grey;
 }
