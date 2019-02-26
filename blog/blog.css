@@ -1,5 +1,6 @@
-body{
+body,html{
 	margin: 0;
+	height: 100%;
 }
 header{
 	width: 100%;
@@ -15,8 +16,7 @@ img{
 	max-width: 100%;
 }
 #page{
-	padding: 30px 0;
-	min-height: 100%;
+	padding: 30px 0 calc(30px + 60px) 0;
 }
 .contains{
 	padding:10px;
@@ -30,5 +30,16 @@ img{
 }
 footer{
 	text-align: center;
-	background-color: grey;
+	padding-top: 8px;
+	border-top: 2px solid black;
+	position: absolute;
+	bottom: 0;
+	width: 100%;
+}
+#app{
+    position:relative;
+	min-height: 100%;
+}
+pre{
+	overflow-x: auto;
 }

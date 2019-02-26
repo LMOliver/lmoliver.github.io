@@ -40,14 +40,29 @@ Vue.component('side-block',{
 	},
 });
 
+function copyText(text){
+	var temp = document.createElement('textarea');
+	temp.value = text;
+	document.body.appendChild(temp);
+	temp.select();
+	document.execCommand("copy");
+	document.body.removeChild(temp);
+}
+
 Vue.component('fold-block',{
 	props:['title','initshow'],
 	template:`
 		<div :class="classObj" style="">
-			<strong v-if="title" style="display:inline-block">{{title}}</strong>
+			<strong v-show="title" style="display:inline-block">{{title}}</strong>
 			<button @click="show = !show" :style="btnStyle">{{show?'收起':'展开'}}</button>
-			<div v-show="show"><slot></slot></div>
+			<button @click="copy()" :style="btnStyle">贺</button>
+			<div v-show="show" ref="block"><slot></slot></div>
 		</div>`,
+	methods:{
+		copy(){
+			copyText(this.$refs.block.innerText);
+		},
+	},
 	data:function(){
 		return {
 			classObj:{
