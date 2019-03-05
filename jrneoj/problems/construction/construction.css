@@ -1,0 +1,30 @@
+table,th,td{
+	border: 1px solid grey !important;
+	-webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+td{
+	padding: 0;
+}
+
+td *{
+	display: table-cell;
+	text-align: center;
+	vertical-align: middle;
+	width: 30px;
+	height: 30px;
+}
+
+table{
+	table-layout:fixed;
+}
+
+.grid{
+	width:30px;
+	height:30px;
+	display:inline-block;
+}

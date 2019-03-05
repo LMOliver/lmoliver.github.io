@@ -1,0 +1,52 @@
+.oj-title{
+	color: black;
+	background: linear-gradient(to bottom right,rgb(128, 128, 255),rgb(128, 255, 255),#00ff00);
+	border-radius: 10px;
+	padding: 6px;
+	display:inline-block;
+}
+
+.main{
+	padding: 0 10%;
+}
+
+.problem-title{
+	display: inline-block;
+}
+
+.problem-subtitle{
+	color: #444444;
+	margin-left: 10px;
+	margin-right: 10px;
+}
+
+nav a{
+	text-decoration: none;
+}
+
+a{
+	color: #444444;
+	margin-left: 10px;
+	margin-right: 10px;
+}
+
+body{
+	padding: 0 5%;
+}
+
+table{
+	border-collapse:collapse;
+}
+
+table,th,td{
+	border: black solid 2px;
+}
+
+p{
+	text-indent: 40px;
+}
+
+pre{
+	max-width: 100%;
+	overflow-x: auto;
+}

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Construction - JRNEOJ</title>
+		<script src="https://cdn.jsdelivr.net/npm/vue"></script>
+		<link rel="stylesheet" href="./construction.css">
+		<link rel="stylesheet" href="../../jrneoj.css">
+	</head>
+	<body>
+		<div id="app">
+			<nav>
+				<a href="../../index.html">
+					<h2 class="oj-title">JRNEOJ</h2>
+				</a>
+				<a href="../../index.html">首页</a>
+				<a href="../../problems.html">题库</a>
+			</nav>
+			<hr>
+			<div class="main">
+				<div>
+					<h1 class="problem-title">Construction</h1>
+					<span class="problem-subtitle">#1</span>
+				</div>
+				<h2>题目背景</h2>
+				<p>
+					在某颗不知名行星的海岛上，小 A 与他的机器人正在偷偷进行建设，试图建造一座城市，成为市长。
+				</p>
+				<h2>题目描述</h2>
+				<p>
+					整块海岛可以被分成 H 行 W 列，共 H*W 个正方形格子。
+					第 i 行第 j 列的格子位于 (i-1,j-1) 。
+					每个格子上都可以建造一座建筑。
+					每个格子都有一个等级，表示这个格子上的建筑的高度。
+					如果一个格子上没有建筑，那么那个格子的等级为 0 。
+				</p>
+				<p>
+					为了进行建设，小 A 可以进行以下操作。
+				</p>
+					<ol>
+						<li>
+							建造:在某个格子建造一座高度为 k 的建筑。
+							在这栋建筑所在格的相邻格子中必须含有从 max(0,k-4) 到 (k-1) 的<strong>每个</strong>等级。
+						</li>
+						<li>
+							拆除:降低某座建筑的高度，或者干脆把它拆掉。
+						</li>
+					</ol>
+				<p>
+					我们定义两个格子相邻当且仅当它们间的曼哈顿距离为 1 。
+				</p>
+				<p>
+					一座高度为 k 的建筑的繁荣度是 2^(k-1) 。
+					一座城市的繁荣度是这座城市所有建筑的繁荣度之和。
+				</p>
+				<p>
+					以下是一座城市的示例:
+				</p>
+				<table>
+					<tr v-for="x in W">
+						<td v-for="y in H" @click="build(x-1,y-1);">
+							<grid-block :lv="gameMap[x-1][y-1]" :tipped="canBuild(x-1,y-1,choiceLv)">
+							</grid-block>
+						</td>
+					</tr>
+				</table>
+				<p>
+					这块海岛的 H={{H}} ， W={{W}}。各个颜色所对应的高度显示如下：
+					<table>
+						<tr>
+							<td v-for="i in MAXLEVEL" @click="toggle(i-1);" v-if="isUnlocked(i-1)">
+								<grid-block :lv="i-1" :tipped="choiceLv==i-1">
+								</grid-block>
+							</td>
+						</tr>
+					</table>
+				</p>
+				<p>
+					这座城市的繁荣度为{{score()}}。
+				</p>
+				<p>
+					现在，小 A 邀请你到这座海岛上共创辉煌。而按照他给你的条件，你只需要帮他计算这座城市的繁荣度即可。
+					当然，小 A 不会轻易地公开这座城市。因此，他对信息进行了加密。
+				</p>
+				<h2>输入输出格式</h2>
+				<h3>输入格式</h3>
+				<p>
+					一行，一个字符串 S ，表示小 A 加密后的城市信息。
+				</p>
+				<h3>输出格式</h3>
+				<p>
+					一行，一个整数 score ，表示这座城市的繁荣度。
+				</p>
+				<h2>输入输出样例</h2>
+				<h3>样例输入</h3>
+				<pre>{{expor_()}}</pre>
+				<h3>样例输出</h3>
+				<pre>{{score()}}</pre>
+				<h2>样例解释</h2>
+				<template v-for="arr in [gameMap.map((a,i)=>a.map((k,j)=>({k,i,j})).filter(x=>x.k>0)).flat()]">
+					<div v-if="arr.length>0">
+						<p>
+							岛上的城市里有以下建筑：
+							<ul>
+								<li v-for="b in arr">
+									位于 ({{b.i}},{{b.j}}) ，高度为 {{b.k}} 的建筑，贡献了 {{Math.pow(2,b.k-1)}} 繁荣度。
+								</li>
+							</ul>
+						</p>
+					</div>
+					<div v-else>
+						<p>
+							岛上没有建筑。
+						</p>
+					</div>
+					<p>
+						总繁荣度为{{score()}}。
+					</p>
+				</template>
+				<hr>
+				<h2>提交代码</h2>
+				<button :disabled="curVer==0" @click="undo()">撤销</button>
+				<button :disabled="curVer==operations.length" @click="redo()">重做</button>
+				<button @click="if(confirm('你真的要清除你的代码吗？'))clear()" style="color:red;">清空</button>
+				<div>
+					<textarea cols="60" rows="10" v-model="IEstr"></textarea>
+				</div>
+				<button @click="impor_(IEstr)" style="color:green;">提交!</button>
+			</div>
+		</div>
+	</body>
+	<script src="./construction.js"></script>
+</html>
