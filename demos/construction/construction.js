@@ -1,5 +1,4 @@
-
-const W=10,H=10;
+const W=12,H=12;
 
 const COLORS=[
 	{background:'#000000',color:'#ffffff'},
@@ -65,9 +64,10 @@ Vue.component('construction-main',{
 			<br>
 			<button :disabled="curVer==0" @click="undo()">Undo</button>
 			<button :disabled="curVer==operations.length" @click="redo()">Redo</button>
-			<button @click="impor_()">Import</button>
-			<button @click="expor_()">Export</button>
+			<button @click="impor_(IEstr)">Import</button>
+			<button @click="IEstr=expor_()">Export</button>
 			<input v-model="IEstr"></input>
+			<button @click="clear()" style="color:red;">Clear</button>
 		</div>`,
 	methods:{
 		canBuild(x,y,lv){
@@ -99,6 +99,8 @@ Vue.component('construction-main',{
 			for(var i=0;i<this.H;i++){
 				for(var j=0;j<this.W;j++){
 					if(this.canBuild(i,j,lv)){
+						this.unlockLv=lv;
+						this.store();
 						return true;
 					}
 				}
@@ -132,6 +134,7 @@ Vue.component('construction-main',{
 			});
 			this.gameMap[x][y]=this.choiceLv;
 			this.update(x,y);
+			this.store();
 		},
 		toggle(x){
 			if(this.choiceLv==x)this.choiceLv=-1;
@@ -141,11 +144,13 @@ Vue.component('construction-main',{
 			var op=this.operations[--this.curVer];
 			this.gameMap[op.x][op.y]=op.old;
 			this.update(op.x,op.y);
+			this.store();
 		},
 		redo(){
 			var op=this.operations[this.curVer++];
 			this.choiceLv=this.gameMap[op.x][op.y]=op.new;
 			this.update(op.x,op.y);
+			this.store();
 		},
 		score(){
 			var s=0;
@@ -158,29 +163,10 @@ Vue.component('construction-main',{
 			}
 			return s;
 		},
-		impor_(){
+		impor_(str){
 			const padding='WW91JTIwYXJlJTIwdG9vJTIweWF1bmclMjB0b28lMjBzaW1wbGUldUZGMENzb21ldGltZXMlMjBuYWl2ZS4lMEE=';
-			[
-				this.W,
-				this.H,
-				this.gameMap,
-				this.buildMap,
-				this.operations,
-				this.curVer,
-				this.choiceLv
-			]=JSON.parse(
-				this.IEstr
-					.slice(padding.length,-padding.length)
-					.split('')
-					.map(ch=>String.fromCharCode(33+126-ch.charCodeAt(0)))
-					.join('')
-			);
-		},
-		expor_(){
-			const padding='WW91JTIwYXJlJTIwdG9vJTIweWF1bmclMjB0b28lMjBzaW1wbGUldUZGMENzb21ldGltZXMlMjBuYWl2ZS4lMEE=';
-			this.IEstr=
-				padding
-				+JSON.stringify([
+			try{
+				[
 					this.W,
 					this.H,
 					this.gameMap,
@@ -188,24 +174,95 @@ Vue.component('construction-main',{
 					this.operations,
 					this.curVer,
 					this.choiceLv
+				]=JSON.parse(
+					str
+						.slice(padding.length,-padding.length)
+						.split('')
+						.map(ch=>String.fromCharCode(33+126-ch.charCodeAt(0)))
+						.join('')
+				);
+			}catch(e){
+				alert('This save is broken.');
+			}
+			this.store();
+		},
+		expor_(){
+			const padding='WW91JTIwYXJlJTIwdG9vJTIweWF1bmclMjB0b28lMjBzaW1wbGUldUZGMENzb21ldGltZXMlMjBuYWl2ZS4lMEE=';
+			return padding
+				+JSON.stringify([
+					this.W,
+					this.H,
+					this.gameMap,
+					this.buildMap,
+					this.operations,
+					this.curVer,
+					this.choiceLv,
+					this.unlockLv,
 				])
 					.split('')
 					.map(ch=>String.fromCharCode(33+126-ch.charCodeAt(0)))
 					.join('')
 				+padding;
 		},
+		store(){
+			localStorage.setItem('save',this.expor_());
+			this.IEstr='';
+		},
+		clear(){
+			if(confirm(`Do you want to CLEAR YOUR SAVE?`)){
+				[
+					this.W,
+					this.H,
+					this.gameMap,
+					this.buildMap,
+					this.operations,
+					this.curVer,
+					this.choiceLv,
+					this.unlockLv,
+				]=[
+					W,
+					H,
+					Array(H).fill(0).map(()=>Array(W).fill(0)),
+					Array(H).fill(0).map(()=>Array(W).fill(0).map(()=>({}))),
+					[],
+					0,
+					-1,
+					1,
+					1,
+				];
+			}
+			
+		},
 	},
-	data:()=>({
-		W,
-		H,
-		gameMap:Array(H).fill(0).map(()=>Array(W).fill(0)),
-		buildMap:Array(H).fill(0).map(()=>Array(W).fill({})),
-		operations:[],
-		curVer:0,
-		choiceLv:-1,
-		unlockLv:1,
-		IEstr:'',
-	}),
+	data(){
+		return {
+			W,
+			H,
+			gameMap:Array(H).fill(0).map(()=>Array(W).fill(0)),
+			buildMap:Array(H).fill(0).map(()=>Array(W).fill(0).map(()=>({}))),
+			operations:[],
+			curVer:0,
+			choiceLv:-1,
+			unlockLv:1,
+			IEstr:'',
+		}
+	},
+	created(){
+		var s=localStorage.getItem('save');
+		if(s)this.impor_(s);
+		window.onkeydown = (e)=>{
+			// console.log(e);
+			var v1='`1234567890-='.indexOf(e.key);
+			if(e.key==='ArrowLeft'){
+				v1=this.choiceLv-1;
+			}else if(e.key==='ArrowRight'){
+				v1=this.choiceLv+1;
+			}
+			if(v1!==-1&&this.canUnlock(v1)){
+				this.choiceLv=v1;
+			}
+        }
+	},
 })
 
 var app=new Vue({
