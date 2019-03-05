@@ -2,4 +2,4 @@
 
 [blog](https://lmoliver.github.io/blog)
 
-[Construction](https://lmoliver.github.io/demos/construction)
+[JRNEOJ](https://lmoliver.github.io/jrneoj)
