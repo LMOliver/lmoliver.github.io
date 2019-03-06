@@ -43,7 +43,6 @@ Vue.component('grid-block',{
 
 var app=new Vue({
 	el: '#app',
-
 	methods:{
 		unlockLv(){
 			if(this.unlockLvStore){
@@ -171,6 +170,15 @@ var app=new Vue({
 		},
 		impor_(str){
 			try{
+				var v=this.decode(str);
+				if(typeof v.W==='undefined'
+					||typeof v.H==='undefined'
+					||typeof v.gameMap==='undefined'
+					||typeof v.operations==='undefined'
+					||typeof v.curVer==='undefined'
+					||typeof v.choiceLv==='undefined'){
+					throw new Error();
+				}
 				({
 					W:this.W,
 					H:this.H,
@@ -178,11 +186,15 @@ var app=new Vue({
 					operations:this.operations,
 					curVer:this.curVer,
 					choiceLv:this.choiceLv,
-				}=this.decode(str));
+				}=v);
+				this.buildMap=Array(H).fill(0).map(()=>Array(W).fill(0).map(()=>({})));
+				this.choiceLv=-1;
+				this.IEstr='';
+				this.unlockLvStore=null;
+				this.store();
 			}catch(e){
 				alert('代码无效，无法提交。');
 			}
-			this.store();
 		},
 		expor_(){
 			return this.encode({
@@ -195,7 +207,7 @@ var app=new Vue({
 			});
 		},
 		store(){
-			localStorage.setItem('save',this.expor_());
+			localStorage.setItem('game-save',this.expor_());
 			this.IEstr='';
 		},
 		clear(){
@@ -224,15 +236,15 @@ var app=new Vue({
 			W,
 			H,
 			gameMap:Array(H).fill(0).map(()=>Array(W).fill(0)),
-			buildMap:Array(H).fill(0).map(()=>Array(W).fill(0).map(()=>({}))),
 			operations:[],
 			curVer:0,
+			buildMap:Array(H).fill(0).map(()=>Array(W).fill(0).map(()=>({}))),
 			choiceLv:-1,
 			IEstr:'',
 		}
 	},
 	created(){
-		var s=localStorage.getItem('save');
+		var s=localStorage.getItem('game-save');
 		if(s)this.impor_(s);
 		window.onkeydown = (e)=>{
 			// console.log(e);
