@@ -1,45 +1,80 @@
 body,html{
 	margin: 0;
 	height: 100%;
+	font-family:sans-serif;
+	background:#eeeeee url(https://api.ixiaowai.cn/api/api.php?SiyuanTQL) fixed;
+}
+
+a{
+	text-decoration: none;
+}
+a:link {
+	color: rgb(0,0,238)
+}   
+a:visited {
+	color: rgb(0,0,238)
+}
+@keyframes a-in{
+	0%{
+		color:rgb(0,0,238);
+	}
+	100%{
+		color:steelblue;
+	}
+}
+a:hover {
+	color:steelblue;
+	animation: a-in 0.3s;
+}
+
+img,canvas{
+	max-width: calc(100%);
+}
+
+pre{
+	overflow-x: auto;
+}
+
+h1,h2,h3,h4,h5,h6{
+	text-decoration: none;
+}
+
+#app{
+    position:relative;
+	min-height: 100%;
+}
+#main{
+	width:64%;
+	margin: 0 auto; 
+}
+#page{
+	padding: 30px 8% calc(30px + 60px) 8%;
+}
+.contains{
+	background-color: rgba(255, 255, 255,0.8);
+	padding:10px;
+	border:2px solid grey;
+	border-radius:5px;
+	margin: 10px 0;
+	/* box-shadow: 0 0 100px gray; */
 }
 header{
-	width: 100%;
 	position: sticky;
 	top:0;
 	background-color: white;
 	border:solid darkblue;
 	border-width: 0 0 2px;
 	box-shadow: 0 0 3px black;
+	padding: 0 10%;
 	z-index: 1;
 }
-img{
-	max-width: 100%;
-}
-#page{
-	padding: 30px 0 calc(30px + 60px) 0;
-}
-.contains{
-	padding:10px;
-	border:2px solid black;
-	border-radius:5px;
-	margin: 10px 0;
-}
-#main{
-	width:64%;
-	margin: 0 auto; 
-}
 footer{
+	height: 60px;
+	background-color: rgba(255, 255, 255,0.8);
 	text-align: center;
 	padding-top: 8px;
-	border-top: 2px solid black;
+	border-top: 2px solid grey;
 	position: absolute;
 	bottom: 0;
 	width: 100%;
-}
-#app{
-    position:relative;
-	min-height: 100%;
-}
-pre{
-	overflow-x: auto;
 }

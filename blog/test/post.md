@@ -15,9 +15,8 @@
 2. _qwq_
 3. ~~ovo~~
 
-
-|Q|A|Q|A|Q|
-|-|-|-|-|-|
-|T|h|i|s| |
-|i|s| |a| |
-|T|A|B|L|E|
+|Q|A|Q|A|Q|$\KaTeX$|
+|-|-|-|-|-|-|
+|T|h|i|s| |$\text{中文}$|
+|i|s| |a| |$\text{text with\error}$|
+|T|A|B|L|E|$a_i^2+b_i^2=c_i^2$|

@@ -161,7 +161,11 @@ int main(){
 
 </fold-block>
 
-等比赛结束后的题解了qwq
+~~等比赛结束后的题解了qwq~~
+
+**Q: Controlled H门怎么构造?我肝了好久都没肝出来，DFS搜不到，自己写全是假做法。**
+
+**题解:在代码里直接写`Controlled H`。**
 
 [CF Announcement](https://codeforces.com/blog/entry/65063)
 
