@@ -1,4 +1,8 @@
-table,th,td{
+table{
+	border: none !important;
+}
+
+th,td{
 	border: 1px solid grey !important;
 	-webkit-touch-callout: none;
     -webkit-user-select: none;
@@ -27,4 +31,40 @@ table{
 	width:30px;
 	height:30px;
 	display:inline-block;
+}
+
+@keyframes lv18{
+	0%{
+		background: dodgerblue;
+	}
+	50%{
+		background: blue;
+	}
+	100%{
+		background: purple;
+	}
+}
+
+@keyframes lv19{
+	0%{
+		background: seagreen;
+	}
+	50%{
+		background: green;
+	}
+	100%{
+		background: teal;
+	}
+}
+
+@keyframes lv20{
+	0%{
+		background: pink;
+	}
+	50%{
+		background: red;
+	}
+	100%{
+		background: gold;
+	}
 }

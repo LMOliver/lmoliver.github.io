@@ -68,9 +68,9 @@
 				<p>
 					这块海岛的 H={{H}} ， W={{W}}。各个颜色所对应的高度显示如下：
 					<table>
-						<tr>
-							<td v-for="i in MAXLEVEL" @click="toggle(i-1);" v-if="isUnlocked(i-1)">
-								<grid-block :lv="i-1" :tipped="choiceLv==i-1">
+						<tr v-for="i in Math.ceil(unlockLv()/W)">
+							<td v-for="j in W" @click="toggle((i-1)*W+j-1);" v-if="isUnlocked((i-1)*W+j-1)">
+								<grid-block :lv="(i-1)*W+j-1" :tipped="choiceLv==(i-1)*W+j-1">
 								</grid-block>
 							</td>
 						</tr>

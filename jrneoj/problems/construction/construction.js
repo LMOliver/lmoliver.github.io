@@ -1,7 +1,5 @@
 const W=12,H=12;
 
-const MAXLEVEL=20; 
-
 const COLORS=[
 	{background:'#000000',color:'#ffffff'},
 	{background:'#555555',color:'#ffffff'},
@@ -21,9 +19,12 @@ const COLORS=[
 	{background:'radial-gradient(circle,blue,black)',color:'#ffffff'},
 	{background:'radial-gradient(circle,purple,black)',color:'#ffffff'},
 	{background:'radial-gradient(circle,red,black)',color:'#ffffff'},
-	{background:'radial-gradient(circle,white,black)',color:'#000000'},
-	{background:'radial-gradient(circle,black,white)',color:'#ffffff'},
-	{background:'white',color:'#000000'},
+	{animation:'lv18 ease-in-out 5s infinite alternate',color:'#ffffff'},
+	{animation:'lv19 ease-in-out 5s infinite alternate',color:'#ffffff'},
+	{animation:'lv20 ease-in-out 5s infinite alternate',color:'#000000'},
+	{background:'radial-gradient(circle at top left,yellow,black,greenyellow)',color:'#ffffff'},
+	{background:'radial-gradient(circle at top left,cyan,black,purple)',color:'#ffffff'},
+	{background:'radial-gradient(circle at top left,orange,black,red)',color:'#ffffff'},
 ];
 
 const PADDING='WW91JTIwYXJlJTIwdG9vJTIweWF1bmclMjB0b28lMjBzaW1wbGUldUZGMENzb21ldGltZXMlMjBuYWl2ZS4lMEE=';
@@ -77,31 +78,31 @@ var app=new Vue({
 			}
 			return s;
 		},
-		_canBuild(x,y,lv){
-			if(lv<this.gameMap[x][y])return true;
-			if(lv==this.gameMap[x][y])return false;
-			var found={};
-			for(d of [
-				{x:1,y:0},
-				{x:0,y:1},
-				{x:-1,y:0},
-				{x:0,y:-1},
-			]){
-				let tx=x+d.x,ty=y+d.y;
-				if(tx<0||tx>=this.H||ty<0||ty>=this.W)continue;
-				found[this.gameMap[tx][ty]]=true;
-			}
-			for(let i=Math.max(0,lv-4);i<=lv-1;i++){
-				if(!found[i])return false;
-			}
-			return true;
-		},
 		canBuild(x,y,lv){
-			if(lv<0)return false;
-			if(!this.buildMap[x][y][lv]){
+			if(lv==this.gameMap[x][y]||lv==-1)return false;
+			if(lv<this.gameMap[x][y])return true;
+			if(typeof this.buildMap[x][y]==='undefined'){
 				this.buildMap[x][y]={};
-				for(let i=0;i<MAXLEVEL;i++){
-					this.buildMap[x][y][i]=this._canBuild(x,y,i);
+				let found=[];
+				for(d of [
+					{x:1,y:0},
+					{x:0,y:1},
+					{x:-1,y:0},
+					{x:0,y:-1},
+				]){
+					let tx=x+d.x,ty=y+d.y;
+					if(tx<0||tx>=this.H||ty<0||ty>=this.W)continue;
+					found[this.gameMap[tx][ty]]=true;
+				}
+				//1,2,3,4
+				for(let i=0;i<=3;i++){
+					if(!found[i])break;
+					this.buildMap[x][y][i+1]=true;
+				}
+				//5,6,...
+				let m=Math.min(...(found.filter(x=>x)));
+				if(found[m+1]&&found[m+2]&&found[m+3]){
+					this.buildMap[x][y][m+4]=true;
 				}
 			}
 			return this.buildMap[x][y][lv];
@@ -116,9 +117,9 @@ var app=new Vue({
 			]){
 				let tx=x+d.x,ty=y+d.y;
 				if(tx<0||tx>=this.H||ty<0||ty>=this.W)continue;
-				this.buildMap[tx][ty]={};
+				this.buildMap[tx][ty]=undefined;
 			}
-			this.unlockLvStore=null;
+			this.unlockLvStore=undefined;
 		},
 		build(x,y){
 			if(!this.canBuild(x,y,this.choiceLv))return;
@@ -187,10 +188,9 @@ var app=new Vue({
 					curVer:this.curVer,
 					choiceLv:this.choiceLv,
 				}=v);
-				this.buildMap=Array(H).fill(0).map(()=>Array(W).fill(0).map(()=>({})));
-				this.choiceLv=-1;
+				this.buildMap=Array(H).fill(0).map(()=>Array(W).fill(0).map(()=>(undefined)));
 				this.IEstr='';
-				this.unlockLvStore=null;
+				this.unlockLvStore=undefined;
 				this.store();
 			}catch(e){
 				alert('代码无效，无法提交。');
@@ -238,7 +238,7 @@ var app=new Vue({
 			gameMap:Array(H).fill(0).map(()=>Array(W).fill(0)),
 			operations:[],
 			curVer:0,
-			buildMap:Array(H).fill(0).map(()=>Array(W).fill(0).map(()=>({}))),
+			buildMap:Array(H).fill(0).map(()=>Array(W).fill(0).map(()=>(undefined))),
 			choiceLv:-1,
 			IEstr:'',
 		}
