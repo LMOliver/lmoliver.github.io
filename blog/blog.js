@@ -80,7 +80,7 @@ Vue.component('fold-block',{
 			this.show=true;
 		}
 	},
-})
+});
 
 Vue.component('post-refence',{
 	template:`
@@ -239,7 +239,7 @@ Vue.component('life-canvas',{
 			started:false,
 		};
 	}
-})
+});
 
 Vue.component('blog-context',{
 	template:'<article :style="style" :class="classObj"><div></div></article>',
@@ -268,6 +268,22 @@ Vue.component('blog-context',{
 	},
 });
 
+// Vue.component('comment-area',{
+// 	props:['href'],
+// 	mounted(){
+// 		const gitalk = new Gitalk({
+// 			clientID: '2404bbe3ef6f6fe0b9de',
+// 			clientSecret: '85cc0b2fe72e057ab1757a2fb83c14142c1e7421',
+// 			repo: 'lmoliver.github.io',
+// 			owner: 'LMOliver',
+// 			admin: ['LMOliver'],
+// 			id: 'blog-'+getBlogHref(),
+// 			distractionFreeMode: false,
+// 		});
+// 		gitalk.render('gitalk-container');
+// 	},
+// });
+
 function renderMetadata(data){
 	var {title='无标题',time='',description=''}=data;
 	return `
@@ -275,7 +291,8 @@ function renderMetadata(data){
 			<h1 style="display:inline">${title}</h1>
 			<span>${time}</span>
 		</div>
-		<p>${description}</p>`
+		<p><em>${description}</em></p>
+		<hr>`
 }
 
 function renderMarkdown(md){

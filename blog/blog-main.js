@@ -32,15 +32,16 @@ function updateHref(){
 	}).catch(reason=>{
 		makeTitle('Error!');
 		console.log(href,reason);
-		this.context=typeof reason==='string'?`
-			<h1>Error!</h1>
-			<p>${reason}</p>
-			<a href="javascript:window.history.back()">back</a>
-		`:`
-			<h1>Error!</h1>
-			<p>${JSON.stringify(reason)}</p>
-			<a href="javascript:window.history.back()">back</a>
-		`;
+		var c;
+		if(typeof reason==='string'){
+			c=`<h1>Error!</h1><p>${reason}</p>`;
+		}else if(typeof reason.status!=='undefined'
+			&&typeof reason.statusText!=='undefined'){
+			c=`<h1>${reason.status} ${reason.statusText}</h1>`;
+		}else{
+			c=`<h1>Error!</h1><p>${JSON.stringify(reason)}</p>`;
+		}
+		this.context=c+'<a href="javascript:window.history.back()">back</a>';
 	});
 }
 var app = new Vue({
@@ -51,15 +52,5 @@ var app = new Vue({
 	mounted(){
 		window.onhashchange=()=>updateHref.call(this);
 		updateHref.call(this);
-		// const gitalk = new Gitalk({
-		// 	clientID: '2404bbe3ef6f6fe0b9de',
-		// 	clientSecret: '85cc0b2fe72e057ab1757a2fb83c14142c1e7421',
-		// 	repo: 'lmoliver.github.io',
-		// 	owner: 'LMOliver',
-		// 	admin: ['LMOliver'],
-		// 	id: 'blog-'+getBlogHref(),      // Ensure uniqueness and length less than 50
-		// 	distractionFreeMode: false  // Facebook-like distraction free mode
-		// });
-		// gitalk.render('gitalk-container');
 	},
 });

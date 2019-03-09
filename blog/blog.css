@@ -9,21 +9,21 @@ a{
 	text-decoration: none;
 }
 a:link {
-	color: rgb(0,0,238)
+	color: darkorange;
 }   
 a:visited {
-	color: rgb(0,0,238)
+	color: darkorange;
 }
 @keyframes a-in{
 	0%{
-		color:rgb(0,0,238);
+		color:darkorange;
 	}
 	100%{
-		color:steelblue;
+		color:orange;
 	}
 }
 a:hover {
-	color:steelblue;
+	color:orange;
 	animation: a-in 0.3s;
 }
 
