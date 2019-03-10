@@ -20,15 +20,16 @@ function getBlogHref(){
 	return c.indexOf('#!')===0?c.slice(2):c;
 }
 function updateHref(){
-	var href=this.href=getBlogHref();
+	var href=getBlogHref();
 	this.context='<p>Loading...</p>';
 	makeTitle('Loading...');
-	loadInfo(href).then(result=>{
-		makeTitle(result.data.title);
-		this.context=renderMetadata(result.data);
+	loadInfo(href).then(({data})=>{
+		makeTitle(data.title);
+		this.commentId='blog-'+href;
+		this.context=renderMetadata(data);
 		return loadContext(href);
-	}).then(result=>{
-		this.context+=renderMarkdown(result.data);
+	}).then(({data})=>{
+		this.context+=renderMarkdown(data);
 	}).catch(reason=>{
 		makeTitle('Error!');
 		console.log(href,reason);
@@ -48,7 +49,7 @@ var app = new Vue({
 	el: '#app',
 	data:{
 		context:'',
-		href:'',
+		commentId:undefined,
 	},
 	mounted(){
 		window.onhashchange=()=>updateHref.call(this);

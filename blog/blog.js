@@ -269,34 +269,41 @@ Vue.component('blog-context',{
 });
 
 Vue.component('comment-area',{
-	props:['href'],
+	props:['gittalkid'],
 	template:`<div><div></div></div>`,
 	methods:{
-		updateHref(){
-			console.log('href => '+this.href);
-			const gitalk = new Gitalk({
-				clientID: '2404bbe3ef6f6fe0b9de',
-				clientSecret: '85cc0b2fe72e057ab1757a2fb83c14142c1e7421',
-				repo: 'lmoliver.github.io',
-				owner: 'LMOliver',
-				admin: ['LMOliver'],
-				id: 'blog-'+this.href,
-				distractionFreeMode: false,
-			});
+		updateId(){
+			// console.log(this.gittalkid);
+			var gitalkEl=this.els[this.gittalkid];
+			if(typeof gitalkEl==='undefined'){
+				const gitalk = new Gitalk({
+					clientID: '2404bbe3ef6f6fe0b9de',
+					clientSecret: '85cc0b2fe72e057ab1757a2fb83c14142c1e7421',
+					repo: 'lmoliver.github.io',
+					owner: 'LMOliver',
+					admin: ['LMOliver'],
+					id: this.gittalkid,
+					distractionFreeMode: false,
+				});
+				this.els[this.gittalkid]=document.createElement('div');
+				gitalk.render(this.els[this.gittalkid]);
+				gitalkEl=this.els[this.gittalkid];
+			}
 			var el=this.$el;
 			el.removeChild(el.children[0]);
-			var s=document.createElement('div');
-			gitalk.render(s);
-			el.appendChild(s);
+			el.appendChild(gitalkEl);
 		},
 	},
 	watch:{
-		href(){
-			this.updateHref();
+		gittalkid(){
+			this.updateId();
 		}
 	},
 	data(){
-	},
+		return {
+			els:{},
+		};
+	}
 });
 
 function renderMetadata(data){
