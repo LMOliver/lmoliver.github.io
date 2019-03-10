@@ -268,21 +268,36 @@ Vue.component('blog-context',{
 	},
 });
 
-// Vue.component('comment-area',{
-// 	props:['href'],
-// 	mounted(){
-// 		const gitalk = new Gitalk({
-// 			clientID: '2404bbe3ef6f6fe0b9de',
-// 			clientSecret: '85cc0b2fe72e057ab1757a2fb83c14142c1e7421',
-// 			repo: 'lmoliver.github.io',
-// 			owner: 'LMOliver',
-// 			admin: ['LMOliver'],
-// 			id: 'blog-'+getBlogHref(),
-// 			distractionFreeMode: false,
-// 		});
-// 		gitalk.render('gitalk-container');
-// 	},
-// });
+Vue.component('comment-area',{
+	props:['href'],
+	template:`<div><div></div></div>`,
+	methods:{
+		updateHref(){
+			console.log('href => '+this.href);
+			const gitalk = new Gitalk({
+				clientID: '2404bbe3ef6f6fe0b9de',
+				clientSecret: '85cc0b2fe72e057ab1757a2fb83c14142c1e7421',
+				repo: 'lmoliver.github.io',
+				owner: 'LMOliver',
+				admin: ['LMOliver'],
+				id: 'blog-'+this.href,
+				distractionFreeMode: false,
+			});
+			var el=this.$el;
+			el.removeChild(el.children[0]);
+			var s=document.createElement('div');
+			gitalk.render(s);
+			el.appendChild(s);
+		},
+	},
+	watch:{
+		href(){
+			this.updateHref();
+		}
+	},
+	data(){
+	},
+});
 
 function renderMetadata(data){
 	var {title='无标题',time='',description=''}=data;

@@ -20,7 +20,7 @@ function getBlogHref(){
 	return c.indexOf('#!')===0?c.slice(2):c;
 }
 function updateHref(){
-	var href=getBlogHref();
+	var href=this.href=getBlogHref();
 	this.context='<p>Loading...</p>';
 	makeTitle('Loading...');
 	loadInfo(href).then(result=>{
@@ -48,6 +48,7 @@ var app = new Vue({
 	el: '#app',
 	data:{
 		context:'',
+		href:'',
 	},
 	mounted(){
 		window.onhashchange=()=>updateHref.call(this);
