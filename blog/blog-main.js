@@ -1,10 +1,3 @@
-function loadInfo(href){
-	return axios({
-		method:'get',
-		url:href?`./${href}/info.json`:'./index-info.json',
-		responseType:'json',
-	});
-}
 function loadContext(href){
 	return axios({
 		method:'get',
@@ -22,17 +15,19 @@ function getBlogHref(){
 function updateHref(){
 	var href=getBlogHref();
 	this.context='<p>Loading...</p>';
+	this.commentId=undefined;
 	makeTitle('Loading...');
 	loadInfo(href).then(({data})=>{
 		makeTitle(data.title);
-		this.commentId='blog-'+href;
+		// console.log(data);
+		this.commentId=data.comment?('blog-'+href):undefined;
 		this.context=renderMetadata(data);
 		return loadContext(href);
 	}).then(({data})=>{
 		this.context+=renderMarkdown(data);
 	}).catch(reason=>{
 		makeTitle('Error!');
-		console.log(href,reason);
+		console.error('blog-context',href,reason);
 		var c;
 		if(typeof reason==='string'){
 			c=`<h1>Error!</h1><p>${reason}</p>`;

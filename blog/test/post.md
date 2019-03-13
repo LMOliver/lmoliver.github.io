@@ -6,8 +6,8 @@
   <life-canvas></life-canvas>
 
   </fold-block>
-- [QY](#!1)
-- S<span style="color:red">TEPS</span>
+- [QY](#!moQY)
+- <span class="cf-black-red">STEPS</span>
 
 ----
 
@@ -20,3 +20,5 @@
 |T|h|i|s| |$\text{中文}$|
 |i|s| |a| |$\text{text with\error}$|
 |T|A|B|L|E|$a_i^2+b_i^2=c_i^2$|
+
+<blog-list></blog-list>

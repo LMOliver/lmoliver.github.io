@@ -82,9 +82,17 @@ Vue.component('fold-block',{
 	},
 });
 
+function loadInfo(href){
+	return axios({
+		method:'get',
+		url:href?`./${href}/info.json`:'./index-info.json',
+		responseType:'json',
+	});
+}
+
 Vue.component('post-refence',{
 	template:`
-		<a :href="'#!'+href" :style="style" :class="classObj">
+		<a :href="'#!'+href" :style="style" :class="classObj" v-if="!data.hidden">
 			<template v-if="size==='small'">
 				<span>{{data.title}}</span>
 				<span>{{data.description}}</span>
@@ -138,6 +146,32 @@ Vue.component('post-refence',{
 		})
 	},
 });
+
+Vue.component('blog-list',{
+	template:`
+		<div>
+			<post-refence v-for="id in list" size="large" :href="id"></post-refence>
+		</div>
+	`,
+	data(){
+		return {
+			list:[],
+		};
+	},
+	mounted(){
+		axios({
+			method:'get',
+			url:'https://api.github.com/repos/LMOliver/lmoliver.github.io/contents/blog',
+			responseType:'json',
+		}).then(({data})=>{
+			this.list=data
+				.filter(f=>f.type==='dir')
+				.map(d=>d.name);
+		}).catch((reason)=>{
+			console.error('blog-post',reason);
+		})
+	},
+})
 
 Vue.component('life-canvas',{
 	template:`
@@ -273,25 +307,29 @@ Vue.component('comment-area',{
 	template:`<div><div></div></div>`,
 	methods:{
 		updateId(){
-			// console.log(this.gittalkid);
-			var gitalkEl=this.els[this.gittalkid];
-			if(typeof gitalkEl==='undefined'){
-				const gitalk = new Gitalk({
-					clientID: '2404bbe3ef6f6fe0b9de',
-					clientSecret: '85cc0b2fe72e057ab1757a2fb83c14142c1e7421',
-					repo: 'lmoliver.github.io',
-					owner: 'LMOliver',
-					admin: ['LMOliver'],
-					id: this.gittalkid,
-					distractionFreeMode: false,
-				});
-				this.els[this.gittalkid]=document.createElement('div');
-				gitalk.render(this.els[this.gittalkid]);
-				gitalkEl=this.els[this.gittalkid];
-			}
+			console.log(this.gittalkid);
 			var el=this.$el;
 			el.removeChild(el.children[0]);
-			el.appendChild(gitalkEl);
+			if(typeof this.gittalkid!=='undefined'){
+				var gitalkEl=this.els[this.gittalkid];
+				if(typeof gitalkEl==='undefined'){
+					const gitalk = new Gitalk({
+						clientID: '2404bbe3ef6f6fe0b9de',
+						clientSecret: '85cc0b2fe72e057ab1757a2fb83c14142c1e7421',
+						repo: 'lmoliver.github.io',
+						owner: 'LMOliver',
+						admin: ['LMOliver'],
+						id: this.gittalkid,
+						distractionFreeMode: false,
+					});
+					this.els[this.gittalkid]=document.createElement('div');
+					gitalk.render(this.els[this.gittalkid]);
+					gitalkEl=this.els[this.gittalkid];
+				}
+				el.appendChild(gitalkEl);
+			}else{
+				el.appendChild(document.createElement('div'));
+			}
 		},
 	},
 	watch:{

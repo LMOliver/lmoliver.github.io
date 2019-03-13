@@ -1,12 +1,10 @@
 
-_嘘……_
-
 **记得改`username`**
 
 <fold-block title="脚本">
 
 ```
-const username = '5teps AK IOI';
+const username = 'Steps AK IOl';
 const user_id = 'Sk-TRL5SV';
 const gameType = 'FFA';
 const custom_game_id = 'pqlh';
@@ -38,11 +36,15 @@ class Socket{
                     &&!document.querySelector('#game-page > div.alert.center > center > h1');
                 if(this.inGame&&!nowInGame){
                     if(document.querySelector('#game-page > div.alert.center > center > h1').innerText==='Game Over'){
-                        this.event('game_lost',{
-                            killer:document
-                                .querySelector('#game-page > div.alert.center > center > p > span > span')
-                                .innerText
-                        });
+						try{
+							this.event('game_lost',{
+								killer:document
+									.querySelector('#game-page > div.alert.center > center > p > span > span')
+									.innerText
+							});
+						}catch(e){
+                       		this.event('game_lost',{});
+						}
                     }else{
                         this.event('game_won');
                     }
@@ -582,7 +584,7 @@ class Bot{
         }else{
             value+=valueTable.edgeDistance*distanceValue(this.edgeDistance);
         }
-        value+=valueTable.enemyDistance*distanceValue(this.enemyDistance);
+		value+=valueTable.enemyDistance*distanceValue(this.enemyDistance);
         if(!this.isOwn(index))value+=valueTable.capatureValue;
 		if(this.isEnemy(index))value+=valueTable.attackValue;
 		value+=this.aroundTiles(index).filter(
@@ -729,11 +731,18 @@ class Bot{
 		var endIndex = move[1];
 		var valueTable=STRATEGY_VALUE[this.mode];
         if(!this.worthAttack(index,endIndex))return -Infinity;
-		var value = 0;
 		var indexArmy=Game.armies[index];
 		var endIndexArmy=Game.armies[endIndex];
-        value+=this.getTileValue(endIndex,indexArmy);
-        value-=this.getTileValue(index,indexArmy);
+
+		var er=this.isOwn(endIndex)?1:-1;
+		var newArmy=indexArmy-1+er*endIndexArmy;
+
+		var value=(
+			+this.getTileValue(endIndex,newArmy)
+        	+this.getTileValue(index,1)
+        	-er*this.getTileValue(endIndex,endIndexArmy)
+			-this.getTileValue(index,indexArmy)
+		);
 		if(this.isOwn(endIndex)&&indexArmy>=endIndexArmy)value+=valueTable.mergeValue*(indexArmy-1)*(endIndexArmy-1);
         if(move[0]===this.last)value=value+1;
         return value;
