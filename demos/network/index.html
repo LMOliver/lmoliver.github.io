@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Network</title>
+		<link rel="stylesheet" href="../../normalize.css">
+		<script src="https://cdn.jsdelivr.net/npm/vue"></script>
+		<link rel="stylesheet" href="./network.css"></head>
+	<body>
+		<div id="app">
+			<div>
+				<h1 style="display:inline-block;">Network</h1>
+				<span>v{{VERSION}}</span>
+			</div>
+			<div style="width: 100%;">
+				<strong>财富:{{printNumber(gameData.coin)}}</strong>
+				<span>({{printNumber(calcGlobalSum())}}财富/秒)</span>
+			</div>
+			<div>
+				<div v-if="calcGlobalMult()&gt;1">全局总加成:x{{printNumber(calcGlobalMult())}}</div>
+				<div v-if="calcGlobalPower()&gt;1">全局总指数:^{{printNumber(calcGlobalPower())}}</div>
+			</div>
+			<div class="col">
+				<h3>基础</h3>
+				<ul>
+					<li v-for="(obj,id) in gameData.arr">
+						<obj-shower :obj="obj" :id="id">
+						</obj-shower>
+					</li>
+					<button @click="addSon(gameData.arr)" class="btn-active" :disabled="gameData.coin&lt;addSonCost(gameData.arr)">
+						增加新的{{LAYER_NAMES[gameData.arr[0].layer]}}
+					</button>
+					<span>花费:{{printNumber(addSonCost(gameData.arr))}}财富</span>
+				</ul>
+			</div>
+			<div class="col">
+				<h3>每个放置游戏都有的东西</h3>
+				<ul>
+					<li v-if="gameData.skills.length>0">
+						<strong>技能</strong>
+						<button @click="gameData.showSkills=!gameData.showSkills">{{gameData.showSkills?'收起':'展示'}}</button>			
+						<ul v-show="gameData.showSkills">
+							<li v-for="(s,id) in gameData.skills">
+								<strong>{{skillLevelName(id)}}</strong>
+								<button @click="s.show=!s.show">{{s.show?'收起':'展示'}}</button>			
+								<div v-show="s.show">
+									<span>
+										{{printNumber(s.skillPoint)+skillPointName(id)}}
+									</span>
+									<button @click="toSkill(id)" class="btn-danger" :disabled="!canToSkill(id)">{{skillLevelName(id)}}</button>
+									<span v-if="canToSkill(id)">
+										(+{{printNumber(calcSkillPointGain(id))}})
+									</span>
+									<span v-else>
+										<span v-if="id>0">
+											需要至少{{printNumber(1e3)}}{{skillPointName(id-1)}}
+										</span>
+										<span v-else>
+											需要至少{{printNumber(1e6)}}财富
+										</span>
+									</span>
+									<ul>
+										<li v-for="(lv,skId) in s" v-if="isSkill(skId)&&isSkillEnabled(skId,id)">
+											<div>
+												<strong>{{skillName(skId)}}</strong>
+												<span>{{skillEffectString(s,skId)}}</span>
+											</div>
+											<span>{{lv}}级</span>
+											<button @click="learnSkill(s,skId)" class="btn-active" :disabled="!canLearnSkill(s,skId)">学习</button>
+											<span>花费:{{printNumber(skillCost(s,skId))+skillPointName(id)}}</span>
+										</li>
+									</ul>
+								</div>
+							</li>
+						</ul>
+					</li>
+					<li v-if="canLayerUp()">
+						<div>
+							<strong>层级</strong>
+						</div>
+						<div>
+							<span>原层级:{{gameData.layer}}</span>
+						</div>
+						<div>
+							<span>新层级:{{gameData.layer+1}}</span>
+						</div>
+						<button class="btn-danger" @click="layerUp()">提升</button>
+					</li>
+				</ul>
+			</div>
+		</div>
+	</body>
+	<script src="./network.js"></script>
+</html>

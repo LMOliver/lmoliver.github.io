@@ -161,7 +161,9 @@ Vue.component('blog-list',{
 	mounted(){
 		axios({
 			method:'get',
-			url:'https://api.github.com/repos/LMOliver/lmoliver.github.io/contents/blog',
+			url:'https://api.github.com/repos/LMOliver/lmoliver.github.io/contents/blog?\
+client_id=a5ff5dd0495db47c22ab\
+&client_secret=da88951dfa058ac808f6032320cb0d7b01e1a936',
 			responseType:'json',
 		}).then(({data})=>{
 			this.list=data
