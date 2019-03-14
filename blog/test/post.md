@@ -20,5 +20,3 @@
 |T|h|i|s| |$\text{中文}$|
 |i|s| |a| |$\text{text with\error}$|
 |T|A|B|L|E|$a_i^2+b_i^2=c_i^2$|
-
-<blog-list></blog-list>
