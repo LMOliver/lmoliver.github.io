@@ -21,7 +21,7 @@
 				<div v-if="calcGlobalPower()&gt;1">全局总指数:^{{printNumber(calcGlobalPower())}}</div>
 			</div>
 			<div class="col">
-				<h3>基础</h3>
+				<h3>结构</h3>
 				<ul>
 					<li v-for="(obj,id) in gameData.arr">
 						<obj-shower :obj="obj" :id="id">
@@ -53,7 +53,7 @@
 									</span>
 									<span v-else>
 										<span v-if="id>0">
-											需要至少{{printNumber(1e3)}}{{skillPointName(id-1)}}
+											需要至少{{printNumber(1e6)}}{{skillPointName(id-1)}}
 										</span>
 										<span v-else>
 											需要至少{{printNumber(1e6)}}财富
@@ -63,7 +63,11 @@
 										<li v-for="(lv,skId) in s" v-if="isSkill(skId)&&isSkillEnabled(skId,id)">
 											<div>
 												<strong>{{skillName(skId)}}</strong>
-												<span>{{skillEffectString(s,skId)}}</span>
+												<span>{{skillEffectString(s,skId,s[skId])}}</span>
+												<span v-if="canLearnSkill(s,skId)">
+													<span>=></span>
+													<span>{{skillEffectString({[skId]:lv+1},skId)}}</span>
+												</span>
 											</div>
 											<span>{{lv}}级</span>
 											<button @click="learnSkill(s,skId)" class="btn-active" :disabled="!canLearnSkill(s,skId)">学习</button>
@@ -74,7 +78,7 @@
 							</li>
 						</ul>
 					</li>
-					<li v-if="canLayerUp()">
+					<li v-if="canLayerUp()||canToSkill(gameData.skills.length)">
 						<div>
 							<strong>层级</strong>
 						</div>
@@ -84,7 +88,9 @@
 						<div>
 							<span>新层级:{{gameData.layer+1}}</span>
 						</div>
-						<button class="btn-danger" @click="layerUp()">提升</button>
+						<button class="btn-danger" :disabled="!canLayerUp()" @click="layerUp()">提升</button>
+						<span v-if="canLayerUp()">提升会使你失去一切，包括所有<strong>结构、财富和技能</strong></span>
+						<span v-else>{{layerUpHint()}}</span>
 					</li>
 				</ul>
 			</div>

@@ -1,5 +1,6 @@
 !function(){
-const VERSION='1.1';
+const VERSION='1.0.2';
+const VERSION_ID='1.0.2.0';
 
 const sum=(arr)=>arr.reduce((a,b)=>a+b,0);
 const product=(arr)=>arr.reduce((a,b)=>a*b,1);
@@ -22,12 +23,14 @@ function decode(str){
 	);
 }
 
+var gameData;
+
 function printNumber(num){
 	const EXP_BASE=10;
 	const heads=['','U','D','T','q','Q','s','S','O','N'];
-	const tails=['','Dc','Vg','Tg','qg','Qg','sg','Sg','Og','Ng'];
-	if(!isFinite(num))return num.toString();
-	var [val,exp]=num.toExponential(2).split('e').map(Number);
+	const tails=['','Dc','Vi','Tg','qg','Qg','sg','Sg','Og','Ng'];
+	if(!Number.isFinite(num))return num.toString();
+	var [val,exp]=num.toExponential(2).split('e').map(parseFloat);
 	if(exp<6){
 		if(Number.isSafeInteger(num))return num.toString();
 		else return num.toFixed(2);
@@ -85,7 +88,11 @@ function calcArrSum(arr){
 }
 
 function calcGlobalSum(){
-	return Math.pow(calcGlobalMult()*calcArrSum(gameData.arr),calcGlobalPower());
+	var s=calcArrSum(gameData.arr);
+	s+=calcGlobalAdd();
+	s*=calcGlobalMult();
+	s**=calcGlobalPower();
+	return s;
 }
 
 function calcPoint(obj){
@@ -114,7 +121,8 @@ function upgrade(obj){
 const APPEND_COST_PER_LAYER=1e4;
 function addSonCost(arr){
 	return 25*Math.pow(APPEND_COST_PER_LAYER,arr[0].layer)
-		*Math.pow((arr[0].layer+1)*4,arr.length);
+		*Math.pow((arr[0].layer+1)*4,arr.length)
+		*Math.sqrt(arr[0].weight);
 }
 
 function addSon(arr){
@@ -192,6 +200,7 @@ function skillPointName(id){
 function initSkill(){
 	return {
 		skillPoint:0,
+		coinGen:0,
 		globalMult:0,
 		globalPower:0,
 		toPointMult:0,
@@ -203,30 +212,43 @@ const SKILLS={
 	globalMult:{
 		name:'全局加成',
 		format:'xVALUE',
-		effectBase:2,
-		effectAdd:0,
+		effect(lv){
+			return Math.pow(2,lv);
+		},
 		costBase:2,
+		costMult:1,
+		enable:0,
+	},
+	coinGen:{
+		name:'财富获取',
+		format:'+VALUE财富/秒',
+		effect(lv){
+			return 100*lv**4;
+		},
+		costBase:5,
 		costMult:1,
 		enable:0,
 	},
 	globalPower:{
 		name:'全局指数',
 		format:'^VALUE',
-		effectBase:1,
-		effectAdd:0.1,
+		effect(lv){
+			return 1+lv*0.01;
+		},
 		costBase:2,
 		costMult:10,
 		enable:1,
 	},
-	toPointMult:{
-		name:'回转加成',
-		format:'xVALUE',
-		effectBase:1.01,
-		effectAdd:0,
-		costBase:3,
-		costMult:3,
-		enable:2,
-	},
+	// toPointMult:{
+	// 	name:'回转加成(无效,请勿购买)',
+	// 	format:'xVALUE',
+	// 	effect(lv){
+	// 		return Math.pow(1.01,lv);
+	// 	},
+	// 	costBase:3,
+	// 	costMult:3,
+	// 	enable:2,
+	// },
 };
 
 function isSkill(skillId){
@@ -239,8 +261,7 @@ function isSkillEnabled(skillId,id){
 	return id>=SKILLS[skillId].enable;
 }
 function skillValue(skill,skillId){
-	const skInfo=SKILLS[skillId];
-	return (1+skInfo.effectAdd*skill[skillId])*Math.pow(skInfo.effectBase,skill[skillId]);
+	return SKILLS[skillId].effect(skill[skillId]);
 }
 function skillEffectString(skill,skillId){
 	return SKILLS[skillId].format.replace(
@@ -260,6 +281,10 @@ function learnSkill(skill,skillId){
 	skill[skillId]++;
 }
 
+function calcGlobalAdd(){
+	return sum(gameData.skills.map(s=>skillValue(s,'coinGen')));
+}
+
 function calcGlobalMult(){
 	return product(gameData.skills.map(s=>skillValue(s,'globalMult')));
 }
@@ -275,19 +300,66 @@ function canLayerUp(){
 		return false;
 	}
 }
+function layerUpHint(){
+	if(gameData.layer<MAX_NAMED_LAYER){
+		return `${LAYER_NAMES[gameData.arr[0].layer]}的数量必须不小于${printNumber(30)}`;
+	}else{
+		return '作者还没做这部分，拿头提升';
+	}
+}
 function layerUp(){
 	gameData.layer+=1;
 	clearNetwork();
 	clearSkills();
 }
 
-var gameData={
-	coin:0,
-	arr:[initObj(0)],
-	layer:0,
-	showSkills:true,
-	skills:[],
-};
+function newGameData(){
+	return {
+		version:VERSION,
+		versionId:VERSION_ID,
+		coin:0,
+		arr:[initObj(0)],
+		layer:0,
+		showSkills:true,
+		skills:[],
+	};
+}
+
+function fixGameData(gd){
+	function fixKey(obj,key,def){
+		if(typeof obj[key]==='undefined'){
+			obj[key]=def;
+		}
+	}
+	fixKey(gd,'version',VERSION);
+	fixKey(gd,'versionId',VERSION_ID);
+	fixKey(gd,'coin',0);
+	fixKey(gd,'layer',0);
+	fixKey(gd,'arr',[initObj(gd.layer)]);
+	fixKey(gd,'showSkills',true);
+	fixKey(gd,'skills',[]);
+	for(let s of gd.skills){
+		fixKey(s,'show',true);
+		for(let skillId in SKILLS){
+			fixKey(s,skillId,0);
+		}
+	}
+}
+
+
+const UPDATE_LOG=`
+
+v1.0.2
+- 新的技能:${SKILLS.coinGen.name}
+	* 生成固定的财富收入
+	* 最低要求:${skillLevelName(0)}
+- 优化平衡性
+- 改善界面
+
+v1.0.1
+- 增加了层次系统
+
+`;
 
 const methods={
 	sum,
@@ -301,6 +373,7 @@ const methods={
 	calcArrPoint,
 	calcArrSum,
 	calcGlobalMult,
+	calcGlobalAdd,
 	calcGlobalPower,
 	calcGlobalSum,
 	calcSkillPointGain,
@@ -324,17 +397,26 @@ const methods={
 	isSkillEnabled,
 	skillValue,
 	layerUp,
+	layerUpHint,
 	learnSkill,
 	skillPointName,
 	skillName,
 	skillCost,
 	skillLevelName,
 	skillEffectString,
+	fixGameData,
+	newGameData,
 };
 
 const data={
-	gameData,
+	get gameData(){
+		return gameData;
+	},
+	set gameData(gd){
+		gameData=gd;
+	},
 	VERSION,
+	VERSION_ID,
 	LAYER_NAMES,
 	SKILLPOINT_TO_SKILL,
 	MAX_NAMED_LAYER,
@@ -342,7 +424,10 @@ const data={
 	PADDING,
 	COIN_TO_SKILL,
 	APPEND_COST_PER_LAYER,
+	UPDATE_LOG,
 }
+
+Vue.component('')
 
 Vue.component('obj-shower',{
 	props:['obj','id'],
@@ -407,17 +492,32 @@ var app=new Vue({
 	el:'#app',
 	data,
 	methods,
-	mounted(){
-		var gd;
-		try{
-			gd=decode(localStorage.getItem('game-network-save'));
-		}catch(e){
-
-		}
-		finally{
-			for(key in gd){
-				this.gameData[key]=gd[key];
+	created(){
+		var save=localStorage.getItem('game-network-save');
+		if(save!=null){
+			var gd;
+			try{
+				try{
+					gd=decode(save);
+				}catch(e){
+					throw new Error('这存档格式咋不对');
+				}
+				if(typeof gd.version==='undefined'||gd.version!==VERSION){
+					if(typeof gd.versionID==='undefined'||gd.versionID<VERSION_ID){	
+						fixGameData(gd);
+						console.log(UPDATE_LOG);
+					}else{
+						throw new Error(`${gd.version}版的存档拿头解析\n当前版本:${VERSION}`);
+					}
+				}
+			}catch(e){
+				console.log(e.tostring());
+				this.gameData=newGameData();
+			}finally{
+				this.gameData=gd;
 			}
+		}else{
+			this.gameData=newGameData();
 		}
 		var time=(new Date()).getTime();
 		this.inv=setInterval(()=>{
@@ -431,5 +531,10 @@ var app=new Vue({
 		clearInterval(this.inv);
 	},
 });
+
+// window.debug={
+// 	data,
+// 	methods,
+// };
 
 }();
