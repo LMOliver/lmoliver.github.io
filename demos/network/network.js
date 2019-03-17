@@ -1,5 +1,5 @@
 !function(){
-const VERSION='1.0.3(dev)';
+const VERSION='1.0.3';
 const VERSION_ID='1.0.3.0';
 
 const sum=(arr)=>arr.reduce((a,b)=>a+b,0);
@@ -363,7 +363,7 @@ function fixGameData(gd){
 			obj[key]=def;
 		}
 	}
-	console.log('存档版本',gd.versionID);
+	// console.log('存档版本',gd.versionID);
 	if(typeof gd.versionID==='undefined'){
 		fixKey(gd,'version','1.0.2');
 		fixKey(gd,'versionID','1.0.2.0');
@@ -383,8 +383,9 @@ function fixGameData(gd){
 		forEachObj(o=>{
 			fixKey(o,'level',1);
 		})
+		gd.versionID='1.0.3.0';
 	}
-	console.log(JSON.parse(JSON.stringify(gd)));
+	// console.log(JSON.parse(JSON.stringify(gd)));
 }
 
 const CHANGE_LOG={
@@ -594,9 +595,9 @@ var app=new Vue({
 	},
 });
 
-window.debug={
-	data,
-	methods,
-};
+// window.debug={
+// 	data,
+// 	methods,
+// };
 
 }();
