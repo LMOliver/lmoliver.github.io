@@ -1,6 +1,6 @@
 !function(){
-const VERSION='1.0.2';
-const VERSION_ID='1.0.2.0';
+const VERSION='1.0.3(dev)';
+const VERSION_ID='1.0.3.0';
 
 const sum=(arr)=>arr.reduce((a,b)=>a+b,0);
 const product=(arr)=>arr.reduce((a,b)=>a*b,1);
@@ -29,6 +29,7 @@ function printNumber(num){
 	const EXP_BASE=10;
 	const heads=['','U','D','T','q','Q','s','S','O','N'];
 	const tails=['','Dc','Vi','Tg','qg','Qg','sg','Sg','Og','Ng'];
+	if(typeof num!=='number')return String(num);
 	if(!Number.isFinite(num))return num.toString();
 	var [val,exp]=num.toExponential(2).split('e').map(parseFloat);
 	if(exp<6){
@@ -66,19 +67,32 @@ function initObj(layer,weight=1){
 		show:true,
 		point:1,
 	};
-	if(layer===0){
-		obj.level=1;
-	}else{
+	obj.level=1;
+	if(layer!==0){
 		obj.sons=[initObj(layer-1,weight)];
 	}
 	return obj;
 }
 
+function forEachObj(callback){
+	function forEachInObj(obj){
+		callback(obj);
+		if(obj.layer>0){
+			obj.sons.forEach(obj => {
+				forEachInObj(obj);
+			});
+		}
+	}
+	gameData.arr.forEach(obj => {
+		forEachInObj(obj);
+	});
+}
+
 function calcSum(obj){
 	return Math.pow(
-		obj.layer===0?
-			obj.level*obj.weight*obj.weight
-			:calcArrSum(obj.sons),
+		obj.level*(obj.layer===0?
+			obj.weight*obj.weight
+			:calcArrSum(obj.sons)),
 		obj.point
 	);
 }
@@ -96,21 +110,22 @@ function calcGlobalSum(){
 }
 
 function calcPoint(obj){
-	const minPro=Math.pow(10,obj.layer)*(obj.weight*2+18);
-	const valPro=obj.layer===0?obj.level:calcArrPoint(obj.sons);
-	return Math.log2(valPro)-Math.log2(minPro-1)+1
+	const minPro=obj.weight*2+18;
+	const valPro=obj.level;
+	const rate=1/(Math.pow(obj.layer+1,3));
+	return (Math.log2(valPro)-Math.log2(minPro-1))*rate+1
 }
 
 function calcArrPoint(arr){
 	return product(arr.map(o=>o.point));
 }
 
+const PRICE_INCERASE_RATE=1.44;
+const PRICE_INCERASE_RATE_PER_LAYER=0.36;
 function upgradeCost(obj){
-	if(obj.layer!==0){
-		throw new Error('obj must be layer 0');
-	}else{
-		return obj.weight*Math.pow(1.44,obj.level-1);
-	}
+	return obj.weight*Math.pow(1e5,Math.pow(obj.layer,1.6))*Math.pow(
+		PRICE_INCERASE_RATE+obj.layer*PRICE_INCERASE_RATE_PER_LAYER,
+		obj.level-1);
 }
 
 function upgrade(obj){
@@ -118,7 +133,7 @@ function upgrade(obj){
 	obj.level++;
 }
 
-const APPEND_COST_PER_LAYER=1e4;
+const APPEND_COST_PER_LAYER=1e5;
 function addSonCost(arr){
 	return 25*Math.pow(APPEND_COST_PER_LAYER,arr[0].layer)
 		*Math.pow((arr[0].layer+1)*4,arr.length)
@@ -141,6 +156,10 @@ function toPoint(obj){
 	}else{
 		obj.sons=[initObj(obj.layer-1)];
 	}
+}
+
+function showImproveAreas(){
+	return showSkillArea()||showLayerArea();
 }
 
 function canToNewSkill(){
@@ -184,17 +203,21 @@ function toSkill(id){
 	clearSkill(id);
 }
 
+function showSkillArea(){
+	return gameData.skills.length>0;
+}
+
 function skillLevelName(id){
 	return id<=3?
 		('超'.repeat(id)+'转'+(id===0?'生':''))
-		:(`超^${id}转`);
+		:(`超.${id}转`);
 }
 
 function skillPointName(id){
 	if(id==='-1')return '财富';
-	return id<=2?
+	return id<=3?
 		('超'.repeat(id)+'技能点')
-		:(`超^${id}技能点`);
+		:(`超.${id}技能点`);
 }
 
 function initSkill(){
@@ -209,16 +232,6 @@ function initSkill(){
 }
 
 const SKILLS={
-	globalMult:{
-		name:'全局加成',
-		format:'xVALUE',
-		effect(lv){
-			return Math.pow(2,lv);
-		},
-		costBase:2,
-		costMult:1,
-		enable:0,
-	},
 	coinGen:{
 		name:'财富获取',
 		format:'+VALUE财富/秒',
@@ -227,7 +240,21 @@ const SKILLS={
 		},
 		costBase:5,
 		costMult:1,
-		enable:0,
+		enable(skillId){
+			return skillId===0;
+		},
+	},
+	globalMult:{
+		name:'全局加成',
+		format:'xVALUE',
+		effect(lv){
+			return Math.pow(2,lv);
+		},
+		costBase:2,
+		costMult:1,
+		enable(skillId){
+			return true;
+		},
 	},
 	globalPower:{
 		name:'全局指数',
@@ -235,9 +262,11 @@ const SKILLS={
 		effect(lv){
 			return 1+lv*0.01;
 		},
-		costBase:2,
-		costMult:10,
-		enable:1,
+		costBase:4,
+		costMult:5,
+		enable(skillId){
+			return skillId>=1;
+		},
 	},
 	// toPointMult:{
 	// 	name:'回转加成(无效,请勿购买)',
@@ -258,7 +287,7 @@ function skillName(skillId){
 	return SKILLS[skillId].name;
 }
 function isSkillEnabled(skillId,id){
-	return id>=SKILLS[skillId].enable;
+	return SKILLS[skillId].enable(id);
 }
 function skillValue(skill,skillId){
 	return SKILLS[skillId].effect(skill[skillId]);
@@ -293,6 +322,9 @@ function calcGlobalPower(){
 	return product(gameData.skills.map(s=>skillValue(s,'globalPower')));
 }
 
+function showLayerArea(){
+	return canLayerUp()||canToSkill(gameData.skills.length);
+}
 function canLayerUp(){
 	if(gameData.layer<MAX_NAMED_LAYER){
 		return gameData.arr.length>=30;
@@ -316,7 +348,7 @@ function layerUp(){
 function newGameData(){
 	return {
 		version:VERSION,
-		versionId:VERSION_ID,
+		versionID:VERSION_ID,
 		coin:0,
 		arr:[initObj(0)],
 		layer:0,
@@ -331,35 +363,47 @@ function fixGameData(gd){
 			obj[key]=def;
 		}
 	}
-	fixKey(gd,'version',VERSION);
-	fixKey(gd,'versionId',VERSION_ID);
-	fixKey(gd,'coin',0);
-	fixKey(gd,'layer',0);
-	fixKey(gd,'arr',[initObj(gd.layer)]);
-	fixKey(gd,'showSkills',true);
-	fixKey(gd,'skills',[]);
-	for(let s of gd.skills){
-		fixKey(s,'show',true);
-		for(let skillId in SKILLS){
-			fixKey(s,skillId,0);
+	console.log('存档版本',gd.versionID);
+	if(typeof gd.versionID==='undefined'){
+		fixKey(gd,'version','1.0.2');
+		fixKey(gd,'versionID','1.0.2.0');
+		fixKey(gd,'coin',0);
+		fixKey(gd,'layer',0);
+		fixKey(gd,'arr',[initObj(gd.layer)]);
+		fixKey(gd,'showSkills',true);
+		fixKey(gd,'skills',[]);
+		for(let s of gd.skills){
+			fixKey(s,'show',true);
+			for(let skillId in SKILLS){
+				fixKey(s,skillId,0);
+			}
 		}
 	}
+	if(gd.versionID<'1.0.3.0'){
+		forEachObj(o=>{
+			fixKey(o,'level',1);
+		})
+	}
+	console.log(JSON.parse(JSON.stringify(gd)));
 }
 
+const CHANGE_LOG={
+	'v1.0.3':
+`增加了对非结点结构的升级功能
+大幅改进界面
+${SKILLS.coinGen.name}现在仅在${skillLevelName(0)}中可用
+`,
 
-const UPDATE_LOG=`
+	'v1.0.2':
+`新的技能:${SKILLS.coinGen.name}
+	生成固定的财富收入
+	最低要求:${skillLevelName(0)}
+改进了界面`,
 
-v1.0.2
-- 新的技能:${SKILLS.coinGen.name}
-	* 生成固定的财富收入
-	* 最低要求:${skillLevelName(0)}
-- 优化平衡性
-- 改善界面
+	'v1.0.1':
+`增加了层次系统`,
 
-v1.0.1
-- 增加了层次系统
-
-`;
+};
 
 const methods={
 	sum,
@@ -392,10 +436,13 @@ const methods={
 	doGameTick,
 	addSonCost,
 	initObj,
+	showImproveAreas,
 	initSkill,
+	showSkillArea,
 	isSkill,
 	isSkillEnabled,
 	skillValue,
+	showLayerArea,
 	layerUp,
 	layerUpHint,
 	learnSkill,
@@ -404,6 +451,7 @@ const methods={
 	skillCost,
 	skillLevelName,
 	skillEffectString,
+	forEachObj,
 	fixGameData,
 	newGameData,
 };
@@ -424,10 +472,27 @@ const data={
 	PADDING,
 	COIN_TO_SKILL,
 	APPEND_COST_PER_LAYER,
-	UPDATE_LOG,
+	CHANGE_LOG,
 }
 
-Vue.component('')
+Vue.component('arr-shower',{
+	props:['arr'],
+	methods,
+	data(){
+		return data;
+	},
+	template:`
+	<ul>
+		<li v-for="(obj,id) in arr">
+			<obj-shower :obj="obj" :id="id">
+			</obj-shower>
+		</li>
+		<button @click="addSon(arr)" class="btn-enabled" :disabled="gameData.coin&lt;addSonCost(arr)">
+			增加新的{{LAYER_NAMES[arr[0].layer]}}
+		</button>
+		<span>花费:{{printNumber(addSonCost(arr))}}财富</span>
+	</ul>`,
+})
 
 Vue.component('obj-shower',{
 	props:['obj','id'],
@@ -436,7 +501,7 @@ Vue.component('obj-shower',{
 		return data;
 	},
 	template:`
-		<div class="obj-shower">
+		<div :class="['object','obj-layer-name-'+obj.layer%(MAX_NAMED_LAYER+1)]">
 			<strong>
 				<span>
 				{{LAYER_NAMES[obj.layer]}}
@@ -448,26 +513,17 @@ Vue.component('obj-shower',{
 			<span>
 				{{printNumber(calcSum(obj))}}财富/秒
 			</span>
-			<button @click="obj.show=!obj.show">{{obj.show?'收起':'展示'}}</button>
-			<div v-show="obj.show">
-				<div v-if="obj.layer===0">
+			<button @click="obj.show=!obj.show" class="btn">{{obj.show?'收起':'展示'}}</button>
+			<div v-if="obj.show">
+				<div>
 					<span>{{obj.level}}级<span>
-					<button @click="upgrade(obj)" class="btn-active" :disabled="gameData.coin&lt;upgradeCost(obj)">
+					<button @click="upgrade(obj)" class="btn-enabled" :disabled="gameData.coin&lt;upgradeCost(obj)">
 						升级
 					</button>
 					<span>花费:{{printNumber(upgradeCost(obj))}}财富<span>
 				</div>
-				<div v-else>
-					<ul>
-						<li v-for="(son,id) in obj.sons">
-							<obj-shower :obj="son" :id="id">
-							</obj-shower>
-						</li>
-						<button @click="addSon(obj.sons)" class="btn-active" :disabled="gameData.coin&lt;addSonCost(obj.sons)">
-							增加新的{{LAYER_NAMES[obj.layer-1]}}
-						</button>
-						<span>花费:{{printNumber(addSonCost(obj.sons))}}财富</span>
-					</ul>
+				<div v-if="obj.layer!==0">
+					<arr-shower :arr="obj.sons"></arr-shower>
 				</div>
 				<div v-if="obj.point&gt;1||canToPoint(obj)">
 					<span>指数:{{obj.point.toFixed(2)}}</span>
@@ -495,26 +551,26 @@ var app=new Vue({
 	created(){
 		var save=localStorage.getItem('game-network-save');
 		if(save!=null){
-			var gd;
 			try{
+				var gd;
 				try{
-					gd=decode(save);
+					this.gameData=gd=decode(save);
 				}catch(e){
-					throw new Error('这存档格式咋不对');
+					throw e;
 				}
 				if(typeof gd.version==='undefined'||gd.version!==VERSION){
 					if(typeof gd.versionID==='undefined'||gd.versionID<VERSION_ID){	
 						fixGameData(gd);
-						console.log(UPDATE_LOG);
+						console.log(CHANGE_LOG);
 					}else{
 						throw new Error(`${gd.version}版的存档拿头解析\n当前版本:${VERSION}`);
 					}
 				}
 			}catch(e){
-				console.log(e.tostring());
+				console.error(e);
 				this.gameData=newGameData();
 			}finally{
-				this.gameData=gd;
+				console.log('存档载入成功');
 			}
 		}else{
 			this.gameData=newGameData();
@@ -526,15 +582,21 @@ var app=new Vue({
 			time=newTime;
 			localStorage.setItem('game-network-save',encode(this.gameData));
 		});
+		console.group('更新记录');
+		for(const ver in CHANGE_LOG){
+			const el=CHANGE_LOG[ver];
+			console.log(`%c${ver}\n%c${el}`,'font-weight:bold','');
+		}
+		console.groupEnd();
 	},
 	beforeDestroy(){
 		clearInterval(this.inv);
 	},
 });
 
-// window.debug={
-// 	data,
-// 	methods,
-// };
+window.debug={
+	data,
+	methods,
+};
 
 }();

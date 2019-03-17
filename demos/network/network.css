@@ -2,12 +2,56 @@ body{
 	padding: 30px 10%;
 }
 
-li{
-	border: black solid 1px;
+.object,.skill-area,.skills,.skill,.layer-area{
 	padding: 5px;
 	border-radius: 5px;
-	margin: 2px;
-	width: calc(100% - 17px);
+	margin:5px 2px;
+}
+
+.obj-layer-name-0{
+	background: linear-gradient(90deg,rgb(0, 128, 255) 0%,rgb(160, 224, 255) 20%); 
+}
+.obj-layer-name-1{
+	background: linear-gradient(90deg,rgb(0, 192, 255) 0%,rgb(192, 224, 255) 30%); 
+}
+.obj-layer-name-2{
+	background: linear-gradient(90deg,rgb(0, 255, 128) 0%,rgb(192, 255, 224) 30%); 
+}
+.obj-layer-name-3{
+	background: linear-gradient(90deg,rgb(255, 255, 0) 0%,rgb(255, 255, 192) 30%); 
+}
+.obj-layer-name-4{
+	background: linear-gradient(90deg,rgb(255, 192, 0) 0%,rgb(255, 224, 192) 30%); 
+}
+.obj-layer-name-5{
+	background: linear-gradient(90deg,rgb(255, 0, 0) 0%,rgb(255, 192, 192) 30%); 
+}
+.obj-layer-name-6{
+	background: linear-gradient(90deg,rgb(160, 0, 255) 0%,rgb(192, 128, 255) 30%); 
+}
+
+.skill-area{
+	background: repeating-linear-gradient(
+		135deg,
+		gray 0%,
+		darkgray 15%,
+		gray 30%
+	); 
+}
+.skills{
+	background: orange; 
+}
+.skill{
+	background: radial-gradient(pink,rgb(255, 128, 128));
+}
+
+.layer-area{
+	background: repeating-linear-gradient(
+		135deg,
+		silver 0%,
+		whitesmoke 15%,
+		silver 30%
+	); 
 }
 
 .col{
@@ -16,23 +60,42 @@ li{
 }
 
 button{
-	border: none;
-	text-decoration: underline;
-	color: black;
-	background: none;
+	border: 1px solid;
+	border-radius: 4px;
+	padding-top: 3px;
+	padding-bottom: 3px;
+	padding-inline-start: 6px;
+	padding-inline-end: 6px;
+	margin-inline-start: 3px;
+	margin-inline-end: 3px;
+	color: white;
+	cursor: pointer;
 }
-
-button:disabled{
-	color:grey;
+.btn{
+	background-color:white;
+	border-color: gray;
+	color:black;
 }
 .btn-danger{
-	color:red;
+	background-color:rgb(255, 48, 32);
+	border-color:rgb(255, 96, 96);
 }
 .btn-warning{
-	color:orange;
+	background-color:orange;
+	border-color:orange;
+}
+.btn-enabled{
+	background-color:rgb(0, 128, 255);
+	border-color: rgb(0, 144, 255);
 }
 .btn-active{
-	color:blue;
+	background-color:rgb(0, 216, 0);
+	border-color: rgb(128, 216, 128);
+}
+button:disabled{
+	background-color:gray;
+	border-color: darkgray;
+	cursor: not-allowed;
 }
 
 ul{

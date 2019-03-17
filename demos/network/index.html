@@ -14,36 +14,33 @@
 			</div>
 			<div style="width: 100%;">
 				<strong>财富:{{printNumber(gameData.coin)}}</strong>
-				<span>({{printNumber(calcGlobalSum())}}财富/秒)</span>
+				<span>(+{{printNumber(calcGlobalSum())}}财富/秒)</span>
 			</div>
 			<div>
 				<div v-if="calcGlobalMult()&gt;1">全局总加成:x{{printNumber(calcGlobalMult())}}</div>
 				<div v-if="calcGlobalPower()&gt;1">全局总指数:^{{printNumber(calcGlobalPower())}}</div>
 			</div>
 			<div class="col">
-				<h3>结构</h3>
-				<ul>
-					<li v-for="(obj,id) in gameData.arr">
-						<obj-shower :obj="obj" :id="id">
-						</obj-shower>
-					</li>
-					<button @click="addSon(gameData.arr)" class="btn-active" :disabled="gameData.coin&lt;addSonCost(gameData.arr)">
-						增加新的{{LAYER_NAMES[gameData.arr[0].layer]}}
-					</button>
-					<span>花费:{{printNumber(addSonCost(gameData.arr))}}财富</span>
-				</ul>
+				<div>
+					<h3 style="display:inline-block">结构</h3>
+					<button @click="forEachObj(o=>o.show=false)" class="btn">收起全部</button>
+					<button @click="forEachObj(o=>o.show=true)" class="btn">展开全部</button>
+				</div>
+				<arr-shower :arr="gameData.arr"></arr-shower>
 			</div>
-			<div class="col">
-				<h3>每个放置游戏都有的东西</h3>
+			<div class="col" v-if="showImproveAreas()">
+				<div>
+					<h3 style="display:inline-block">每个放置游戏都有的东西</h3>
+				</div>
 				<ul>
-					<li v-if="gameData.skills.length>0">
+					<li v-if="showSkillArea()" class="skill-area">
 						<strong>技能</strong>
-						<button @click="gameData.showSkills=!gameData.showSkills">{{gameData.showSkills?'收起':'展示'}}</button>			
-						<ul v-show="gameData.showSkills">
-							<li v-for="(s,id) in gameData.skills">
+						<button @click="gameData.showSkills=!gameData.showSkills" class="btn">{{gameData.showSkills?'收起':'展示'}}</button>			
+						<ul v-if="gameData.showSkills">
+							<li v-for="(s,id) in gameData.skills" class="skills">
 								<strong>{{skillLevelName(id)}}</strong>
-								<button @click="s.show=!s.show">{{s.show?'收起':'展示'}}</button>			
-								<div v-show="s.show">
+								<button @click="s.show=!s.show" class="btn">{{s.show?'收起':'展示'}}</button>			
+								<div v-if="s.show">
 									<span>
 										{{printNumber(s.skillPoint)+skillPointName(id)}}
 									</span>
@@ -60,7 +57,7 @@
 										</span>
 									</span>
 									<ul>
-										<li v-for="(lv,skId) in s" v-if="isSkill(skId)&&isSkillEnabled(skId,id)">
+										<li v-for="(lv,skId) in s" v-if="isSkill(skId)&&isSkillEnabled(skId,id)" class="skill">
 											<div>
 												<strong>{{skillName(skId)}}</strong>
 												<span>{{skillEffectString(s,skId,s[skId])}}</span>
@@ -70,7 +67,7 @@
 												</span>
 											</div>
 											<span>{{lv}}级</span>
-											<button @click="learnSkill(s,skId)" class="btn-active" :disabled="!canLearnSkill(s,skId)">学习</button>
+											<button @click="learnSkill(s,skId)" class="btn-enabled" :disabled="!canLearnSkill(s,skId)">学习</button>
 											<span>花费:{{printNumber(skillCost(s,skId))+skillPointName(id)}}</span>
 										</li>
 									</ul>
@@ -78,7 +75,7 @@
 							</li>
 						</ul>
 					</li>
-					<li v-if="canLayerUp()||canToSkill(gameData.skills.length)">
+					<li v-if="showLayerArea()" class="layer-area">
 						<div>
 							<strong>层级</strong>
 						</div>
