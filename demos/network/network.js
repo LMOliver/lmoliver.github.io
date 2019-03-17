@@ -560,11 +560,9 @@ var app=new Vue({
 					throw e;
 				}
 				if(typeof gd.version==='undefined'||gd.version!==VERSION){
+					console.log(`存档版本:${gd.version}\n当前版本:${VERSION}`);
 					if(typeof gd.versionID==='undefined'||gd.versionID<VERSION_ID){	
 						fixGameData(gd);
-						console.log(CHANGE_LOG);
-					}else{
-						throw new Error(`${gd.version}版的存档拿头解析\n当前版本:${VERSION}`);
 					}
 				}
 			}catch(e){
