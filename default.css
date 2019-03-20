@@ -1,0 +1,103 @@
+body{
+	padding:4% 20%;
+}
+
+h1,h2,h3,h4,h5,h6{
+	padding: 3px;
+	border-radius: 3px;
+}
+h1{
+	background-color: rgb(128, 192, 255);
+	margin:20px 0;
+}
+h2{
+	background-color: #aaccaa;
+	margin:18px 0;
+}
+h3{
+	background-color: #ddbbbb;
+	margin:16px 0;
+}
+h4{
+	background-color: #eeeecc;
+	margin:14px 0;
+}
+h5{
+	background-color: #ddffff;
+	margin:12px 0;
+}
+h6{
+	background-color: #eeeeee;
+	margin:10px 0;
+}
+
+hr{
+	border: 1px lightgray solid;
+}
+
+del{
+	color:gray;
+}
+
+code{
+	color:red;
+	border-radius: 2px;
+	background: rgb(255, 216, 216);
+	padding: 0 2px;
+}
+pre{
+	border: 1px black solid;
+	background: whitesmoke;
+	border-radius: 5px;
+	padding: 5px;
+}
+pre code{
+	color:black;
+	border-radius: 0;
+	background: whitesmoke;
+	padding: 0;
+}
+
+blockquote{
+	margin-left: 5px;
+	border-left: 5px skyblue solid;
+	padding-left: 10px;
+	background: lightcyan;
+}
+
+p{
+	text-indent: 40px;
+}
+
+a{
+	text-decoration: none;
+}
+a:link,a:visited{
+	color:rgb(255, 128, 0);
+}
+a:hover{
+	color:orange;
+}
+a:active{
+	color:rgb(255, 96, 0);
+}
+
+button{
+	border: 1px gray solid;
+	border-radius: 5px;
+	background: white;
+	color:black;
+	padding: 4px 8px;
+}
+button:hover{
+	background: whitesmoke;
+
+}
+button:active{
+	background: lightgray;
+}
+
+li{
+	border-radius: 5px;
+	margin: 5px 0px;
+}

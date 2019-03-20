@@ -2,7 +2,7 @@ body{
 	padding: 30px 10%;
 }
 
-.object,.skill-area,.skills,.skill,.layer-area{
+.game-item{
 	padding: 5px;
 	border-radius: 5px;
 	margin:5px 2px;
@@ -31,11 +31,11 @@ body{
 }
 
 .skill-area{
-	background: repeating-linear-gradient(
+	background:linear-gradient(
 		135deg,
 		gray 0%,
-		darkgray 15%,
-		gray 30%
+		darkgray 50%,
+		gray 100%
 	); 
 }
 .skills{
@@ -46,17 +46,22 @@ body{
 }
 
 .layer-area{
-	background: repeating-linear-gradient(
+	background: linear-gradient(
 		135deg,
 		silver 0%,
-		whitesmoke 15%,
-		silver 30%
+		whitesmoke 50%,
+		silver 100%
 	); 
 }
 
+.time-building{
+	background: repeating-radial-gradient(circle at 15% 50%,skyblue 0%,cyan 4%,skyblue 8%);
+}
+
 .col{
-	width: 40%;
+	width: calc(40% - 10px);
 	float: left;
+	margin: 0 5px;
 }
 
 button{
@@ -71,30 +76,51 @@ button{
 	color: white;
 	cursor: pointer;
 }
+
 .btn{
 	background-color:white;
 	border-color: gray;
 	color:black;
 }
+.btn:hover{
+	background-color:whitesmoke;
+}
+
 .btn-danger{
+	border: 1px rgba(0,0,0,0) solid;
 	background-color:rgb(255, 48, 32);
-	border-color:rgb(255, 96, 96);
 }
+.btn-danger:hover{
+	background-color:rgb(255, 83, 71);
+}
+
 .btn-warning{
+	border: 1px rgba(0,0,0,0) solid;
 	background-color:orange;
-	border-color:orange;
 }
+.btn-warning:hover{
+	background-color:rgb(255, 187, 61);
+}
+
 .btn-enabled{
+	border: 1px rgba(0,0,0,0) solid;
 	background-color:rgb(0, 128, 255);
-	border-color: rgb(0, 144, 255);
 }
+.btn-enabled:hover{
+	background-color:rgb(48, 160, 255);
+}
+
 .btn-active{
+	border: 1px rgba(0,0,0,0) solid;
 	background-color:rgb(0, 216, 0);
-	border-color: rgb(128, 216, 128);
 }
+.btn-active:hover{
+	background-color:rgb(0, 240, 0);
+}
+
 button:disabled{
-	background-color:gray;
-	border-color: darkgray;
+	border: 1px rgba(0,0,0,0) solid;
+	background-color:gray !important;
 	cursor: not-allowed;
 }
 
@@ -102,4 +128,10 @@ ul{
 	list-style-type: none;
 	padding-inline-start:0;
 	margin: 0;
+}
+
+.right-arrow::before{
+	content: "→";
+	color:#555555;
+	font-weight: bold;
 }

@@ -3,95 +3,204 @@
 	<head>
 		<meta charset="utf-8">
 		<title>Network</title>
-		<link rel="stylesheet" href="../../normalize.css">
 		<script src="https://cdn.jsdelivr.net/npm/vue"></script>
-		<link rel="stylesheet" href="./network.css"></head>
 	<body>
 		<div id="app">
 			<div>
 				<h1 style="display:inline-block;">Network</h1>
 				<span>v{{VERSION}}</span>
 			</div>
-			<div style="width: 100%;">
-				<strong>财富:{{printNumber(gameData.coin)}}</strong>
-				<span>(+{{printNumber(calcGlobalSum())}}财富/秒)</span>
-			</div>
-			<div>
-				<div v-if="calcGlobalMult()&gt;1">全局总加成:x{{printNumber(calcGlobalMult())}}</div>
-				<div v-if="calcGlobalPower()&gt;1">全局总指数:^{{printNumber(calcGlobalPower())}}</div>
-			</div>
-			<div class="col">
-				<div>
-					<h3 style="display:inline-block">结构</h3>
-					<button @click="forEachObj(o=>o.show=false)" class="btn">收起全部</button>
-					<button @click="forEachObj(o=>o.show=true)" class="btn">展开全部</button>
+			<tab-chooser tab="main"></tab-chooser>
+			<tab-chooser tab="time" v-if="showTimeStructs()"></tab-chooser>
+			<tab-chooser tab="stats"></tab-chooser>
+			<tab-chooser tab="save"></tab-chooser>
+			<hr>
+			<tab-container tab="main">
+				<div style="width: 100%;">
+					<strong>财富:{{printNumber(gameData.coin)}}</strong>
+					<span>(+{{printNumber(calcGlobalSum())}}财富/秒<span v-if="timeFlow()!==1"> x{{printNumber(timeFlow())}}</span>)</span>
 				</div>
-				<arr-shower :arr="gameData.arr"></arr-shower>
-			</div>
-			<div class="col" v-if="showImproveAreas()">
 				<div>
-					<h3 style="display:inline-block">每个放置游戏都有的东西</h3>
+					<div v-if="calcGlobalMult()&gt;1">全局总加成:x{{printNumber(calcGlobalMult())}}</div>
+					<div v-if="calcGlobalPower()&gt;1">全局总指数:^{{printNumber(calcGlobalPower())}}</div>
 				</div>
-				<ul>
-					<li v-if="showSkillArea()" class="skill-area">
-						<strong>技能</strong>
-						<button @click="gameData.showSkills=!gameData.showSkills" class="btn">{{gameData.showSkills?'收起':'展示'}}</button>			
-						<ul v-if="gameData.showSkills">
-							<li v-for="(s,id) in gameData.skills" class="skills">
-								<strong>{{skillLevelName(id)}}</strong>
-								<button @click="s.show=!s.show" class="btn">{{s.show?'收起':'展示'}}</button>			
-								<div v-if="s.show">
-									<span>
-										{{printNumber(s.skillPoint)+skillPointName(id)}}
-									</span>
-									<button @click="toSkill(id)" class="btn-danger" :disabled="!canToSkill(id)">{{skillLevelName(id)}}</button>
-									<span v-if="canToSkill(id)">
-										(+{{printNumber(calcSkillPointGain(id))}})
-									</span>
-									<span v-else>
-										<span v-if="id>0">
-											需要至少{{printNumber(1e6)}}{{skillPointName(id-1)}}
+				<div class="col">
+					<div>
+						<h3>结构</h3>
+						<button @click="forEachObj(o=>o.show=false)" class="btn">收起全部</button>
+						<button @click="forEachObj(o=>o.show=true)" class="btn">展开全部</button>
+					</div>
+					<arr-shower :arr="gameData.arr"></arr-shower>
+				</div>
+				<div class="col" v-if="showImproveAreas()">
+					<div>
+						<h3>每个放置游戏都有的东西</h3>
+					</div>
+					<ul>
+						<li v-if="showSkillArea()" class="skill-area game-item">
+							<strong>技能</strong>
+							<button @click="gameData.showSkills=!gameData.showSkills" class="btn">{{gameData.showSkills?'收起':'展示'}}</button>			
+							<ul v-if="gameData.showSkills">
+								<li v-for="(s,id) in gameData.skills" class="skills game-item">
+									<strong>{{skillLevelName(id)}}</strong>
+									<button @click="s.show=!s.show" class="btn">{{s.show?'收起':'展示'}}</button>			
+									<div v-if="s.show">
+										<span>
+											{{printNumber(s.skillPoint)+skillPointName(id)}}
+										</span>
+										<button @click="toSkill(id)" class="btn-danger" :disabled="!canToSkill(id)">{{skillLevelName(id)}}</button>
+										<span v-if="canToSkill(id)">
+											(+{{printNumber(calcSkillPointGain(id))}})
 										</span>
 										<span v-else>
-											需要至少{{printNumber(1e6)}}财富
+											<span v-if="id>0">
+												需要至少{{printNumber(1e6)}}{{skillPointName(id-1)}}
+											</span>
+											<span v-else>
+												需要至少{{printNumber(1e6)}}财富
+											</span>
 										</span>
-									</span>
-									<ul>
-										<li v-for="(lv,skId) in s" v-if="isSkill(skId)&&isSkillEnabled(skId,id)" class="skill">
-											<div>
-												<strong>{{skillName(skId)}}</strong>
-												<span>{{skillEffectString(s,skId,s[skId])}}</span>
-												<span v-if="canLearnSkill(s,skId)">
-													<span>=></span>
-													<span>{{skillEffectString({[skId]:lv+1},skId)}}</span>
-												</span>
-											</div>
-											<span>{{lv}}级</span>
-											<button @click="learnSkill(s,skId)" class="btn-enabled" :disabled="!canLearnSkill(s,skId)">学习</button>
-											<span>花费:{{printNumber(skillCost(s,skId))+skillPointName(id)}}</span>
-										</li>
-									</ul>
-								</div>
-							</li>
-						</ul>
-					</li>
-					<li v-if="showLayerArea()" class="layer-area">
+										<ul>
+											<li v-for="(lv,skId) in s" v-if="isSkill(skId)&&isSkillEnabled(skId,id)" class="skill game-item">
+												<div>
+													<strong>{{skillName(skId)}}</strong>
+													<span>{{skillEffectString(s,skId,s[skId])}}</span>
+													<span v-if="canLearnSkill(s,skId)">
+														<span class="right-arrow"></span>
+														<span>{{skillEffectString({[skId]:lv+1},skId)}}</span>
+													</span>
+												</div>
+												<span>{{lv}}级</span>
+												<button @click="learnSkill(s,skId)" class="btn-enabled" :disabled="!canLearnSkill(s,skId)">学习</button>
+												<span>{{printNumber(skillCost(s,skId))+skillPointName(id)}}</span>
+											</li>
+										</ul>
+									</div>
+								</li>
+							</ul>
+						</li>
+						<li v-if="showLayerArea()" class="layer-area game-item">
+							<div>
+								<strong>层级</strong>
+							</div>
+							<div>
+								<span>原层级:{{gameData.layer}}</span>
+							</div>
+							<div>
+								<span>新层级:{{gameData.layer+1}}</span>
+							</div>
+							<button class="btn-danger" :disabled="!canLayerUp()" @click="layerUp()">提升</button>
+							<span v-if="canLayerUp()">提升会使你失去一切，包括所有<strong>结构、财富和技能</strong></span>
+							<span v-else>{{layerUpHint()}}</span>
+						</li>
+					</ul>
+				</div>
+			</tab-container>
+			<tab-container tab="time">
+				<div>
+					<div>
 						<div>
-							<strong>层级</strong>
+							<strong>时间:{{printNumber(gameData.timeStruct.time)}}</strong>
+							<span v-if="timeGain()!==0">({{printNumber(timeGain())}}t)</span>
+						</div>
+						<div v-if="timeFlow()!==1">
+							<strong>时间流速:</strong>
+							<span>{{printNumber(timeFlow())}}</span>
+						</div>
+						<div v-else>
+							<em>一寸光阴一寸金，寸金难买寸光阴</em>
 						</div>
 						<div>
-							<span>原层级:{{gameData.layer}}</span>
+							<button :disabled="!canConvertTime()" @click="convertTime()" class="btn-warning">转换</button>
+							<span v-if="canConvertTime()">
+								<span>(+{{printNumber(convertTimeGain())}})</span>
+								<span>你将失去<strong>所有财富</strong>!</span>
+							</span>
+							<span v-else>{{convertTimeHint()}}</span>
 						</div>
-						<div>
-							<span>新层级:{{gameData.layer+1}}</span>
-						</div>
-						<button class="btn-danger" :disabled="!canLayerUp()" @click="layerUp()">提升</button>
-						<span v-if="canLayerUp()">提升会使你失去一切，包括所有<strong>结构、财富和技能</strong></span>
-						<span v-else>{{layerUpHint()}}</span>
-					</li>
-				</ul>
-			</div>
+					</div>
+				</div>
+				<div class="col">
+					<h3>时间建筑</h3>
+					<ul>
+						<li class="time-building game-item" v-for="(b,id) in gameData.timeStruct" v-if="isTimeBuilding(id)">
+							<div>
+								<strong>{{TIME_BUILDINGS[id].name}}</strong>
+								<button :disabled="gameData.timeStruct.time===0&&TIME_BUILDINGS[id].dependOnTime" :class="[b.enable?'btn-active':'btn-enabled']" @click="b.enable = !b.enable">
+									{{b.enable?'运行中':'暂停中'}}
+								</button>
+								<span>{{timeBuildingEffectString(id,b.level)}}</span>
+								<span v-if="gameData.timeStruct.time&gt;=timeBuildingUpgradeCost(id)">
+									<span class="right-arrow"></span>
+									{{timeBuildingEffectString(id,b.level+1)}}
+								</span>
+							</div>
+							<div>
+								<span>{{b.level}}级</span>
+								<button class="btn-enabled" @click="upgradeTimeBuilding(id)" :disabled="gameData.timeStruct.time&lt;timeBuildingUpgradeCost(id)">
+									升级
+								</button>
+								<span>{{printNumber(timeBuildingUpgradeCost(id))}}时间</span>
+							</div>
+							<div>
+								<span style="color: #222222;">{{TIME_BUILDINGS[id].description}}</span>
+							</div>
+						</li>
+					</ul>
+				</div>
+			</tab-container>
+			<tab-container tab="stats">
+				<h3>结构</h3>
+				<div>
+					<strong>总时间</strong>
+					<span>{{printNumber(gameData.statistics.totalTime)}}秒</span>
+				</div>
+				<div>
+					<strong>实际时间</strong>
+					<span>{{printNumber(gameData.statistics.actualTotalTime)}}秒</span>
+				</div>
+				<div>
+					<strong>总财富获取</strong>
+					<span>{{printNumber(gameData.statistics.coinEarned)}}</span>
+				</div>
+				<div>
+					<strong>回转次数</strong>
+					<span>{{printNumber(gameData.statistics.toPointTimes)}}</span>
+				</div>
+				<h3>每个放置游戏都有的东西</h3>
+				<div>
+					<ul>
+						<li v-for="(cnt,id) in gameData.statistics.toSkillTimes">
+							<div>
+								<strong>{{skillLevelName(Number(id))}}次数</strong>
+								<span>{{printNumber(cnt)}}</span>
+							</div>
+						</li>
+					</ul>
+				</div>
+			</tab-container>
+			<tab-container tab="save">
+				<h3>导入/导出</h3>
+				<div>
+					<input v-model="saveStr">
+				</div>
+				<span>
+					<strong>导入会清除你的当前存档!</strong>
+				</span>
+				<div>
+					<button class="btn-danger" @click="try{loadGameData(saveStr)}catch(e){saveStr='导入失败!';}">导入</button>
+					<button class="btn-enabled" @click="saveStr=encode(gameData)">导出</button>
+					<button class="btn-danger" @click="if(saveStr!=='Yes'){var r=Math.floor(Math.random()*19260818);saveStr=`(${r}+${19260817-r})是质数吗?(Yes/No)`;}else{gameData=newGameData();}">清除存档</button>
+				</div>
+				<br v-for="_ in 50">
+				<h3>萌新刚学OI,LCT写挂了，有大佬能帮帮窝吗?</h3>
+				<p>这个LCT哪里错了?QAQ</p>
+				<pre><code>{{LCTCODE}}</code></pre>
+			</tab-container>
 		</div>
 	</body>
 	<script src="./network.js"></script>
+	<link rel="stylesheet" href="../../normalize.css">
+	<link rel="stylesheet" href="../../default.css">
+	<link rel="stylesheet" href="./network.css"></head>
 </html>

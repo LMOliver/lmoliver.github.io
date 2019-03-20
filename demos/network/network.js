@@ -1,6 +1,6 @@
 !function(){
-const VERSION='1.0.3';
-const VERSION_ID='1.0.3.0';
+const VERSION='1.0.4';
+const VERSION_ID='1.0.4.0';
 
 const sum=(arr)=>arr.reduce((a,b)=>a+b,0);
 const product=(arr)=>arr.reduce((a,b)=>a*b,1);
@@ -49,15 +49,13 @@ function printNumber(num){
 	return `${val.toPrecision(3)}${suf}`;
 }
 
-const MAX_NAMED_LAYER=6;
+const MAX_NAMED_LAYER=4;
 const LAYER_NAMES=[
 	'结点',
 	'链',
-	'菊花',
 	'树',
 	'森林',
 	'图',
-	'网络',
 ];
 
 function initObj(layer,weight=1){
@@ -112,8 +110,8 @@ function calcGlobalSum(){
 function calcPoint(obj){
 	const minPro=obj.weight*2+18;
 	const valPro=obj.level;
-	const rate=1/(Math.pow(obj.layer+1,3));
-	return (Math.log2(valPro)-Math.log2(minPro-1))*rate+1
+	const rate=4/(Math.pow(obj.layer+2,2));
+	return (Math.log(valPro)-Math.log(minPro-1))*rate+1
 }
 
 function calcArrPoint(arr){
@@ -121,11 +119,14 @@ function calcArrPoint(arr){
 }
 
 const PRICE_INCERASE_RATE=1.44;
-const PRICE_INCERASE_RATE_PER_LAYER=0.36;
+const PRICE_INCERASE_RATE_PER_LAYER=0.56;
 function upgradeCost(obj){
-	return obj.weight*Math.pow(1e5,Math.pow(obj.layer,1.6))*Math.pow(
-		PRICE_INCERASE_RATE+obj.layer*PRICE_INCERASE_RATE_PER_LAYER,
-		obj.level-1);
+	return obj.weight
+		*Math.pow(1e5,Math.pow(obj.layer,1.6))
+		*Math.pow(
+			PRICE_INCERASE_RATE+obj.layer*PRICE_INCERASE_RATE_PER_LAYER,
+			obj.level-1
+		);
 }
 
 function upgrade(obj){
@@ -133,11 +134,13 @@ function upgrade(obj){
 	obj.level++;
 }
 
-const APPEND_COST_PER_LAYER=1e5;
+const APPEND_COST_MULT=25;
+const APPEND_COST_PER_LAYER=1e7;
 function addSonCost(arr){
-	return 25*Math.pow(APPEND_COST_PER_LAYER,arr[0].layer)
+	return APPEND_COST_MULT
+		*Math.pow(APPEND_COST_PER_LAYER,arr[0].layer)
 		*Math.pow((arr[0].layer+1)*4,arr.length)
-		*Math.sqrt(arr[0].weight);
+		*arr[0].weight;
 }
 
 function addSon(arr){
@@ -150,10 +153,10 @@ function canToPoint(obj){
 }
 
 function toPoint(obj){
+	gameData.statistics.toPointTimes+=1;
 	obj.point=calcPoint(obj);
-	if(obj.layer==0){
-		obj.level=1;
-	}else{
+	obj.level=1;
+	if(obj.layer!==0){
 		obj.sons=[initObj(obj.layer-1)];
 	}
 }
@@ -198,6 +201,9 @@ function clearSkills(){
 	gameData.skills=[];
 }
 function toSkill(id){
+	var st=gameData.statistics.toSkillTimes;
+	if(typeof st[id]==='undefined')st[id]=0;
+	st[id]+=1;
 	gameData.skills[id].skillPoint+=calcSkillPointGain(id);
 	clearNetwork();
 	clearSkill(id);
@@ -236,7 +242,7 @@ const SKILLS={
 		name:'财富获取',
 		format:'+VALUE财富/秒',
 		effect(lv){
-			return 100*lv**4;
+			return 100*lv**3;
 		},
 		costBase:5,
 		costMult:1,
@@ -345,6 +351,135 @@ function layerUp(){
 	clearSkills();
 }
 
+function newStatistics(){
+	return {
+		totalTime:0,
+		actualTotalTime:0,
+		coinEarned:0,
+		toPointTimes:0,
+		toSkillTimes:{},
+	}
+}
+
+const TIME_BUILDINGS={
+	timeCollector:{
+		name:'时间收集器',
+		description:'减慢时间流逝，以此收集时间',
+		dependOnTime:false,
+		cost(lv){
+			return 10*Math.pow(lv,2);
+		},
+		effect(lv){
+			return 1-1/(1+lv/10);
+		},
+		format:'VALUEt',
+	},
+	timeBurner:{
+		name:'燃烧炉',
+		description:'以恒定速率燃烧时间，换取加速',
+		dependOnTime:true,
+		cost(lv){
+			return 10*Math.pow(lv,2);
+		},
+		effect(lv){
+			return Math.sqrt(lv/50);
+		},
+		format:'VALUEt',
+	},
+	timeRepeator:{
+		name:'时空复读机',
+		description:'增加燃烧炉的效率(消耗不变)',
+		dependOnTime:true,
+		cost(lv){
+			return 5*Math.pow(lv,2.5);
+		},
+		effect(lv){
+			return Math.log(lv+Math.E);
+		},
+		format:'xVALUE',
+	},
+	// timeRecycler:{
+	// 	name:'时间回收机',
+	// 	description:'回收游戏关闭时从',
+	// 	dependOnTime:true,
+	// 	cost(lv){
+	// 		return 10*Math.pow(lv,2);
+	// 	},
+	// 	effect(lv){
+	// 		return lv*0.1;
+	// 	},
+	// 	format:'VALUEt',
+	// },
+};
+function timeBuildingEffect(id){
+	const ts=gameData.timeStruct;
+	return TIME_BUILDINGS[id].effect(ts[id].enable?ts[id].level:0);
+}
+function timeFlow(){
+	return Math.max(
+		1-timeBuildingEffect('timeCollector')
+			+timeBuildingEffect('timeBurner')*timeBuildingEffect('timeRepeator'),
+		0
+	);
+}
+function timeGain(){
+	return timeBuildingEffect('timeCollector')
+		-timeBuildingEffect('timeBurner');
+}
+function showTimeStructs(){
+	return gameData.layer>=1;
+}
+function timeBuildingEffectString(id,lv){
+	const info=TIME_BUILDINGS[id];
+	return info.format.replace(
+		'VALUE',
+		printNumber(info.effect(lv))
+	);
+}
+function newTimeBuilding(){
+	return {
+		level:0,
+		enable:false,
+	};
+}
+function isTimeBuilding(id){
+	return typeof TIME_BUILDINGS[id]!=='undefined';
+}
+function timeBuildingUpgradeCost(id){
+	return TIME_BUILDINGS[id].cost(gameData.timeStruct[id].level+1);
+}
+function upgradeTimeBuilding(id){
+	const ts=gameData.timeStruct;
+	ts.time-=timeBuildingUpgradeCost(id);
+	ts[id].level+=1;
+}
+function newTimeStruct(){
+	return {
+		time:0,
+		timeCollector:newTimeBuilding(),
+		timeBurner:newTimeBuilding(),
+		timeRepeator:newTimeBuilding(),
+	};
+}
+
+const CONVERT_TIME_MIN=1e15;
+function convertTimeHint(){
+	return `至少需要${printNumber(CONVERT_TIME_MIN)}财富`;
+}
+function convertTimeGain(){
+	return Math.max(
+		(Math.log1p(gameData.coin)-Math.log1p(CONVERT_TIME_MIN))*(1e3/(1e3+gameData.timeStruct.time)),
+		0
+	);
+}
+function canConvertTime(){
+	return convertTimeGain()>1e-3;
+}
+function convertTime(){
+	gameData.timeStruct.time+=convertTimeGain();
+	gameData.coin=0;
+}
+
 function newGameData(){
 	return {
 		version:VERSION,
@@ -354,6 +489,9 @@ function newGameData(){
 		layer:0,
 		showSkills:true,
 		skills:[],
+		statistics:newStatistics(),
+		currentTab:'main',
+		timeStruct:newTimeStruct(),
 	};
 }
 
@@ -363,7 +501,6 @@ function fixGameData(gd){
 			obj[key]=def;
 		}
 	}
-	// console.log('存档版本',gd.versionID);
 	if(typeof gd.versionID==='undefined'){
 		fixKey(gd,'version','1.0.2');
 		fixKey(gd,'versionID','1.0.2.0');
@@ -382,28 +519,73 @@ function fixGameData(gd){
 	if(gd.versionID<'1.0.3.0'){
 		forEachObj(o=>{
 			fixKey(o,'level',1);
-		})
+		});
 		gd.versionID='1.0.3.0';
 	}
-	// console.log(JSON.parse(JSON.stringify(gd)));
+	if(gd.versionID<'1.0.4.0'){
+		fixKey(gd,'statistics',newStatistics());
+		fixKey(gd,'currentTab','main');
+		fixKey(gd,'timeStruct',newTimeStruct());
+		for(let key in TIME_BUILDINGS){
+			fixKey(gd.timeStruct,key,newTimeBuilding());
+		}
+		gd.versionID='1.0.4.0';
+	}
 }
 
+function loadGameData(save){
+	var gd;
+	this.gameData=gd=decode(save);
+	if(typeof gd.versionID==='undefined'||gd.versionID!==VERSION_ID){
+		console.log(`存档版本:${gd.version}\n当前版本:${VERSION}`);
+		if(typeof gd.versionID==='undefined'||gd.versionID<VERSION_ID){	
+			fixGameData(gd);
+		}else{
+			console.warn('存档版本高于当前版本');
+		}
+	}
+}
+
+const TABS={
+	'main':{
+		name:'main()',
+	},
+	'time':{
+		name:'时间',
+	},
+	'stats':{
+		name:'统计',
+	},
+	'save':{
+		name:'存档',
+	},
+};
+
 const CHANGE_LOG={
+	'v1.0.4':
+`增加了统计功能
+支持文本导入导出
+增加时间界面
+- 在层级1解锁
+- 建立时间建筑，影响时间流逝
+调整了平衡性
+略微改进了界面
+修复了回转非结点结构时不重置等级的BUG
+`,
 	'v1.0.3':
 `增加了对非结点结构的升级功能
 大幅改进界面
 ${SKILLS.coinGen.name}现在仅在${skillLevelName(0)}中可用
 `,
-
 	'v1.0.2':
 `新的技能:${SKILLS.coinGen.name}
-	生成固定的财富收入
-	最低要求:${skillLevelName(0)}
-改进了界面`,
-
+- 生成固定的财富收入
+- 最低要求:${skillLevelName(0)}
+改进了界面
+`,
 	'v1.0.1':
-`增加了层次系统`,
-
+`增加了层次系统
+`,
 };
 
 const methods={
@@ -435,6 +617,7 @@ const methods={
 	encode,
 	decode,
 	doGameTick,
+	actualTimeFlow,
 	addSonCost,
 	initObj,
 	showImproveAreas,
@@ -452,9 +635,25 @@ const methods={
 	skillCost,
 	skillLevelName,
 	skillEffectString,
+	showTimeStructs,
+	isTimeBuilding,
+	timeBuildingEffect,
+	timeBuildingEffectString,
+	timeFlow,
+	timeGain,
+	newTimeStruct,
+	newTimeBuilding,
+	convertTime,
+	convertTimeGain,
+	canConvertTime,
+	convertTimeHint,
+	timeBuildingUpgradeCost,
+	upgradeTimeBuilding,
 	forEachObj,
 	fixGameData,
+	loadGameData,
 	newGameData,
+	newStatistics,
 };
 
 const data={
@@ -464,6 +663,7 @@ const data={
 	set gameData(gd){
 		gameData=gd;
 	},
+	saveStr:'',
 	VERSION,
 	VERSION_ID,
 	LAYER_NAMES,
@@ -472,9 +672,200 @@ const data={
 	SKILLS,
 	PADDING,
 	COIN_TO_SKILL,
+	TIME_BUILDINGS,
 	APPEND_COST_PER_LAYER,
 	CHANGE_LOG,
+	TABS,
+	LCTCODE:String.raw `#include<bits/stdc++.h>
+using namespace std;
+#define OK (printf("%s %d OK\n",__FUNCTION__,__LINE__))
+const int N=300300;
+struct Node{
+	typedef Node *np;
+	int val,size,x;
+	bool rev;
+	np ch[2],fa;
+	Node(int _val=0){
+		val=_val;
+		x=val;
+		size=1;
+		fa=ch[0]=ch[1]=NULL;
+		rev=false;
+	}
+	inline void pd(){
+		if(rev){
+			if(ch[0])ch[0]->mk();
+			if(ch[1])ch[1]->mk();
+			rev=false;
+		}
+	}
+	inline bool isr(){
+		return !fa||(fa->ch[0]!=this&&fa->ch[1]!=this);
+	}
+	inline void mk(){
+		rev^=1;
+		swap(ch[0],ch[1]);
+	}
+#define sz(p) ((p)?(p)->size:0)
+#define X(p) ((p)?(p)->x:0)
+	inline void upd(){
+		size=sz(ch[0])+1+sz(ch[1]);
+		x=X(ch[0])^val^X(ch[1]);
+	}
+	inline int id(){
+		return fa&&fa->ch[0]==this?0:1;
+	}
+	inline void rot(){
+		int d=id();
+		np f=fa,g=f->fa,s=ch[1^d];
+		if(!f->isr())g->ch[f->id()]=this;
+		fa=g;
+		f->fa=this;
+		ch[1^d]=f;
+		f->ch[d]=s;
+		if(s)s->fa=f;
+		f->upd();
+		upd();
+	}
+	inline void splay(){
+		static stack<np> qaq;
+		for(np x=this;!x->isr();x=x->fa)qaq.push(x->fa);
+		while(!qaq.empty()){
+			qaq.top()->pd();
+			qaq.pop();
+		}
+		pd();
+		while(!isr()){
+			if(fa->fa)(fa->id()==id()?fa:this)->rot();
+			rot();
+		}
+	}
+	np lim(int id){
+		pd();
+		return ch[id]?ch[id]->lim(id):(splay(),this);
+	}
+	void access(){
+		for(np x=this,y=NULL;x;x=x->fa){
+			x->splay();
+			x->ch[1]=y;
+			x->upd();
+			y=x;
+		}
+		splay();
+	}
+	void mkroot(){
+		access();
+		mk();
+	}
+	np findroot(){
+		access();
+		return lim(0);
+	}
+	void split(np y){
+		mkroot();
+		y->access();
+	}
+	bool link(np y){
+		mkroot();
+		if(y->findroot()==this)return false;
+		fa=y;
+		return true;
+	}
+	bool cut(np y){
+		split(y);
+		y->pd();
+		pd();
+		return fa==y&&!ch[0]?(fa=y->ch[1]=NULL,y->upd(),true):false;
+	}
+};
+typedef Node *np;
+Node a[N];
+
+void db(np x){
+	if(x){
+		// x->pd();
+		db(x->ch[0]);
+#define CD(e) #e"="<<(x->e)<<" "
+		// printf("%d ",x->val);
+		cerr<<x<<" "<<CD(val)<<CD(fa)<<CD(ch[0])<<CD(ch[1])<<CD(rev)<<CD(x)<<endl;
+		db(x->ch[1]);
+	}
 }
+int n,m;
+void debug(){
+	for(int i=1;i<=n;i++){
+		if(a[i].isr()){
+			cerr<<"Chain"<<endl;
+			db(&a[i]);
+		}
+	}
+}
+
+int main(){
+	scanf("%d%d",&n,&m);
+	for(int i=1;i<=n;i++){
+		int x;
+		scanf("%d",&x);
+		a[i]=Node(x);
+	}
+	// debug();
+	while(m--){
+		int op,x,y;
+		scanf("%d%d%d",&op,&x,&y);
+		if(op==0){
+			a[x].split(&a[y]);
+			printf("%d\n",a[y].x);
+		}else if(op==1){
+			a[x].link(&a[y]);
+		}else if(op==2){
+			a[x].cut(&a[y]);
+		}else if(op==3){
+			a[x].splay();
+			a[x].val=y;
+			a[x].upd();
+		}else{
+			// DEBUG
+			if(op==10){
+				cerr<<(a[x].isr()?"Y":"N")<<endl;
+			}else if(op==20){
+				a[x].access();
+			}else if(op==30){
+				cerr<<a[x].findroot()<<endl;
+			}else if(op==40){
+				a[x].mkroot();
+			}
+		}
+		// cerr<<endl;
+		// debug();
+	}
+	return 0;
+}`,
+};
+
+Vue.component('tab-chooser',{
+	props:['tab'],
+	methods,
+	data(){
+		return data;
+	},
+	template:`
+		<button :class="[gameData.currentTab===tab?'btn-active':'btn']" \
+@click="gameData.currentTab=tab">{{TABS[tab].name}}</button>
+	`,
+});
+
+Vue.component('tab-container',{
+	props:['tab'],
+	methods,
+	data(){
+		return data;
+	},
+	template:`
+		<div v-if="gameData.currentTab===tab">
+			<slot></slot>
+		</div>
+	`,
+});
 
 Vue.component('arr-shower',{
 	props:['arr'],
@@ -483,17 +874,17 @@ Vue.component('arr-shower',{
 		return data;
 	},
 	template:`
-	<ul>
-		<li v-for="(obj,id) in arr">
-			<obj-shower :obj="obj" :id="id">
-			</obj-shower>
-		</li>
-		<button @click="addSon(arr)" class="btn-enabled" :disabled="gameData.coin&lt;addSonCost(arr)">
-			增加新的{{LAYER_NAMES[arr[0].layer]}}
-		</button>
-		<span>花费:{{printNumber(addSonCost(arr))}}财富</span>
-	</ul>`,
-})
+		<ul>
+			<li v-for="(obj,id) in arr">
+				<obj-shower :obj="obj" :id="id">
+				</obj-shower>
+			</li>
+			<button @click="addSon(arr)" class="btn-enabled" :disabled="gameData.coin&lt;addSonCost(arr)">
+				增加新的{{LAYER_NAMES[arr[0].layer]}}
+			</button>
+			<span>{{printNumber(addSonCost(arr))}}财富</span>
+		</ul>`,
+});
 
 Vue.component('obj-shower',{
 	props:['obj','id'],
@@ -502,7 +893,7 @@ Vue.component('obj-shower',{
 		return data;
 	},
 	template:`
-		<div :class="['object','obj-layer-name-'+obj.layer%(MAX_NAMED_LAYER+1)]">
+		<div :class="['object','game-item','obj-layer-name-'+obj.layer%(MAX_NAMED_LAYER+1)]">
 			<strong>
 				<span>
 				{{LAYER_NAMES[obj.layer]}}
@@ -521,27 +912,61 @@ Vue.component('obj-shower',{
 					<button @click="upgrade(obj)" class="btn-enabled" :disabled="gameData.coin&lt;upgradeCost(obj)">
 						升级
 					</button>
-					<span>花费:{{printNumber(upgradeCost(obj))}}财富<span>
-				</div>
-				<div v-if="obj.layer!==0">
-					<arr-shower :arr="obj.sons"></arr-shower>
+					<span>{{printNumber(upgradeCost(obj))}}财富<span>
 				</div>
 				<div v-if="obj.point&gt;1||canToPoint(obj)">
 					<span>指数:{{obj.point.toFixed(2)}}</span>
 					<span v-if="canToPoint(obj)">
-						<span>=> {{calcPoint(obj).toFixed(2)}}</span>
-						<button @click="toPoint(obj)" class="btn-danger">回转{{LAYER_NAMES[obj.layer]}}</button>
+						<span class="right-arrow"></span>
+						<span>{{calcPoint(obj).toFixed(2)}}</span>
+						<button @click="toPoint(obj)" class="btn-warning">回转{{LAYER_NAMES[obj.layer]}}</button>
 					</span>
-				<div>
+				</div>
+				<div v-if="obj.layer!==0">
+					<arr-shower :arr="obj.sons"></arr-shower>
+				</div>
 			</div>
 		</div>
 	`,
 });
 
 function doGameTick(ms){
-	this.gameData.coin+=calcGlobalSum()*ms/1000;
+	const sec=ms/1000;
+	var coinGain=calcGlobalSum()*sec;
+	gameData.coin+=coinGain;
+	gameData.statistics.totalTime+=sec;
+	gameData.statistics.coinEarned+=coinGain;
 	while(canToNewSkill()){
-		this.gameData.skills.push(initSkill());
+		gameData.skills.push(initSkill());
+	}
+	const ts=gameData.timeStruct;
+	if(ts.time<=0){
+		ts.time=0;
+		for(id in ts){
+			if(isTimeBuilding(id)&&TIME_BUILDINGS[id].dependOnTime){
+				ts[id].enable=false;
+			}
+		}
+	}
+}
+
+function hasEvent(ms){
+	function check(v,x){
+		return v<0&&x-v*ms<0;
+	}
+	if(check(timeGain(),gameData.timeStruct.time))return true;
+	return false;
+}
+
+const MIN_TIME_STAMP=1e-8;
+function actualTimeFlow(ms){
+	if(ms<=MIN_TIME_STAMP||!hasEvent(ms)){
+		doGameTick(ms*timeFlow());
+		gameData.timeStruct.time+=timeGain()*ms/1000;
+	}else{
+		var half=ms/2;
+		actualTimeFlow(half);
+		actualTimeFlow(half);
 	}
 }
 
@@ -553,18 +978,7 @@ var app=new Vue({
 		var save=localStorage.getItem('game-network-save');
 		if(save!=null){
 			try{
-				var gd;
-				try{
-					this.gameData=gd=decode(save);
-				}catch(e){
-					throw e;
-				}
-				if(typeof gd.version==='undefined'||gd.version!==VERSION){
-					console.log(`存档版本:${gd.version}\n当前版本:${VERSION}`);
-					if(typeof gd.versionID==='undefined'||gd.versionID<VERSION_ID){	
-						fixGameData(gd);
-					}
-				}
+				this.loadGameData(save);
 			}catch(e){
 				console.error(e);
 				this.gameData=newGameData();
@@ -577,7 +991,9 @@ var app=new Vue({
 		var time=(new Date()).getTime();
 		this.inv=setInterval(()=>{
 			var newTime=(new Date()).getTime();
-			this.doGameTick.call(this,newTime-time);
+			var dt=newTime-time;
+			this.actualTimeFlow(dt);
+			gameData.statistics.actualTotalTime+=dt/1000;
 			time=newTime;
 			localStorage.setItem('game-network-save',encode(this.gameData));
 		});
@@ -587,6 +1003,7 @@ var app=new Vue({
 			console.log(`%c${ver}\n%c${el}`,'font-weight:bold','');
 		}
 		console.groupEnd();
+		console.log('加载完毕')
 	},
 	beforeDestroy(){
 		clearInterval(this.inv);
@@ -594,6 +1011,7 @@ var app=new Vue({
 });
 
 // window.debug={
+// 	app,
 // 	data,
 // 	methods,
 // };

@@ -3,7 +3,7 @@
 
 <fold-block title="脚本">
 
-```
+```js
 const username = 'Steps AK IOl';
 const user_id = 'Sk-TRL5SV';
 const gameType = 'FFA';

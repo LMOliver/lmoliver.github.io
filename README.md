@@ -14,6 +14,8 @@
 
 - [Demos](https://lmoliver.github.io/demos/index.html)
 
+  - [Default](https://lmoliver.github.io/demos/default/index.html)
+
   - [Function](https://lmoliver.github.io/demos/function/index.html)
 
   - [NetWork](https://lmoliver.github.io/demos/network/index.html)
