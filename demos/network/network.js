@@ -1,6 +1,6 @@
 !function(){
-const VERSION='1.0.4';
-const VERSION_ID='1.0.4.0';
+const VERSION='1.0.5';
+const VERSION_ID='1.0.5.0';
 
 const sum=(arr)=>arr.reduce((a,b)=>a+b,0);
 const product=(arr)=>arr.reduce((a,b)=>a*b,1);
@@ -122,7 +122,7 @@ const PRICE_INCERASE_RATE=1.44;
 const PRICE_INCERASE_RATE_PER_LAYER=0.56;
 function upgradeCost(obj){
 	return obj.weight
-		*Math.pow(1e5,Math.pow(obj.layer,1.6))
+		*Math.pow(1e6,Math.pow(obj.layer,1.6))
 		*Math.pow(
 			PRICE_INCERASE_RATE+obj.layer*PRICE_INCERASE_RATE_PER_LAYER,
 			obj.level-1
@@ -254,7 +254,7 @@ const SKILLS={
 		name:'全局加成',
 		format:'xVALUE',
 		effect(lv){
-			return Math.pow(2,lv);
+			return Math.pow(1.8,lv);
 		},
 		costBase:2,
 		costMult:1,
@@ -468,7 +468,8 @@ function convertTimeHint(){
 }
 function convertTimeGain(){
 	return Math.max(
-		(Math.log1p(gameData.coin)-Math.log1p(CONVERT_TIME_MIN))*(1e3/(1e3+gameData.timeStruct.time)),
+		(Math.log1p(gameData.coin)-Math.log1p(CONVERT_TIME_MIN))
+			/Math.pow(1.12,1+Math.sqrt(gameData.timeStruct.time)),
 		0
 	);
 }
@@ -531,6 +532,10 @@ function fixGameData(gd){
 		}
 		gd.versionID='1.0.4.0';
 	}
+	if(gd.versionID<'1.0.5.0'){
+		//nothing
+		gd.versionID='1.0.5.0';
+	}
 }
 
 function loadGameData(save){
@@ -562,6 +567,10 @@ const TABS={
 };
 
 const CHANGE_LOG={
+	'v1.0.5':
+`调整了平衡性
+移除了关于LCT的求助信息(膜拜Siyuan以表感激)
+`,
 	'v1.0.4':
 `增加了统计功能
 支持文本导入导出
@@ -676,170 +685,6 @@ const data={
 	APPEND_COST_PER_LAYER,
 	CHANGE_LOG,
 	TABS,
-	LCTCODE:String.raw `#include<bits/stdc++.h>
-using namespace std;
-#define OK (printf("%s %d OK\n",__FUNCTION__,__LINE__))
-const int N=300300;
-struct Node{
-	typedef Node *np;
-	int val,size,x;
-	bool rev;
-	np ch[2],fa;
-	Node(int _val=0){
-		val=_val;
-		x=val;
-		size=1;
-		fa=ch[0]=ch[1]=NULL;
-		rev=false;
-	}
-	inline void pd(){
-		if(rev){
-			if(ch[0])ch[0]->mk();
-			if(ch[1])ch[1]->mk();
-			rev=false;
-		}
-	}
-	inline bool isr(){
-		return !fa||(fa->ch[0]!=this&&fa->ch[1]!=this);
-	}
-	inline void mk(){
-		rev^=1;
-		swap(ch[0],ch[1]);
-	}
-#define sz(p) ((p)?(p)->size:0)
-#define X(p) ((p)?(p)->x:0)
-	inline void upd(){
-		size=sz(ch[0])+1+sz(ch[1]);
-		x=X(ch[0])^val^X(ch[1]);
-	}
-	inline int id(){
-		return fa&&fa->ch[0]==this?0:1;
-	}
-	inline void rot(){
-		int d=id();
-		np f=fa,g=f->fa,s=ch[1^d];
-		if(!f->isr())g->ch[f->id()]=this;
-		fa=g;
-		f->fa=this;
-		ch[1^d]=f;
-		f->ch[d]=s;
-		if(s)s->fa=f;
-		f->upd();
-		upd();
-	}
-	inline void splay(){
-		static stack<np> qaq;
-		for(np x=this;!x->isr();x=x->fa)qaq.push(x->fa);
-		while(!qaq.empty()){
-			qaq.top()->pd();
-			qaq.pop();
-		}
-		pd();
-		while(!isr()){
-			if(fa->fa)(fa->id()==id()?fa:this)->rot();
-			rot();
-		}
-	}
-	np lim(int id){
-		pd();
-		return ch[id]?ch[id]->lim(id):(splay(),this);
-	}
-	void access(){
-		for(np x=this,y=NULL;x;x=x->fa){
-			x->splay();
-			x->ch[1]=y;
-			x->upd();
-			y=x;
-		}
-		splay();
-	}
-	void mkroot(){
-		access();
-		mk();
-	}
-	np findroot(){
-		access();
-		return lim(0);
-	}
-	void split(np y){
-		mkroot();
-		y->access();
-	}
-	bool link(np y){
-		mkroot();
-		if(y->findroot()==this)return false;
-		fa=y;
-		return true;
-	}
-	bool cut(np y){
-		split(y);
-		y->pd();
-		pd();
-		return fa==y&&!ch[0]?(fa=y->ch[1]=NULL,y->upd(),true):false;
-	}
-};
-typedef Node *np;
-Node a[N];
-
-void db(np x){
-	if(x){
-		// x->pd();
-		db(x->ch[0]);
-#define CD(e) #e"="<<(x->e)<<" "
-		// printf("%d ",x->val);
-		cerr<<x<<" "<<CD(val)<<CD(fa)<<CD(ch[0])<<CD(ch[1])<<CD(rev)<<CD(x)<<endl;
-		db(x->ch[1]);
-	}
-}
-int n,m;
-void debug(){
-	for(int i=1;i<=n;i++){
-		if(a[i].isr()){
-			cerr<<"Chain"<<endl;
-			db(&a[i]);
-		}
-	}
-}
-
-int main(){
-	scanf("%d%d",&n,&m);
-	for(int i=1;i<=n;i++){
-		int x;
-		scanf("%d",&x);
-		a[i]=Node(x);
-	}
-	// debug();
-	while(m--){
-		int op,x,y;
-		scanf("%d%d%d",&op,&x,&y);
-		if(op==0){
-			a[x].split(&a[y]);
-			printf("%d\n",a[y].x);
-		}else if(op==1){
-			a[x].link(&a[y]);
-		}else if(op==2){
-			a[x].cut(&a[y]);
-		}else if(op==3){
-			a[x].splay();
-			a[x].val=y;
-			a[x].upd();
-		}else{
-			// DEBUG
-			if(op==10){
-				cerr<<(a[x].isr()?"Y":"N")<<endl;
-			}else if(op==20){
-				a[x].access();
-			}else if(op==30){
-				cerr<<a[x].findroot()<<endl;
-			}else if(op==40){
-				a[x].mkroot();
-			}
-		}
-		// cerr<<endl;
-		// debug();
-	}
-	return 0;
-}`,
 };
 
 Vue.component('tab-chooser',{
@@ -1003,7 +848,7 @@ var app=new Vue({
 			console.log(`%c${ver}\n%c${el}`,'font-weight:bold','');
 		}
 		console.groupEnd();
-		console.log('加载完毕')
+		console.log('加载完毕');
 	},
 	beforeDestroy(){
 		clearInterval(this.inv);

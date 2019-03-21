@@ -192,10 +192,6 @@
 					<button class="btn-enabled" @click="saveStr=encode(gameData)">导出</button>
 					<button class="btn-danger" @click="if(saveStr!=='Yes'){var r=Math.floor(Math.random()*19260818);saveStr=`(${r}+${19260817-r})是质数吗?(Yes/No)`;}else{gameData=newGameData();}">清除存档</button>
 				</div>
-				<br v-for="_ in 50">
-				<h3>萌新刚学OI,LCT写挂了，有大佬能帮帮窝吗?</h3>
-				<p>这个LCT哪里错了?QAQ</p>
-				<pre><code>{{LCTCODE}}</code></pre>
 			</tab-container>
 		</div>
 	</body>
