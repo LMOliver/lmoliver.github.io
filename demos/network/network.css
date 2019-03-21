@@ -55,11 +55,15 @@ body{
 }
 
 .time-building{
-	background: repeating-radial-gradient(circle at 15% 50%,skyblue 0%,cyan 4%,skyblue 8%);
+	background: repeating-radial-gradient(circle at 15% 50%,rgb(128, 160, 216) 0%,cyan 4%,rgb(128, 160, 216) 8%);
+}
+
+.time-magic{
+	background: repeating-radial-gradient(circle at 85% 50%,rgb(255, 0, 255) 0%,violet 4%,rgb(255, 0, 255) 8%);
 }
 
 .col{
-	width: calc(40% - 10px);
+	width: calc(50% - 10px);
 	float: left;
 	margin: 0 5px;
 }

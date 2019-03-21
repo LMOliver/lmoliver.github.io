@@ -1,6 +1,6 @@
 !function(){
-const VERSION='1.0.5';
-const VERSION_ID='1.0.5.0';
+const VERSION='1.0.6';
+const VERSION_ID='1.0.6';
 
 const sum=(arr)=>arr.reduce((a,b)=>a+b,0);
 const product=(arr)=>arr.reduce((a,b)=>a*b,1);
@@ -241,7 +241,7 @@ const SKILLS={
 	coinGen:{
 		name:'财富获取',
 		format:'+VALUE财富/秒',
-		effect(lv){
+		effect(lv,id){
 			return 100*lv**3;
 		},
 		costBase:5,
@@ -253,8 +253,8 @@ const SKILLS={
 	globalMult:{
 		name:'全局加成',
 		format:'xVALUE',
-		effect(lv){
-			return Math.pow(1.8,lv);
+		effect(lv,id){
+			return Math.pow(2-0.2/(id+2),lv);
 		},
 		costBase:2,
 		costMult:1,
@@ -265,8 +265,8 @@ const SKILLS={
 	globalPower:{
 		name:'全局指数',
 		format:'^VALUE',
-		effect(lv){
-			return 1+lv*0.01;
+		effect(lv,id){
+			return 1+lv*(id+1)*0.01;
 		},
 		costBase:4,
 		costMult:5,
@@ -277,7 +277,7 @@ const SKILLS={
 	// toPointMult:{
 	// 	name:'回转加成(无效,请勿购买)',
 	// 	format:'xVALUE',
-	// 	effect(lv){
+	// 	effect(lv,skillId){
 	// 		return Math.pow(1.01,lv);
 	// 	},
 	// 	costBase:3,
@@ -295,13 +295,13 @@ function skillName(skillId){
 function isSkillEnabled(skillId,id){
 	return SKILLS[skillId].enable(id);
 }
-function skillValue(skill,skillId){
-	return SKILLS[skillId].effect(skill[skillId]);
+function skillValue(skill,skillId,id){
+	return SKILLS[skillId].effect(skill[skillId],id);
 }
-function skillEffectString(skill,skillId){
+function skillEffectString(skill,skillId,id){
 	return SKILLS[skillId].format.replace(
 		'VALUE',
-		printNumber(skillValue(skill,skillId))
+		printNumber(skillValue(skill,skillId,id))
 	);
 }
 function skillCost(skill,skillId){
@@ -317,15 +317,15 @@ function learnSkill(skill,skillId){
 }
 
 function calcGlobalAdd(){
-	return sum(gameData.skills.map(s=>skillValue(s,'coinGen')));
+	return sum(gameData.skills.map((s,id)=>skillValue(s,'coinGen',id)));
 }
 
 function calcGlobalMult(){
-	return product(gameData.skills.map(s=>skillValue(s,'globalMult')));
+	return product(gameData.skills.map((s,id)=>skillValue(s,'globalMult',id)));
 }
 
 function calcGlobalPower(){
-	return product(gameData.skills.map(s=>skillValue(s,'globalPower')));
+	return product(gameData.skills.map((s,id)=>skillValue(s,'globalPower',id)));
 }
 
 function showLayerArea(){
@@ -453,6 +453,10 @@ function upgradeTimeBuilding(id){
 	ts.time-=timeBuildingUpgradeCost(id);
 	ts[id].level+=1;
 }
+function isTimeBuildingDisabled(id){
+	const ts=gameData.timeStruct;
+	return ts[id].level===0||(TIME_BUILDINGS[id].dependOnTime&&ts.time===0);
+}
 function newTimeStruct(){
 	return {
 		time:0,
@@ -460,6 +464,25 @@ function newTimeStruct(){
 		timeBurner:newTimeBuilding(),
 		timeRepeator:newTimeBuilding(),
 	};
+}
+
+const TIME_MAGICS={
+	compress:{
+		name:'??',
+		description:'??????????????',
+		cost:1,
+		effect(){
+			gameData.coin+=1e4;
+		},
+	},
+};
+
+function canUseTimeMagic(m){
+	return gameData.timeStruct.time>=m.cost;
+}
+function useTimeMagic(m){
+	gameData.timeStruct.time-=m.cost;
+	m.effect();
 }
 
 const CONVERT_TIME_MIN=1e15;
@@ -536,6 +559,10 @@ function fixGameData(gd){
 		//nothing
 		gd.versionID='1.0.5.0';
 	}
+	if(gd.versionID<'1.0.6.0'){
+		//nothing
+		gd.versionID='1.0.6.0';
+	}
 }
 
 function loadGameData(save){
@@ -567,6 +594,13 @@ const TABS={
 };
 
 const CHANGE_LOG={
+	'v1.0.6':
+`调整了平衡性
+- 现在一些技能的效果与它们所在的层级有关
+增加了时间魔法
+- 目前只有一个测试用途的魔法
+修复了一些界面问题
+`,
 	'v1.0.5':
 `调整了平衡性
 移除了关于LCT的求助信息(膜拜Siyuan以表感激)
@@ -652,6 +686,9 @@ const methods={
 	timeGain,
 	newTimeStruct,
 	newTimeBuilding,
+	isTimeBuildingDisabled,
+	canUseTimeMagic,
+	useTimeMagic,
 	convertTime,
 	convertTimeGain,
 	canConvertTime,
@@ -682,6 +719,7 @@ const data={
 	PADDING,
 	COIN_TO_SKILL,
 	TIME_BUILDINGS,
+	TIME_MAGICS,
 	APPEND_COST_PER_LAYER,
 	CHANGE_LOG,
 	TABS,
@@ -788,7 +826,7 @@ function doGameTick(ms){
 	if(ts.time<=0){
 		ts.time=0;
 		for(id in ts){
-			if(isTimeBuilding(id)&&TIME_BUILDINGS[id].dependOnTime){
+			if(isTimeBuilding(id)&&isTimeBuildingDisabled(id)){
 				ts[id].enable=false;
 			}
 		}

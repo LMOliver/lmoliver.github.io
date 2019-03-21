@@ -64,10 +64,10 @@
 											<li v-for="(lv,skId) in s" v-if="isSkill(skId)&&isSkillEnabled(skId,id)" class="skill game-item">
 												<div>
 													<strong>{{skillName(skId)}}</strong>
-													<span>{{skillEffectString(s,skId,s[skId])}}</span>
+													<span>{{skillEffectString(s,skId,id)}}</span>
 													<span v-if="canLearnSkill(s,skId)">
 														<span class="right-arrow"></span>
-														<span>{{skillEffectString({[skId]:lv+1},skId)}}</span>
+														<span>{{skillEffectString({[skId]:lv+1},skId,id)}}</span>
 													</span>
 												</div>
 												<span>{{lv}}级</span>
@@ -126,7 +126,7 @@
 						<li class="time-building game-item" v-for="(b,id) in gameData.timeStruct" v-if="isTimeBuilding(id)">
 							<div>
 								<strong>{{TIME_BUILDINGS[id].name}}</strong>
-								<button :disabled="gameData.timeStruct.time===0&&TIME_BUILDINGS[id].dependOnTime" :class="[b.enable?'btn-active':'btn-enabled']" @click="b.enable = !b.enable">
+								<button :disabled="isTimeBuildingDisabled(id)" :class="[b.enable?'btn-active':'btn-enabled']" @click="b.enable = !b.enable">
 									{{b.enable?'运行中':'暂停中'}}
 								</button>
 								<span>{{timeBuildingEffectString(id,b.level)}}</span>
@@ -144,6 +144,25 @@
 							</div>
 							<div>
 								<span style="color: #222222;">{{TIME_BUILDINGS[id].description}}</span>
+							</div>
+						</li>
+					</ul>
+				</div>
+				<div class="col">
+					<h3>时间魔法</h3>
+					<ul>
+						<li class="time-magic game-item" v-for="m in TIME_MAGICS">
+							<div>
+								<strong>{{m.name}}</strong>
+							</div>
+							<div>
+								<button class="btn-enabled" @click="useTimeMagic(m)" :disabled="!canUseTimeMagic(m)">
+									施展
+								</button>
+								<span>{{printNumber(m.cost)}}时间</span>
+							</div>
+							<div>
+								<span style="color: #222222;">{{m.description}}</span>
 							</div>
 						</li>
 					</ul>
