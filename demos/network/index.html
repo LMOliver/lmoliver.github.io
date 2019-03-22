@@ -4,6 +4,7 @@
 		<meta charset="utf-8">
 		<title>Network</title>
 		<script src="https://cdn.jsdelivr.net/npm/vue"></script>
+		<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
 	</head>
 	<body>
 		<div id="app">
@@ -207,17 +208,28 @@
 				</div>
 			</tab-container>
 			<tab-container tab="save">
-				<h3>导入/导出</h3>
-				<div>
-					<input v-model="saveStr">
+				<div class="col">
+					<h3>导入/导出</h3>
+					<div>
+						<input v-model="saveStr">
+					</div>
+					<div>
+						<span>
+							<strong>导入会清除你的当前存档!</strong>
+						</span>
+					</div>
+					<div>
+						<button class="btn-danger" @click="try{loadGameData(saveStr,false)}catch(e){saveStr='导入失败!';}">导入</button>
+						<button class="btn-enabled" @click="saveStr=encode(gameData)">导出</button>
+						<button class="btn-danger" @click="if(saveStr!=='Yes'){var r=Math.floor(Math.random()*19260818);saveStr=`(${r}+${19260817-r})是质数吗?(Yes/No)`;}else{gameData=newGameData();}">清除存档</button>
+					</div>
 				</div>
-				<span>
-					<strong>导入会清除你的当前存档!</strong>
-				</span>
-				<div>
-					<button class="btn-danger" @click="try{loadGameData(saveStr)}catch(e){saveStr='导入失败!';}">导入</button>
-					<button class="btn-enabled" @click="saveStr=encode(gameData)">导出</button>
-					<button class="btn-danger" @click="if(saveStr!=='Yes'){var r=Math.floor(Math.random()*19260818);saveStr=`(${r}+${19260817-r})是质数吗?(Yes/No)`;}else{gameData=newGameData();}">清除存档</button>
+				<div class="col">
+					<h3>升级来自<code>1.0.7.1</code>及以下版本的存档</h3>
+					<div>
+						<p>LMOliver 太弱了，他认为检查一个存档是否被修改过的最好方法是人工检查。</p>
+					</div>
+					<comment-area gittalkid="demos-network"></comment-area>
 				</div>
 			</tab-container>
 		</div>
@@ -226,4 +238,5 @@
 	<link rel="stylesheet" href="../../normalize.css">
 	<link rel="stylesheet" href="../../default.css">
 	<link rel="stylesheet" href="./network.css">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
 </html>

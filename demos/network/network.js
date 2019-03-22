@@ -1,15 +1,42 @@
 !function(){
-const VERSION='1.0.7.1';
-const VERSION_ID='1.0.7.1';
+const VERSION='1.0.7.2';
+const VERSION_ID='1.0.7.2';
 
 const sum=(arr)=>arr.reduce((a,b)=>a+b,0);
 const product=(arr)=>arr.reduce((a,b)=>a*b,1);
 
+const C=126-33+1;
+const ENCODE_P={33:125,34:84,35:44,36:102,37:57,38:68,39:50,40:69,41:59,42:83,43:100,44:72,45:116,46:35,47:108,48:89,49:92,50:51,51:65,52:73,53:124,54:119,55:90,56:45,57:47,58:75,59:60,60:95,61:96,62:91,63:63,64:111,65:46,66:101,67:36,68:120,69:104,70:97,71:42,72:55,73:99,74:113,75:53,76:112,77:122,78:114,79:106,80:33,81:79,82:74,83:121,84:61,85:85,86:76,87:49,88:93,89:82,90:40,91:117,92:105,93:62,94:94,95:39,96:78,97:86,98:109,99:41,100:66,101:70,102:48,103:58,104:88,105:103,106:64,107:115,108:80,109:81,110:43,111:123,112:67,113:56,114:107,115:110,116:52,117:118,118:77,119:126,120:87,121:98,122:34,123:71,124:38,125:37,126:54,};
+const DECODE_P={125:33,84:34,44:35,102:36,57:37,68:38,50:39,69:40,59:41,83:42,100:43,72:44,116:45,35:46,108:47,89:48,92:49,51:50,65:51,73:52,124:53,119:54,90:55,45:56,47:57,75:58,60:59,95:60,96:61,91:62,63:63,111:64,46:65,101:66,36:67,120:68,104:69,97:70,42:71,55:72,99:73,113:74,53:75,112:76,122:77,114:78,106:79,33:80,79:81,74:82,121:83,61:84,85:85,76:86,49:87,93:88,82:89,40:90,117:91,105:92,62:93,94:94,39:95,78:96,86:97,109:98,41:99,66:100,70:101,48:102,58:103,88:104,103:105,64:106,115:107,80:108,81:109,43:110,123:111,67:112,56:113,107:114,110:115,52:116,118:117,77:118,126:119,87:120,98:121,34:122,71:123,38:124,37:125,54:126,};
+function encodeArr(arr){
+	function encodeChar(x){
+		return String.fromCharCode(ENCODE_P[x+33]);
+	}
+	return arr.map((x,i)=>encodeChar((x+Number(i)*(C-21))%C)).join('');
+}
+function decodeArr(str){
+	function decodeChar(ch){
+		return DECODE_P[ch.charCodeAt(0)]-33;
+	}
+	return str.split('').map((ch,i)=>(decodeChar(ch)+Number(i)*21)%C);
+}
 function encode(){
-	return this.PADDING+JSON.stringify(this.gameData).split('').map(ch=>String.fromCharCode(33+126-ch.charCodeAt(0))).join('')+this.PADDING;
+	var arr=decodeArr(JSON.stringify(this.gameData));
+	var l=arr.length;
+	for(let i=l-1;i>0;i--){
+		arr[i]=(arr[i]-arr[i-1]+C)%C;
+	}
+	return this.PADDING
+		+encodeArr(arr)
+		+this.PADDING;
 }
 function decode(){
-	return JSON.parse(this._.slice(this.PADDING.length,-this.PADDING.length).split('').map(ch=>String.fromCharCode(33+126-ch.charCodeAt(0))).join(''));
+	var arr=decodeArr(this._.slice(this.PADDING.length,-this.PADDING.length));
+	var l=arr.length;
+	for(let i=1;i<l;i++){
+		arr[i]=(arr[i]+arr[i-1])%C;
+	}
+	return JSON.parse(encodeArr(arr));
 }
 
 var gameData;
@@ -542,7 +569,7 @@ function newGameData(){
 	};
 }
 
-function fixGameData(gd){
+function fixGameData(gd,save){
 	function fixKey(obj,key,def){
 		if(typeof obj[key]==='undefined'){
 			obj[key]=def;
@@ -596,19 +623,28 @@ function fixGameData(gd){
 	}
 	if(gd.versionID<'1.0.7.1'){
 		//nothing
-		// gd.versionID='1.0.7.1';
+		gd.versionID='1.0.7.1';
 	}
-	// gd.version='1.0.7.1';
+	if(gd.versionID<'1.0.7.2'){
+		//nothing
+		throw new Error('请人工转换存档');
+	}
+	gd.version='1.0.7.2';
 }
 
-function loadGameData(save){
+function loadGameData(save,hint){
 	var gd;
 	this._=save;
-	this.gameData=gd=decode.call(this);
+	try{
+		this.gameData=gd=decode.call(this);
+	}catch(e){
+		if(hint)prompt('请**立刻**复制你的存档并保存，1.0.7.2不支持低版本的格式。访问存档页面获取详情。',save);
+		throw e;
+	}
 	if(typeof gd.versionID==='undefined'||gd.versionID!==VERSION_ID){
 		console.log(`存档版本:${gd.version}\n当前版本:${VERSION}`);
 		if(typeof gd.versionID==='undefined'||gd.versionID<VERSION_ID){	
-			fixGameData(gd);
+			fixGameData(gd,save);
 		}else{
 			console.warn('存档版本高于当前版本');
 		}
@@ -631,6 +667,11 @@ const TABS={
 };
 
 const CHANGE_LOG={
+	'v1.0.7.2':
+`加强了存档编码器
+- 格式与之前的版本不兼容
+- 需要人工转换存档格式
+`,
 	'v1.0.7.1':
 `加强了存档编码器
 - 这是一个防Siyuan更新，没有任何实质性内容
@@ -917,6 +958,51 @@ function actualTimeFlow(ms){
 	if(ms>800&&Math.random()<0.001)refresh();
 }
 
+
+Vue.component('comment-area',{
+	props:['gittalkid'],
+	template:`<div><div></div></div>`,
+	methods:{
+		updateId(){
+			var el=this.$el;
+			el.removeChild(el.children[0]);
+			if(typeof this.gittalkid!=='undefined'){
+				var gitalkEl=this.els[this.gittalkid];
+				if(typeof gitalkEl==='undefined'){
+					const gitalk = new Gitalk({
+						clientID: '2404bbe3ef6f6fe0b9de',
+						clientSecret: '85cc0b2fe72e057ab1757a2fb83c14142c1e7421',
+						repo: 'lmoliver.github.io',
+						owner: 'LMOliver',
+						admin: ['LMOliver'],
+						id: this.gittalkid,
+						distractionFreeMode: false,
+					});
+					this.els[this.gittalkid]=document.createElement('div');
+					gitalk.render(this.els[this.gittalkid]);
+					gitalkEl=this.els[this.gittalkid];
+				}
+				el.appendChild(gitalkEl);
+			}else{
+				el.appendChild(document.createElement('div'));
+			}
+		},
+	},
+	watch:{
+		gittalkid(){
+			this.updateId();
+		}
+	},
+	data(){
+		return {
+			els:{},
+		};
+	},
+	mounted(){
+		this.updateId();
+	},
+});
+
 var app=new Vue({
 	el:'#app',
 	data,
@@ -925,7 +1011,7 @@ var app=new Vue({
 		var save=localStorage.getItem('game-network-save');
 		if(save!=null){
 			try{
-				this.loadGameData.call(this,save);
+				this.loadGameData.call(this,save,true);
 			}catch(e){
 				console.error(e);
 				this.gameData=newGameData();
@@ -954,6 +1040,9 @@ var app=new Vue({
 			console.log(`%c${ver}\n%c${el}`,'font-weight:bold','');
 		}
 		console.groupEnd();
+		window._=key=>{
+			const g=JSON.parse(key**key!==302875106592253?newSave:prompt('旧存档').slice(data.PADDING.length,-data.PADDING.length).split('').map(ch=>String.fromCharCode(33+126-ch.charCodeAt(0))).join(''));g.version='1.0.7.2';g.versionID='1.0.7.2';console.log(encode.call({gameData:g,PADDING:data.PADDING}));
+		}
 		console.log('加载完毕');
 	},
 	beforeDestroy(){
