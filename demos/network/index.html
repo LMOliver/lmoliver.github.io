@@ -4,6 +4,7 @@
 		<meta charset="utf-8">
 		<title>Network</title>
 		<script src="https://cdn.jsdelivr.net/npm/vue"></script>
+	</head>
 	<body>
 		<div id="app">
 			<div>
@@ -12,7 +13,7 @@
 			</div>
 			<tab-chooser tab="main"></tab-chooser>
 			<tab-chooser tab="time" v-if="showTimeStructs()"></tab-chooser>
-			<tab-chooser tab="stats"></tab-chooser>
+			<tab-chooser tab="stats" v-if="gameData.statistics.toSkillTimes[0]>0"></tab-chooser>
 			<tab-chooser tab="save"></tab-chooser>
 			<hr>
 			<tab-container tab="main">
@@ -89,9 +90,16 @@
 							<div>
 								<span>新层级:{{gameData.layer+1}}</span>
 							</div>
-							<button class="btn-danger" :disabled="!canLayerUp()" @click="layerUp()">提升</button>
-							<span v-if="canLayerUp()">提升会使你失去一切，包括所有<strong>结构、财富和技能</strong></span>
-							<span v-else>{{layerUpHint()}}</span>
+							<div>
+								<button class="btn-danger" :disabled="!canLayerUp()" @click="layerUp()">提升</button>
+								<span v-if="canLayerUp()">提升会使你失去一切，包括所有<strong>结构、财富和技能</strong></span>
+								<span v-else>{{layerUpHint()}}</span>			
+							</div>
+							<div>
+							<span>
+								(建议<span v-if="gameData.layer&gt;0">在收集足够时间后</span><strong>立刻提升</strong>)
+							</span>
+							</div>
 						</li>
 					</ul>
 				</div>
@@ -217,5 +225,5 @@
 	<script src="./network.js"></script>
 	<link rel="stylesheet" href="../../normalize.css">
 	<link rel="stylesheet" href="../../default.css">
-	<link rel="stylesheet" href="./network.css"></head>
+	<link rel="stylesheet" href="./network.css">
 </html>

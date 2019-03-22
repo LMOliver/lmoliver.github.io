@@ -1,26 +1,15 @@
 !function(){
-const VERSION='1.0.6';
-const VERSION_ID='1.0.6';
+const VERSION='1.0.7';
+const VERSION_ID='1.0.7.0';
 
 const sum=(arr)=>arr.reduce((a,b)=>a+b,0);
 const product=(arr)=>arr.reduce((a,b)=>a*b,1);
 
-const PADDING='WW91JTIwYXJlJTIwdG9vJTIweWF1bmclMjB0b28lMjBzaW1wbGUldUZGMENzb21ldGltZXMlMjBuYWl2ZS4lMEE=';
 function encode(obj){
-	return PADDING+JSON.stringify(obj)
-			.split('')
-			.map(ch=>String.fromCharCode(33+126-ch.charCodeAt(0)))
-			.join('')
-		+PADDING;
+	return this.PADDING+JSON.stringify(obj).split('').map(ch=>String.fromCharCode(33+126-ch.charCodeAt(0))).join('')+this.PADDING;
 }
 function decode(str){
-	return JSON.parse(
-		str
-			.slice(PADDING.length,-PADDING.length)	
-			.split('')
-			.map(ch=>String.fromCharCode(33+126-ch.charCodeAt(0)))
-			.join('')
-	);
+	return JSON.parse(str.slice(this.PADDING.length,-this.PADDING.length).split('').map(ch=>String.fromCharCode(33+126-ch.charCodeAt(0))).join(''));
 }
 
 var gameData;
@@ -34,6 +23,8 @@ function printNumber(num){
 	var [val,exp]=num.toExponential(2).split('e').map(parseFloat);
 	if(exp<6){
 		if(Number.isSafeInteger(num))return num.toString();
+		else if(exp<-4)return num.toExponential(3);
+		else if(exp<-2)return num.toPrecision(2);
 		else return num.toFixed(2);
 	}
 	val*=Math.pow(10,exp%3);
@@ -108,7 +99,7 @@ function calcGlobalSum(){
 }
 
 function calcPoint(obj){
-	const minPro=obj.weight*2+18;
+	const minPro=obj.weight*(obj.layer+1)*2+18;
 	const valPro=obj.level;
 	const rate=4/(Math.pow(obj.layer+2,2));
 	return (Math.log(valPro)-Math.log(minPro-1))*rate+1
@@ -121,12 +112,13 @@ function calcArrPoint(arr){
 const PRICE_INCERASE_RATE=1.44;
 const PRICE_INCERASE_RATE_PER_LAYER=0.56;
 function upgradeCost(obj){
-	return obj.weight
+	return Math.pow(obj.weight,obj.layer+1)
 		*Math.pow(1e6,Math.pow(obj.layer,1.6))
 		*Math.pow(
 			PRICE_INCERASE_RATE+obj.layer*PRICE_INCERASE_RATE_PER_LAYER,
 			obj.level-1
-		);
+		)
+		*calcGlobalCost(obj.layer);
 }
 
 function upgrade(obj){
@@ -140,7 +132,8 @@ function addSonCost(arr){
 	return APPEND_COST_MULT
 		*Math.pow(APPEND_COST_PER_LAYER,arr[0].layer)
 		*Math.pow((arr[0].layer+1)*4,arr.length)
-		*arr[0].weight;
+		*arr[0].weight
+		*calcGlobalCost(arr[0].layer);
 }
 
 function addSon(arr){
@@ -227,14 +220,14 @@ function skillPointName(id){
 }
 
 function initSkill(){
-	return {
+	var o={
 		skillPoint:0,
-		coinGen:0,
-		globalMult:0,
-		globalPower:0,
-		toPointMult:0,
 		show:true,
 	};
+	for(let skId in SKILLS){
+		o[skId]=0;
+	}
+	return o;
 }
 
 const SKILLS={
@@ -272,6 +265,18 @@ const SKILLS={
 		costMult:5,
 		enable(skillId){
 			return skillId>=1;
+		},
+	},
+	costDec:{
+		name:'层次价格',
+		format:'xVALUE',
+		effect(lv,id){
+			return Math.pow((id+3)/(lv+(id+3)),2);
+		},
+		costBase:4,
+		costMult:20,
+		enable(skillId){
+			return true;
 		},
 	},
 	// toPointMult:{
@@ -316,6 +321,11 @@ function learnSkill(skill,skillId){
 	skill[skillId]++;
 }
 
+function calcGlobalCost(id){
+	const s=gameData.skills[id];
+	return typeof s!=='undefined'?skillValue(s,'costDec',id):1;
+}
+
 function calcGlobalAdd(){
 	return sum(gameData.skills.map((s,id)=>skillValue(s,'coinGen',id)));
 }
@@ -329,18 +339,23 @@ function calcGlobalPower(){
 }
 
 function showLayerArea(){
-	return canLayerUp()||canToSkill(gameData.skills.length);
+	const l=gameData.layer;
+	const s=gameData.skills;
+	return canLayerUp()||(s.length>l&&s[l].skillPoint>0);
 }
 function canLayerUp(){
-	if(gameData.layer<MAX_NAMED_LAYER){
-		return gameData.arr.length>=30;
+	const l=gameData.layer;
+	const s=gameData.skills;
+	if(l<MAX_NAMED_LAYER){
+		return s.length>l&&s[l].skillPoint>=1e6;
 	}else{
 		return false;
 	}
 }
 function layerUpHint(){
-	if(gameData.layer<MAX_NAMED_LAYER){
-		return `${LAYER_NAMES[gameData.arr[0].layer]}的数量必须不小于${printNumber(30)}`;
+	const l=gameData.layer;
+	if(l<MAX_NAMED_LAYER){
+		return `需要${printNumber(1e6)}${skillPointName(l)}`;
 	}else{
 		return '作者还没做这部分，拿头提升';
 	}
@@ -468,11 +483,19 @@ function newTimeStruct(){
 
 const TIME_MAGICS={
 	compress:{
-		name:'??',
-		description:'??????????????',
+		name:'汲取',
+		description:'夕阳无限好，只是近黄昏。',
 		cost:1,
 		effect(){
-			gameData.coin+=1e4;
+			gameData.coin+=2e4;
+		},
+	},
+	flow:{
+		name:'流动',
+		description:'盛年不重来，一日难再晨。',
+		cost:80,
+		effect(){
+			gameData.timeStruct.time+=Math.random()*40+60;
 		},
 	},
 };
@@ -525,6 +548,15 @@ function fixGameData(gd){
 			obj[key]=def;
 		}
 	}
+	function fixSkills(){
+		for(let s of gd.skills){
+			fixKey(s,'show',true);
+			fixKey(s,'skillPoint',0);
+			for(let skillId in SKILLS){
+				fixKey(s,skillId,0);
+			}
+		}
+	}
 	if(typeof gd.versionID==='undefined'){
 		fixKey(gd,'version','1.0.2');
 		fixKey(gd,'versionID','1.0.2.0');
@@ -533,12 +565,7 @@ function fixGameData(gd){
 		fixKey(gd,'arr',[initObj(gd.layer)]);
 		fixKey(gd,'showSkills',true);
 		fixKey(gd,'skills',[]);
-		for(let s of gd.skills){
-			fixKey(s,'show',true);
-			for(let skillId in SKILLS){
-				fixKey(s,skillId,0);
-			}
-		}
+		fixSkills();
 	}
 	if(gd.versionID<'1.0.3.0'){
 		forEachObj(o=>{
@@ -563,11 +590,16 @@ function fixGameData(gd){
 		//nothing
 		gd.versionID='1.0.6.0';
 	}
+	if(gd.versionID<'1.0.7.0'){
+		fixSkills();
+		gd.versionID='1.0.7.0';
+	}
+	gd.version='1.0.7';
 }
 
 function loadGameData(save){
 	var gd;
-	this.gameData=gd=decode(save);
+	this.gameData=gd=decode.call(this,save);
 	if(typeof gd.versionID==='undefined'||gd.versionID!==VERSION_ID){
 		console.log(`存档版本:${gd.version}\n当前版本:${VERSION}`);
 		if(typeof gd.versionID==='undefined'||gd.versionID<VERSION_ID){	
@@ -594,6 +626,17 @@ const TABS={
 };
 
 const CHANGE_LOG={
+	'v1.0.7':
+`调整了平衡性
+新的技能:${SKILLS.costDec.name}
+- 降低对应层级结构的价格
+- 最低要求:${skillLevelName(0)}
+增加了新的魔法
+- 汲取
+- 流动
+略微改进了界面
+开启空闲时自动刷新功能
+`,
 	'v1.0.6':
 `调整了平衡性
 - 现在一些技能的效果与它们所在的层级有关
@@ -646,6 +689,7 @@ const methods={
 	calcGlobalAdd,
 	calcGlobalPower,
 	calcGlobalSum,
+	calcGlobalCost,
 	calcSkillPointGain,
 	calcPoint,
 	canLayerUp,
@@ -660,7 +704,9 @@ const methods={
 	encode,
 	decode,
 	doGameTick,
+	gameTimeFlow,
 	actualTimeFlow,
+	refresh,
 	addSonCost,
 	initObj,
 	showImproveAreas,
@@ -716,7 +762,7 @@ const data={
 	SKILLPOINT_TO_SKILL,
 	MAX_NAMED_LAYER,
 	SKILLS,
-	PADDING,
+	PADDING:'WW91JTIwYXJlJTIwdG9vJTIweWF1bmclMjB0b28lMjBzaW1wbGUldUZGMENzb21ldGltZXMlMjBuYWl2ZS4lMEE=',
 	COIN_TO_SKILL,
 	TIME_BUILDINGS,
 	TIME_MAGICS,
@@ -841,16 +887,25 @@ function hasEvent(ms){
 	return false;
 }
 
+function refresh(){
+	window.location.reload();
+}
+
 const MIN_TIME_STAMP=1e-8;
-function actualTimeFlow(ms){
+function gameTimeFlow(ms){
 	if(ms<=MIN_TIME_STAMP||!hasEvent(ms)){
 		doGameTick(ms*timeFlow());
 		gameData.timeStruct.time+=timeGain()*ms/1000;
 	}else{
 		var half=ms/2;
-		actualTimeFlow(half);
-		actualTimeFlow(half);
+		gameTimeFlow(half);
+		gameTimeFlow(half);
 	}
+}
+
+function actualTimeFlow(ms){
+	gameTimeFlow(ms);
+	if(ms>800&&Math.random()<0.001)refresh();
 }
 
 var app=new Vue({
@@ -861,7 +916,7 @@ var app=new Vue({
 		var save=localStorage.getItem('game-network-save');
 		if(save!=null){
 			try{
-				this.loadGameData(save);
+				this.loadGameData.call(this,save);
 			}catch(e){
 				console.error(e);
 				this.gameData=newGameData();
@@ -878,7 +933,7 @@ var app=new Vue({
 			this.actualTimeFlow(dt);
 			gameData.statistics.actualTotalTime+=dt/1000;
 			time=newTime;
-			localStorage.setItem('game-network-save',encode(this.gameData));
+			localStorage.setItem('game-network-save',encode.call(this,this.gameData));
 		});
 		console.group('更新记录');
 		for(const ver in CHANGE_LOG){
@@ -893,10 +948,10 @@ var app=new Vue({
 	},
 });
 
-// window.debug={
-// 	app,
-// 	data,
-// 	methods,
-// };
+window.debug={
+	app,
+	data,
+	methods,
+};
 
 }();
