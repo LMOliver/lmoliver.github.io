@@ -1,15 +1,15 @@
 !function(){
-const VERSION='1.0.7';
-const VERSION_ID='1.0.7.0';
+const VERSION='1.0.7.1';
+const VERSION_ID='1.0.7.1';
 
 const sum=(arr)=>arr.reduce((a,b)=>a+b,0);
 const product=(arr)=>arr.reduce((a,b)=>a*b,1);
 
-function encode(obj){
-	return this.PADDING+JSON.stringify(obj).split('').map(ch=>String.fromCharCode(33+126-ch.charCodeAt(0))).join('')+this.PADDING;
+function encode(){
+	return this.PADDING+JSON.stringify(this.gameData).split('').map(ch=>String.fromCharCode(33+126-ch.charCodeAt(0))).join('')+this.PADDING;
 }
-function decode(str){
-	return JSON.parse(str.slice(this.PADDING.length,-this.PADDING.length).split('').map(ch=>String.fromCharCode(33+126-ch.charCodeAt(0))).join(''));
+function decode(){
+	return JSON.parse(this._.slice(this.PADDING.length,-this.PADDING.length).split('').map(ch=>String.fromCharCode(33+126-ch.charCodeAt(0))).join(''));
 }
 
 var gameData;
@@ -594,12 +594,17 @@ function fixGameData(gd){
 		fixSkills();
 		gd.versionID='1.0.7.0';
 	}
-	gd.version='1.0.7';
+	if(gd.versionID<'1.0.7.1'){
+		//nothing
+		// gd.versionID='1.0.7.1';
+	}
+	// gd.version='1.0.7.1';
 }
 
 function loadGameData(save){
 	var gd;
-	this.gameData=gd=decode.call(this,save);
+	this._=save;
+	this.gameData=gd=decode.call(this);
 	if(typeof gd.versionID==='undefined'||gd.versionID!==VERSION_ID){
 		console.log(`存档版本:${gd.version}\n当前版本:${VERSION}`);
 		if(typeof gd.versionID==='undefined'||gd.versionID<VERSION_ID){	
@@ -626,6 +631,10 @@ const TABS={
 };
 
 const CHANGE_LOG={
+	'v1.0.7.1':
+`加强了存档编码器
+- 这是一个防Siyuan更新，没有任何实质性内容
+`,
 	'v1.0.7':
 `调整了平衡性
 新的技能:${SKILLS.costDec.name}
@@ -933,7 +942,11 @@ var app=new Vue({
 			this.actualTimeFlow(dt);
 			gameData.statistics.actualTotalTime+=dt/1000;
 			time=newTime;
-			localStorage.setItem('game-network-save',encode.call(this,this.gameData));
+			localStorage.setItem('game-network-save',encode.call(this));
+			if(Math.random()<0.0001){
+				window.encode=()=>"naive";
+				window.decode=()=>"naive";
+			}
 		});
 		console.group('更新记录');
 		for(const ver in CHANGE_LOG){
@@ -948,10 +961,10 @@ var app=new Vue({
 	},
 });
 
-window.debug={
-	app,
-	data,
-	methods,
-};
+// window.debug={
+// 	app,
+// 	data,
+// 	methods,
+// };
 
 }();
