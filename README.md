@@ -18,4 +18,4 @@
 
   - [Function](https://lmoliver.github.io/demos/function/index.html)
 
-  - [Network](https://lmoliver.github.io/demos/network/index.html)
+  - [NetWork](https://lmoliver.github.io/demos/network/index.html)

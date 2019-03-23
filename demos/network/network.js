@@ -1,6 +1,6 @@
 !function(){
-const VERSION='1.0.7.2';
-const VERSION_ID='1.0.7.2';
+const VERSION='1.0.7.3';
+const VERSION_ID='1.0.7.3';
 
 const sum=(arr)=>arr.reduce((a,b)=>a+b,0);
 const product=(arr)=>arr.reduce((a,b)=>a*b,1);
@@ -629,7 +629,11 @@ function fixGameData(gd,save){
 		//nothing
 		throw new Error('请人工转换存档');
 	}
-	gd.version='1.0.7.2';
+	if(gd.versionID<'1.0.7.2'){
+		//nothing
+		gd.versionID='1.0.7.3';
+	}
+	gd.version='1.0.7.3';
 }
 
 function loadGameData(save,hint){
@@ -638,7 +642,10 @@ function loadGameData(save,hint){
 	try{
 		this.gameData=gd=decode.call(this);
 	}catch(e){
-		if(hint)prompt('请**立刻**复制你的存档并保存，1.0.7.2不支持低版本的格式。访问存档页面获取详情。',save);
+		if(hint){
+			prompt('请*立刻*复制你的存档并保存!\n不要双击 Ctrl+C 复制!\n使用三击 Ctrl+C 或 Ctrl+A Ctrl+C 复制。\n1.0.7.2及以上版本不支持低版本的格式。\n访问存档页面获取详情。',save);
+			localStorage.setItem('game-network-temp-save',save);
+		}
 		throw e;
 	}
 	if(typeof gd.versionID==='undefined'||gd.versionID!==VERSION_ID){
@@ -667,6 +674,10 @@ const TABS={
 };
 
 const CHANGE_LOG={
+	'v1.0.7.3':
+`修改了转换存档格式的提示
+在转换存档格式提示出现时会在本地存储中保存一份副本
+`,
 	'v1.0.7.2':
 `加强了存档编码器
 - 格式与之前的版本不兼容

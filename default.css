@@ -101,3 +101,7 @@ li{
 	border-radius: 5px;
 	margin: 5px 0px;
 }
+
+input{
+	max-width: 100%;
+}

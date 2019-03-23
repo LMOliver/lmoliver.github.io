@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Encode</title>
+		<script src="https://cdn.jsdelivr.net/npm/vue"></script></head>
+	<body>
+		<div id="app">
+			<h1>膜拜大佬</h1>
+			<div>
+				<textarea style="width:100%;" rows="10" placeholder="凡人的话语" v-model="qaq"></textarea>
+			</div>
+			<div>
+				<textarea style="width:100%;" rows="10" placeholder="膜拜大佬的姿势" v-model="qwq"></textarea>
+			</div>
+			<button @click="encode()">膜拜</button>
+			<button @click="decode()">解读</button>
+		</div>
+	</body>
+	<script src="./encode.js"></script>
+	<link rel="stylesheet" href="../../normalize.css">
+	<link rel="stylesheet" href="../../default.css">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/katex.min.css" integrity="sha384-dbVIfZGuN1Yq7/1Ocstc1lUEm+AT+/rCkibIcC/OmWo5f0EA48Vf8CytHzGrSwbQ" crossorigin="anonymous">
+</html>

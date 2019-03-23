@@ -3,6 +3,7 @@ body,html{
 	height: 100%;
 	font-family:sans-serif;
 	background:#eeeeee url(https://api.ixiaowai.cn/api/api.php?SiyuanTQL) fixed;
+	background-size: cover;
 }
 
 a{
