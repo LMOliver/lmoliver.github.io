@@ -96,6 +96,11 @@ button:hover{
 button:active{
 	background: lightgray;
 }
+button:disabled{
+	border: 1px rgba(0,0,0,0) solid;
+	background-color:gray !important;
+	cursor: not-allowed;
+}
 
 li{
 	border-radius: 5px;

@@ -122,12 +122,6 @@ button{
 	background-color:rgb(0, 240, 0);
 }
 
-button:disabled{
-	border: 1px rgba(0,0,0,0) solid;
-	background-color:gray !important;
-	cursor: not-allowed;
-}
-
 ul{
 	list-style-type: none;
 	padding-inline-start:0;
