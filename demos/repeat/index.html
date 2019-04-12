@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Repeat</title>
+		<script src="https://cdn.jsdelivr.net/npm/vue"></script>
+	</head>
+	<body>
+		<div id="app">
+			<h1>复读机</h1>
+			<div class="game">
+				<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="600" height="600">
+					<svg-bullet v-for="bullet in bullets" :bullet="bullet"></svg-bullet>
+					<svg-plane v-for="plane in planes" v-if="!plane.died" :plane="plane"></svg-plane>
+				</svg>
+			</div>
+		</div>
+		<script src="./repeat.js"></script>
+		<link rel="stylesheet" href="./repeat.css">
+		<link rel="stylesheet" href="../../normalize.css">
+		<link rel="stylesheet" href="../../default.css">
+	</body>
+</html>

@@ -1,0 +1,7 @@
+.game{
+	border: 2px black solid;
+	margin: 0 auto;
+	width:600px;
+	height:600px;
+	background: linear-gradient(180deg,cyan,skyblue);
+}

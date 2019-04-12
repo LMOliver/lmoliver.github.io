@@ -1,0 +1,21 @@
+.col{
+	width: 45%;
+	margin: 0 2.5%;
+	float: left;
+}
+
+.area{
+	float: left;
+}
+
+.siyuan{
+	display: inline-block;
+}
+.siyuan::before{
+	content: 'Siyuan';
+	font-weight: bold;
+	color:red !important;
+}
+.siyuan:first-letter{
+	color:black !important;
+}

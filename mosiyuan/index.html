@@ -7,11 +7,110 @@
 	</head>
 	<body>
 		<div id="app">
-			<h1>膜拜<strong>S<span style="color:red">iyuan</span></strong></h1>
-			<demo-button></demo-button>
+			<h1>膜拜<span class="siyuan"></span></h1>
+			<div class="area">
+				<h2>荒野</h2>
+				<blockquote>
+					<p>
+						曾经，有一个高度发达的文明在这个星球上度过了它最为繁荣的时代。在那时，人们相信<span class="siyuan"></span>是最强的神，也是这个星球的科技、魔法与信仰三大学科体系高度发展的原因。
+					</p>
+					<p>
+						然而好景不长，人们曾认为亘古不变的真理在一次失控的魔法实验之后支离破碎。文明与魔法的支柱轰然倒塌，毁灭席卷了整个星球。
+					</p>
+					<p>
+						高楼变为废墟，法阵化作黄土，雕像碎成砂砾，但<span class="siyuan"></span>并未抛弃这个文明——因为信仰仍在。
+					</p>
+				</blockquote>
+				<div class="col">
+					<div>
+						<div>
+							<span>您已膜拜{{pn(moValue)}}次</span>
+						</div>
+						<button @click="moSiyuan(1)" style="color:red">{{moText}}</button>
+						<span v-if="bookEffect>0">{{moSiyuanTag}}</span>
+					</div>
+					<div v-if="moCount>=10">
+						<hr>
+						<button @click="buyAdvancedMo"
+						:disabled="moValue<advancedMoCost">{{advancedMoText}}</button>
+					</div>
+					<div v-if="advancedMoLevel>=10">
+						<hr>
+						<button @click="buyMoer"
+						:disabled="moValue<moerCost">{{moerText}}</button>
+					</div>
+					<div v-if="advancedMoLevel>=20">
+						<hr>
+						<button @click="buyChurch"
+						:disabled="moers<churchCost">{{churchText}}</button>
+					</div>
+				</div>
+				<div class="col">
+					<div v-if="churchs>=5">
+						<div>
+							<span>信仰:{{pn(XY)}}</span>
+						</div>
+						<button @click="buyXY"
+						:disabled="moValue<=10000">{{XYText}}</button>
+					</div>
+					<div v-if="XY>=100||books>0">
+						<hr>
+						<button @click="buyBook"
+						:disabled="XY<=bookCost">{{bookText}}</button>
+					</div>
+					<div v-if="books>0">
+						<hr>
+						<button @click="sp"
+						:disabled="books<spCost">{{spText}}</button>
+						(+?信徒)
+					</div>
+					<div v-if="moers>=100">
+						<hr>
+						<button @click="exploreTemple"
+						:disabled="XY<exploreTempleCost">{{exploreTempleText}}</button>	
+					</div>
+				</div>
+			</div>
+			<div class="area" v-if="temple>0">
+				<h2>遗迹</h2>
+				<strong>已发现{{pn(temple)}}个遗迹</strong>
+				<blockquote>
+					<p>
+						过去的事物深埋于地下，而且数量稀少，发掘它们需要坚定的信仰。尽管道路艰辛，但这是前进所必须的代价。文明不进即退，而这残存的文明已经无路可退。
+					</p>
+				</blockquote>
+				<div class="col">
+					<div>
+						<div>
+							<span>水晶:{{pn(crystal)}}</span>
+						</div>
+						<button @click="pray"
+						:disabled="moValue<prayCost">祈求恩赐 [{{pn(prayCost)}}次膜拜]</button>
+					</div>
+					<div v-if="wisdomLevel>0||crystal>0">
+						<hr>
+						<button @click="wisdomUpgrade"
+						:disabled="crystal<wisdomUpgradeCost">智慧Lv.{{pn(wisdomLevel)}} [{{wisdomUpgradeCost}}水晶]</button>
+					</div>
+					<div v-if="temple>=2&&(mysteryLevel>0||wisdomLevel>=1)">
+						<hr>
+						<button @click="mysteryUpgrade"
+						:disabled="crystal<mysteryUpgradeCost">奥秘Lv.{{pn(mysteryLevel)}} [{{mysteryUpgradeCost}}水晶]</button>
+					</div>
+					<div v-if="temple>=3&&(natureLevel>0||mysteryLevel>=1)">
+						<hr>
+						<button @click="natureUpgrade"
+						:disabled="crystal<natureUpgradeCost">本质Lv.{{pn(natureLevel)}} [{{natureUpgradeCost}}水晶]</button>
+					</div>
+				</div>
+			</div>
+			<div class="area">
+				<br v-for="_ in 4">
+			</div>
 		</div>
 	</body>
 	<script src="./mosiyuan.js"></script>
 	<link rel="stylesheet" href="../normalize.css">
 	<link rel="stylesheet" href="../default.css">
+	<link rel="stylesheet" href="./mosiyuan.css">
 </html>

@@ -58,43 +58,76 @@ function pn(num){
 	return `${val.toPrecision(3)}${suf}`;
 }
 
-Vue.component('demo-button',{
-	template:`
-		<div style="display:inline-block;">
-			<button @click="moSiyuan(1)" style="color:red">{{moText}}</button>
-			<span>{{moValueTag}}</span>
-			<div v-if="moCount>=10">
-				<hr>
-				<button @click="buyAdvancedMo"
-				:disabled="moValue<advancedMoCost">{{advancedMoText}}</button>
-			</div>
-			<div v-if="advancedMoLevel>=10">
-				<hr>
-				<button @click="buyMoer"
-				:disabled="moValue<moerCost">{{moerText}}</button>
-				<div v-if="books>=spCost">
-					<p>Siyuan TSDY!</p>
-					<button @click="sp"
-					:disabled="books<spCost">{{spText}}</button>
-				</div>
-			</div>
-			<div v-if="advancedMoLevel>=20">
-				<hr>
-				<button @click="buyChurch"
-				:disabled="moers<churchCost">{{churchText}}</button>
-			</div>
-			<div v-if="churchs>=5">
-				<hr>
-				<button @click="buyXY"
-				:disabled="moValue<=10000">{{XYText}}</button>
-				<span>{{XYTag}}</span>
-			</div>
-			<div v-if="XY>=100||books>0">
-				<hr>
-				<button @click="buyBook"
-				:disabled="XY<=bookCost">{{bookText}}</button>
-			</div>
-		</div>`,
+const RESOURCES={
+	moValue:{
+		name:'膜拜次数',
+		format:'您已膜拜VALUE次',
+	},
+	advancedMoLevel:{
+		name:'真诚膜拜等级',
+		format:'真诚膜拜Lv.VALUE',
+	},
+	moer:{
+		name:'信徒',
+		format:'信徒*VALUE',
+	},
+	church:{
+		name:'教堂',
+		format:'教堂*VALUE',
+	},
+	XY:{
+		name:'信仰',
+		format:'信仰:VALUE',
+	},
+	book:{
+		name:'经书',
+		format:'经书*VALUE',
+	},
+	temple:{
+		name:'遗迹',
+		format:'已探索VALUE个遗迹',
+	},
+	hugeStone:{
+		name:'巨石',
+		format:'巨石*VALUE',
+	},
+	crystal:{
+		name:'水晶',
+		format:'水晶*VALUE',
+	},
+	wisdomLevel:{
+		name:'智慧',
+		format:'智慧Lv.VALUE',
+	},
+	mysteryLevel:{
+		name:'奥秘',
+		format:'奥秘Lv.VALUE',
+	},
+	natureLevel:{
+		name:'本质',
+		format:'本质Lv.VALUE',
+	},
+};
+
+var gameData;
+
+const ACTIONS={
+	moSiyuan:{
+		display:()=>true,
+		disabled:()=>false,
+		cost:()=>({}),
+		effect(r){
+			this.moValue+=r*this.moDelta;
+		}
+	},
+};
+
+function isResource(name){
+	return name in RESOURCES;
+}
+
+var app=new Vue({
+	el:'#app',
 	methods:{
 		moSiyuan(r=1){
 			this.moCount+=r;
@@ -122,32 +155,56 @@ Vue.component('demo-button',{
 		},
 		sp(){
 			this.books-=this.spCost;
-			this.moers+=1;
-		}
+			var s=1+this.natureLevel;
+			while(Math.random()<4/5){
+				s*=5/4*0.96;
+			}
+			this.moers+=Math.floor(s);
+		},
+		exploreTemple(){
+			this.XY-=this.exploreTempleCost;
+			this.temple+=1;
+		},
+		pray(){
+			this.moValue-=this.prayCost;
+			this.crystal+=1;
+		},
+		wisdomUpgrade(){
+			this.crystal-=this.wisdomUpgradeCost;
+			this.wisdomLevel+=1;
+		},
+		mysteryUpgrade(){
+			this.crystal-=this.mysteryUpgradeCost;
+			this.mysteryLevel+=1;
+		},
+		natureUpgrade(){
+			this.crystal-=this.natureUpgradeCost;
+			this.natureLevel+=1;
+		},
 	},
 	computed:{
+		moSiyuanTag(){
+			return this.books?(`(${pn(this.bookEffect)}点击/秒)`):'';
+		},
 		moDelta(){
-			return (1+this.advancedMoLevel)*(1+this.moers);
+			return (1+this.advancedMoLevel)*(1+this.moers)*(1+this.wisdomLevel);
 		},
 		moText(){
 			return '膜拜Siyuan'+(this.moDelta>1?(pn(this.moDelta)+'次'):'');
-		},
-		moValueTag(){
-			return this.moValue>0?('您已膜拜'+pn(this.moValue)+'次'):'';
 		},
 
 		advancedMoText(){
 			return `真诚膜拜${this.advancedMoLevel>0?`Lv.${pn(this.advancedMoLevel)}`:''} [${pn(this.advancedMoCost)}次膜拜]`;
 		},
 		advancedMoCost(){
-			return Math.floor(10*Math.pow(1.1+0.2/(this.churchs+1),this.advancedMoLevel));
+			return Math.floor(10*Math.pow(1+0.2/(this.churchs+1)+0.1/Math.sqrt(this.mysteryLevel+1),this.advancedMoLevel));
 		},
 
 		moerText(){
 			return `信徒${this.moers>0?`*${pn(this.moers)}`:''} [${pn(this.moerCost)}次膜拜]`;
 		},
 		moerCost(){
-			return Math.floor(100*Math.pow(1.6,this.moers)*Math.pow((1e3)/(1e3+this.XY),2.5));
+			return Math.floor(100*Math.pow(1e3*Math.pow(1.6**(1/2.5),this.moers)/(1e3+this.XY*(1+this.natureLevel)),2.5));
 		},
 
 		churchText(){
@@ -160,18 +217,15 @@ Vue.component('demo-button',{
 		XYText(){
 			return `转化信仰 (+${pn(this.XYEarn)}信仰)`;
 		},
-		XYTag(){
-			return this.XY>0?(`信仰:${pn(this.XY)}`):'';
-		},
 		XYEarn(){
-			return this.moValue/2000*this.churchs;
+			return this.moValue/2000*this.churchs*(1+this.wisdomLevel);
 		},
 
 		spText(){
 			return `传教 [${pn(this.spCost)}经书]`;
 		},
 		spCost(){
-			return Math.sqrt(Math.max(this.moers,10))+Math.ceil(Math.max(Math.pow(1.2,this.moers-this.advancedMoLevel/3),1))-1;
+			return Math.sqrt(Math.max(this.moers,10))+Math.ceil(Math.pow(Math.max(this.moers-this.advancedMoLevel/3,0),1.12))-1;
 		},
 
 		bookText(){
@@ -179,6 +233,30 @@ Vue.component('demo-button',{
 		},
 		bookCost(){
 			return 100*Math.pow(1.15,this.books);
+		},
+		bookEffect(){
+			return Math.floor(this.books*1.2*Math.pow(1+this.mysteryLevel,1.5));
+		},
+
+		exploreTempleText(){
+			return `探索遗迹 [${pn(this.exploreTempleCost)}信仰]`;
+		},
+		exploreTempleCost(){
+			return Math.pow(2,Math.pow(1.8,this.temple))*5e6;
+		},
+
+		prayCost(){
+			return Math.pow(1.6,this.crystal/this.temple)*1e10/Math.pow(this.XY,1/3);
+		},
+
+		wisdomUpgradeCost(){
+			return Math.ceil(Math.pow(this.wisdomLevel+1.5,2));
+		},
+		mysteryUpgradeCost(){
+			return Math.ceil(Math.pow(this.mysteryLevel+4.5,3)/this.wisdomLevel);
+		},
+		natureUpgradeCost(){
+			return Math.ceil(Math.pow(this.natureLevel+4.5,3)/this.mysteryLevel);
 		},
 	},
 	data:function(){
@@ -195,11 +273,22 @@ Vue.component('demo-button',{
 				churchs:0,
 				books:0,
 				XY:0,
+				temple:0,
+				hugeStone:0,
+				crystal:0,
+				wisdomLevel:0,
+				mysteryLevel:0,
+				natureLevel:0,
 				PADDING:'WW91JTIwYXJlJTIwdG9vJTIweWF1bmclMjB0b28lMjBzaW1wbGUldUZGMENzb21ldGltZXMlMjBuYWl2ZS4lMEE=',
 			};
 		}
 	},
 	mounted(){
+		for(var resName in RESOURCES){
+			if(!this[resName]){
+				this[resName]=0;
+			}
+		}
 		setInterval(()=>{
 			localStorage.setItem('game-mosiyuan-save',encode.call(this,{
 				moCount:this.moCount,
@@ -209,21 +298,23 @@ Vue.component('demo-button',{
 				churchs:this.churchs,
 				books:this.books,
 				XY:this.XY,
+				temple:this.temple,
+				hugeStone:this.hugeStone,
+				crystal:this.crystal,
+				wisdomLevel:this.wisdomLevel,
+				mysteryLevel:this.mysteryLevel,
+				natureLevel:this.natureLevel,
 				PADDING:this.PADDING,
 			}));
 		});
 		var now=(new Date()).getTime();
 		var loop=()=>{
 			var nt=(new Date()).getTime();
-			for(let _=1;_<=this.books;_++){
+			for(let _=1;_<=this.bookEffect;_++){
 				this.moSiyuan((nt-now)/1000);
 			}
 			now=nt;
 		};
 		setInterval(loop);
 	},
-});
-
-var app=new Vue({
-	el:'#app',
 });
