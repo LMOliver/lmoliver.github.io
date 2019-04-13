@@ -64,7 +64,7 @@
 						:disabled="books<spCost">{{spText}}</button>
 						(+?信徒)
 					</div>
-					<div v-if="moers>=100">
+					<div v-if="moers>=100+temple*10">
 						<hr>
 						<button @click="exploreTemple"
 						:disabled="XY<exploreTempleCost">{{exploreTempleText}}</button>	
@@ -102,6 +102,21 @@
 						<button @click="natureUpgrade"
 						:disabled="crystal<natureUpgradeCost">本质Lv.{{pn(natureLevel)}} [{{natureUpgradeCost}}水晶]</button>
 					</div>
+				</div>
+			</div>
+			<div class="area" v-if="moCount>1e6">
+				<h2>文档</h2>
+				<blockquote>
+					<p>
+						在探索荒野的时候，人们发现了一些来自失落文明的文档。它们现在看起来奥妙重重，难以读懂，但也许对将来文明的重建有巨大的帮助。
+					</p>
+				</blockquote>
+				<div class="col">
+					<h4>
+						<a href="./documentA.pdf">文档A</a>
+					</h4>
+					<iframe v-if="moCount>1e6" src="./documentA.pdf" width="100%" height="250">
+					</iframe>
 				</div>
 			</div>
 			<div class="area">

@@ -283,6 +283,13 @@ var app=new Vue({
 			};
 		}
 	},
+	created(){
+		for(var resName in RESOURCES){
+			if(!this[resName]){
+				this[resName]=0;
+			}
+		}
+	},
 	mounted(){
 		for(var resName in RESOURCES){
 			if(!this[resName]){
