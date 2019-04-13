@@ -19,3 +19,5 @@
   - [Function](https://lmoliver.github.io/demos/function/index.html)
 
   - [Network](https://lmoliver.github.io/demos/network/index.html)
+
+  - [Repeat](https://lmoliver.github.io/demos/repeat/index.html)
