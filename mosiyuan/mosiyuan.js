@@ -342,7 +342,7 @@ function isResource(name){
 				return 16*Math.pow(1.5,this.altar);
 			},
 			theologyPerSec(){
-				return Math.max(0,Math.sqrt(this.moDelta*this.gem)-this.theology/this.altar)/3e4;
+				return Math.max(0,Math.sqrt(this.moDelta*this.gem)-this.theology/(1+this.altar))/3e4;
 			},
 			magicianCost(){
 				return 16*Math.pow(1.5,this.magician);
