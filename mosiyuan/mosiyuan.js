@@ -342,7 +342,7 @@ function isResource(name){
 				return 16*Math.pow(1.5,this.altar);
 			},
 			theologyPerSec(){
-				return Math.max(0,Math.sqrt(this.moDelta*this.gem)-this.theology/(1+this.altar))/3e4;
+				return Math.max(0,Math.sqrt(this.moDelta*this.gem)-(1+this.theology)/this.altar)/3e4;
 			},
 			magicianCost(){
 				return 16*Math.pow(1.5,this.magician);
@@ -443,9 +443,8 @@ function isResource(name){
 			var loop=()=>{
 				var nt=(new Date()).getTime();
 				var s=(nt-now)/1000;
-				for(let _=1;_<=this.bookEffect;_++){
-					this.moSiyuan(s);
-				}
+
+				this.moSiyuan(s*this.bookEffect);
 				
 				this.theology+=s*this.theologyPerSec;
 				var msc=Math.min(this.magicStone,s*this.magicCostPerSec);
