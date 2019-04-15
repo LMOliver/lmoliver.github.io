@@ -107,6 +107,46 @@ const RESOURCES={
 		name:'本质',
 		format:'本质Lv.VALUE',
 	},
+	truthLevel:{
+		name:'真理',
+		format:'真理Lv.VALUE',
+	},
+	len:{
+		name:'透镜',
+		format:'透镜*VALUE',
+	},
+	gem:{
+		name:'宝石',
+		format:'宝石*VALUE',
+	},
+	magicStone:{
+		name:'魔法石',
+		format:'魔法石*VALUE',
+	},
+	altar:{
+		name:'神坛',
+		format:'神坛*VALUE',
+	},
+	theology:{
+		name:'神学',
+		format:'神学:VALUE',
+	},
+	magician:{
+		name:'魔法师',
+		format:'魔法师*VALUE',
+	},
+	magic:{
+		name:'魔力',
+		format:'魔力:VALUE',
+	},
+	scientist:{
+		name:'科学家',
+		format:'科学家*VALUE',
+	},
+	science:{
+		name:'研究',
+		format:'研究:VALUE',
+	},
 };
 
 var gameData;
@@ -126,202 +166,300 @@ function isResource(name){
 	return name in RESOURCES;
 }
 
-var app=new Vue({
-	el:'#app',
-	methods:{
-		moSiyuan(r=1){
-			this.moCount+=r;
-			this.moValue+=r*this.moDelta;
+!function(){
+	var _=new Vue({
+		el:'#app',
+		methods:{
+			moSiyuan(r=1){
+				this.moCount+=r;
+				this.moValue+=r*this.moDelta;
+			},
+			buyAdvancedMo(){
+				this.moValue-=this.advancedMoCost;
+				this.advancedMoLevel+=1;
+			},
+			buyMoer(){
+				this.moValue-=this.moerCost;
+				this.moers+=1;
+			},
+			buyChurch(){
+				this.moers-=this.churchCost;
+				this.churchs+=1;
+			},
+			buyXY(){
+				this.XY+=this.XYEarn;
+				this.moValue=0;
+			},
+			buyBook(){
+				this.XY-=this.bookCost;
+				this.books+=1;
+			},
+			sp(){
+				this.books-=this.spCost;
+				var s=1+this.natureLevel;
+				while(Math.random()<4/5){
+					s*=5/4*0.999;
+				}
+				this.moers+=Math.round(s);
+			},
+			exploreTemple(){
+				this.XY-=this.exploreTempleCost;
+				this.temple+=1;
+			},
+			pray(){
+				this.moValue-=this.prayCost;
+				this.crystal+=1;
+			},
+			wisdomUpgrade(){
+				this.crystal-=this.wisdomUpgradeCost;
+				this.wisdomLevel+=1;
+			},
+			mysteryUpgrade(){
+				this.crystal-=this.mysteryUpgradeCost;
+				this.mysteryLevel+=1;
+			},
+			natureUpgrade(){
+				this.crystal-=this.natureUpgradeCost;
+				this.natureLevel+=1;
+			},
+			makeLen(){
+				this.len+=this.makeLenEarn;
+				this.crystal=0;
+			},
+			makeGem(){
+				this.gem+=this.makeGemEarn;
+				this.crystal=0;
+			},
+			makeMagicStone(){
+				this.magicStone+=this.makeMagicStoneEarn;
+				this.crystal=0;
+			},
+			makeLen(){
+				this.len+=this.makeLenEarn;
+				this.crystal=0;
+			},
+			buyAltar(){
+				this.gem-=this.altarCost;
+				this.altar+=1;
+			},
+			buyMagician(){
+				this.magicStone-=this.magicianCost;
+				this.magician+=1;
+			},
+			buyScientist(){
+				this.len-=this.scientistCost;
+				this.scientist+=1;
+			},
 		},
-		buyAdvancedMo(){
-			this.moValue-=this.advancedMoCost;
-			this.advancedMoLevel+=1;
+		computed:{
+			moSiyuanTag(){
+				return this.books?(`(${pn(this.bookEffect)}点击/秒)`):'';
+			},
+			moDelta(){
+				return (1+this.advancedMoLevel)*(1+this.moers)*(1+this.wisdomLevel);
+			},
+			moText(){
+				return '膜拜Siyuan'+(this.moDelta>1?(pn(this.moDelta)+'次'):'');
+			},
+
+			advancedMoText(){
+				return `真诚膜拜${this.advancedMoLevel>0?`Lv.${pn(this.advancedMoLevel)}`:''} [${pn(this.advancedMoCost)}次膜拜]`;
+			},
+			advancedMoCost(){
+				return Math.floor(10*Math.pow(1+0.2/(this.churchs+1)+0.1/Math.sqrt(this.mysteryLevel+1),this.advancedMoLevel));
+			},
+
+			moerText(){
+				return `信徒${this.moers>0?`*${pn(this.moers)}`:''} [${pn(this.moerCost)}次膜拜]`;
+			},
+			moerCost(){
+				return Math.floor(100*Math.pow(1e3*Math.pow(1.6**(1/2.5),this.moers)/(1e3+this.XY*(1+this.natureLevel)),2.5));
+			},
+
+			churchText(){
+				return `教堂${this.churchs>0?`*${pn(this.churchs)}`:''} [${pn(this.churchCost)}位信徒]`;
+			},
+			churchCost(){
+				return Math.floor(5+Math.pow(this.churchs,1.2));
+			},
+
+			XYText(){
+				return `转化信仰 (+${pn(this.XYEarn)}信仰)`;
+			},
+			XYEarn(){
+				return this.moValue/2000*this.churchs*(1+this.wisdomLevel);
+			},
+
+			spText(){
+				return `传教 [${pn(this.spCost)}经书]`;
+			},
+			spCost(){
+				return Math.sqrt(Math.max(this.moers,10))+Math.ceil(Math.pow(Math.max(this.moers-this.advancedMoLevel/3,0),1.12))-1;
+			},
+
+			bookText(){
+				return `经书${this.books>0?`*${pn(this.books)}`:''} [${pn(this.bookCost)}信仰]`;
+			},
+			bookCost(){
+				return 100*Math.pow(1.15,this.books);
+			},
+			bookEffect(){
+				return Math.floor(this.books*1.2*Math.pow(1+this.mysteryLevel,1.5));
+			},
+
+			exploreTempleText(){
+				return `探索遗迹 [${pn(this.exploreTempleCost)}信仰]`;
+			},
+			exploreTempleCost(){
+				return Math.pow(2,Math.pow(1.8,this.temple))*5e6;
+			},
+
+			prayCost(){
+				return Math.pow(1.6,this.crystal/this.temple)*1e10/Math.pow(this.XY,1/3);
+			},
+
+			wisdomUpgradeCost(){
+				return Math.ceil(Math.pow(this.wisdomLevel+1.5,2)/(1+this.altar/3));
+			},
+			mysteryUpgradeCost(){
+				return Math.ceil(Math.pow(this.mysteryLevel+4.5,3)/this.wisdomLevel/(1+this.magician/3));
+			},
+			natureUpgradeCost(){
+				return Math.ceil(Math.pow(this.natureLevel+4.5,3)/this.mysteryLevel/(1+this.scientist/3));
+			},
+
+			makeGemEarn(){
+				return Math.max(0,Math.floor(this.crystal/3*(this.wisdomLevel/6)-this.gem*0.6));
+			},
+			makeMagicStoneEarn(){
+				return Math.max(0,Math.floor(this.crystal/3*(this.mysteryLevel/6)-this.magicStone*0.6));
+			},
+			makeLenEarn(){
+				return Math.max(0,Math.floor(this.crystal/3*(this.natureLevel/6)-this.len*0.6));
+			},
+
+			altarCost(){
+				return 16*Math.pow(1.5,this.altar);
+			},
+			theologyPerSec(){
+				return Math.max(0,Math.sqrt(this.moDelta*this.gem)-this.theology/this.altar)/3e4;
+			},
+			magicianCost(){
+				return 16*Math.pow(1.5,this.magician);
+			},
+			magicCostPerSec(){
+				return Math.max(0.01,Math.sqrt(this.magician)/1e2*this.magicStone);
+			},
+			magicRate(){
+				return 0.9;
+			},
+			scientistCost(){
+				return 16*Math.pow(1.5,this.scientist);
+			},
+			sciencePerSec(){
+				return Math.max(0,Math.sqrt(this.len*this.scientist)/2);
+			},
+			scienceLimit(){
+				return 50*Math.pow(this.scientist,2);
+			},
 		},
-		buyMoer(){
-			this.moValue-=this.moerCost;
-			this.moers+=1;
-		},
-		buyChurch(){
-			this.moers-=this.churchCost;
-			this.churchs+=1;
-		},
-		buyXY(){
-			this.XY+=this.XYEarn;
-			this.moValue=0;
-		},
-		buyBook(){
-			this.XY-=this.bookCost;
-			this.books+=1;
-		},
-		sp(){
-			this.books-=this.spCost;
-			var s=1+this.natureLevel;
-			while(Math.random()<4/5){
-				s*=5/4*0.96;
+		data:function(){
+			this.PADDING='WW91JTIwYXJlJTIwdG9vJTIweWF1bmclMjB0b28lMjBzaW1wbGUldUZGMENzb21ldGltZXMlMjBuYWl2ZS4lMEE=';
+			var save=localStorage.getItem('game-mosiyuan-save');
+			if(!save){
+				save={
+					moCount:0,
+					moValue:0,
+					advancedMoLevel:0,
+					moers:0,
+					churchs:0,
+					books:0,
+					XY:0,
+					temple:0,
+					hugeStone:0,
+					crystal:0,
+					wisdomLevel:0,
+					mysteryLevel:0,
+					natureLevel:0,
+					truthLevel:0,
+					len:0,
+					gem:0,
+					magicStone:0,
+					altar:0,
+					theology:0,
+					magician:0,
+					magic:0,
+					scientist:0,
+					science:0,
+				};
+			}else{
+				save=decode.call(this,save);
 			}
-			this.moers+=Math.floor(s);
+			save.PADDING='WW91JTIwYXJlJTIwdG9vJTIweWF1bmclMjB0b28lMjBzaW1wbGUldUZGMENzb21ldGltZXMlMjBuYWl2ZS4lMEE=';
+			return save;
 		},
-		exploreTemple(){
-			this.XY-=this.exploreTempleCost;
-			this.temple+=1;
+		created(){
+			for(var resName in RESOURCES){
+				if(!this[resName]){
+					this[resName]=0;
+				}
+			}
 		},
-		pray(){
-			this.moValue-=this.prayCost;
-			this.crystal+=1;
-		},
-		wisdomUpgrade(){
-			this.crystal-=this.wisdomUpgradeCost;
-			this.wisdomLevel+=1;
-		},
-		mysteryUpgrade(){
-			this.crystal-=this.mysteryUpgradeCost;
-			this.mysteryLevel+=1;
-		},
-		natureUpgrade(){
-			this.crystal-=this.natureUpgradeCost;
-			this.natureLevel+=1;
-		},
-	},
-	computed:{
-		moSiyuanTag(){
-			return this.books?(`(${pn(this.bookEffect)}点击/秒)`):'';
-		},
-		moDelta(){
-			return (1+this.advancedMoLevel)*(1+this.moers)*(1+this.wisdomLevel);
-		},
-		moText(){
-			return '膜拜Siyuan'+(this.moDelta>1?(pn(this.moDelta)+'次'):'');
-		},
+		mounted(){
+			for(var resName in RESOURCES){
+				if(!this[resName]){
+					this[resName]=0;
+				}
+			}
+			setInterval(()=>{
+				localStorage.setItem('game-mosiyuan-save',encode.call(this,{
+					moCount:this.moCount,
+					moValue:this.moValue,
+					advancedMoLevel:this.advancedMoLevel,
+					moers:this.moers,
+					churchs:this.churchs,
+					books:this.books,
+					XY:this.XY,
+					temple:this.temple,
+					hugeStone:this.hugeStone,
+					crystal:this.crystal,
+					wisdomLevel:this.wisdomLevel,
+					mysteryLevel:this.mysteryLevel,
+					natureLevel:this.natureLevel,
+					truthLevel:this.truthLevel,
+					PADDING:this.PADDING,
+					len:this.len,
+					gem:this.gem,
+					magicStone:this.magicStone,
+					altar:this.altar,
+					theology:this.theology,
+					magician:this.magician,
+					magic:this.magic,
+					scientist:this.scientist,
+					science:this.science,
+				}));
+			});
+			var now=(new Date()).getTime();
+			var loop=()=>{
+				var nt=(new Date()).getTime();
+				var s=(nt-now)/1000;
+				for(let _=1;_<=this.bookEffect;_++){
+					this.moSiyuan(s);
+				}
+				
+				this.theology+=s*this.theologyPerSec;
+				var msc=Math.min(this.magicStone,s*this.magicCostPerSec);
+				this.magicStone-=msc;
+				this.magic+=msc*this.magicRate;
+				var sci=this.science;
+				sci+=s*this.sciencePerSec;
+				sci=Math.min(sci,this.scienceLimit);
+				this.science=sci;
 
-		advancedMoText(){
-			return `真诚膜拜${this.advancedMoLevel>0?`Lv.${pn(this.advancedMoLevel)}`:''} [${pn(this.advancedMoCost)}次膜拜]`;
-		},
-		advancedMoCost(){
-			return Math.floor(10*Math.pow(1+0.2/(this.churchs+1)+0.1/Math.sqrt(this.mysteryLevel+1),this.advancedMoLevel));
-		},
-
-		moerText(){
-			return `信徒${this.moers>0?`*${pn(this.moers)}`:''} [${pn(this.moerCost)}次膜拜]`;
-		},
-		moerCost(){
-			return Math.floor(100*Math.pow(1e3*Math.pow(1.6**(1/2.5),this.moers)/(1e3+this.XY*(1+this.natureLevel)),2.5));
-		},
-
-		churchText(){
-			return `教堂${this.churchs>0?`*${pn(this.churchs)}`:''} [${pn(this.churchCost)}位信徒]`;
-		},
-		churchCost(){
-			return Math.floor(5+Math.pow(this.churchs,1.2));
-		},
-
-		XYText(){
-			return `转化信仰 (+${pn(this.XYEarn)}信仰)`;
-		},
-		XYEarn(){
-			return this.moValue/2000*this.churchs*(1+this.wisdomLevel);
-		},
-
-		spText(){
-			return `传教 [${pn(this.spCost)}经书]`;
-		},
-		spCost(){
-			return Math.sqrt(Math.max(this.moers,10))+Math.ceil(Math.pow(Math.max(this.moers-this.advancedMoLevel/3,0),1.12))-1;
-		},
-
-		bookText(){
-			return `经书${this.books>0?`*${pn(this.books)}`:''} [${pn(this.bookCost)}信仰]`;
-		},
-		bookCost(){
-			return 100*Math.pow(1.15,this.books);
-		},
-		bookEffect(){
-			return Math.floor(this.books*1.2*Math.pow(1+this.mysteryLevel,1.5));
-		},
-
-		exploreTempleText(){
-			return `探索遗迹 [${pn(this.exploreTempleCost)}信仰]`;
-		},
-		exploreTempleCost(){
-			return Math.pow(2,Math.pow(1.8,this.temple))*5e6;
-		},
-
-		prayCost(){
-			return Math.pow(1.6,this.crystal/this.temple)*1e10/Math.pow(this.XY,1/3);
-		},
-
-		wisdomUpgradeCost(){
-			return Math.ceil(Math.pow(this.wisdomLevel+1.5,2));
-		},
-		mysteryUpgradeCost(){
-			return Math.ceil(Math.pow(this.mysteryLevel+4.5,3)/this.wisdomLevel);
-		},
-		natureUpgradeCost(){
-			return Math.ceil(Math.pow(this.natureLevel+4.5,3)/this.mysteryLevel);
-		},
-	},
-	data:function(){
-		this.PADDING='WW91JTIwYXJlJTIwdG9vJTIweWF1bmclMjB0b28lMjBzaW1wbGUldUZGMENzb21ldGltZXMlMjBuYWl2ZS4lMEE=';
-		var save=localStorage.getItem('game-mosiyuan-save');
-		if(save!==null){
-			return decode.call(this,save);
-		}else{
-			return {
-				moCount:0,
-				moValue:0,
-				advancedMoLevel:0,
-				moers:0,
-				churchs:0,
-				books:0,
-				XY:0,
-				temple:0,
-				hugeStone:0,
-				crystal:0,
-				wisdomLevel:0,
-				mysteryLevel:0,
-				natureLevel:0,
-				PADDING:'WW91JTIwYXJlJTIwdG9vJTIweWF1bmclMjB0b28lMjBzaW1wbGUldUZGMENzb21ldGltZXMlMjBuYWl2ZS4lMEE=',
+				now=nt;
 			};
-		}
-	},
-	created(){
-		for(var resName in RESOURCES){
-			if(!this[resName]){
-				this[resName]=0;
-			}
-		}
-	},
-	mounted(){
-		for(var resName in RESOURCES){
-			if(!this[resName]){
-				this[resName]=0;
-			}
-		}
-		setInterval(()=>{
-			localStorage.setItem('game-mosiyuan-save',encode.call(this,{
-				moCount:this.moCount,
-				moValue:this.moValue,
-				advancedMoLevel:this.advancedMoLevel,
-				moers:this.moers,
-				churchs:this.churchs,
-				books:this.books,
-				XY:this.XY,
-				temple:this.temple,
-				hugeStone:this.hugeStone,
-				crystal:this.crystal,
-				wisdomLevel:this.wisdomLevel,
-				mysteryLevel:this.mysteryLevel,
-				natureLevel:this.natureLevel,
-				PADDING:this.PADDING,
-			}));
-		});
-		var now=(new Date()).getTime();
-		var loop=()=>{
-			var nt=(new Date()).getTime();
-			for(let _=1;_<=this.bookEffect;_++){
-				this.moSiyuan((nt-now)/1000);
-			}
-			now=nt;
-		};
-		setInterval(loop);
-	},
-});
+			setInterval(loop);
+		},
+	});
+	window._=_;
+}();

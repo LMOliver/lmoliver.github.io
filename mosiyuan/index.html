@@ -15,7 +15,7 @@
 						曾经，有一个高度发达的文明在这个星球上度过了它最为繁荣的时代。在那时，人们相信<span class="siyuan"></span>是最强的神，也是这个星球的科技、魔法与信仰三大学科体系高度发展的原因。
 					</p>
 					<p>
-						然而好景不长，人们曾认为亘古不变的真理在一次失控的魔法实验之后支离破碎。文明与魔法的支柱轰然倒塌，毁灭席卷了整个星球。
+						然而好景不长，人们曾认为亘古不变的真理在一次失控的魔法实验之后支离破碎。科技与魔法的支柱轰然倒塌，毁灭席卷了整个星球。
 					</p>
 					<p>
 						高楼变为废墟，法阵化作黄土，雕像碎成砂砾，但<span class="siyuan"></span>并未抛弃这个文明——因为信仰仍在。
@@ -78,29 +78,84 @@
 					<p>
 						过去的事物深埋于地下，而且数量稀少，发掘它们需要坚定的信仰。尽管道路艰辛，但这是前进所必须的代价。文明不进即退，而这残存的文明已经无路可退。
 					</p>
+					<p>
+						在遗迹中，人们惊喜地发现了向<span class="siyuan"></span>祈求水晶的途径。拥有了水晶，两扇大门便随着遗迹的探索徐徐开启……
+					</p>
 				</blockquote>
-				<div class="col">
-					<div>
-						<div>
-							<span>水晶:{{pn(crystal)}}</span>
+				<div class="area">
+					<div class="area">
+						<div class="col">
+							<h4>遗迹大门</h4>
+							<div>
+								<div>
+									<span>水晶:{{pn(crystal)}}</span>
+								</div>
+								<button @click="pray"
+								:disabled="moValue<prayCost">祈求恩赐 [{{pn(prayCost)}}次膜拜]</button>
+							</div>
+							<div v-if="wisdomLevel>0||crystal>0">
+								<hr>
+								<button @click="wisdomUpgrade"
+								:disabled="crystal<wisdomUpgradeCost">智慧Lv.{{pn(wisdomLevel)}} [{{wisdomUpgradeCost}}水晶]</button>
+							</div>
+							<div v-if="temple>=2&&(mysteryLevel>0||wisdomLevel>=1)">
+								<hr>
+								<button @click="mysteryUpgrade"
+								:disabled="crystal<mysteryUpgradeCost">奥秘Lv.{{pn(mysteryLevel)}} [{{mysteryUpgradeCost}}水晶]</button>
+							</div>
+							<div v-if="temple>=3&&(natureLevel>0||mysteryLevel>=1)">
+								<hr>
+								<button @click="natureUpgrade"
+								:disabled="crystal<natureUpgradeCost">本质Lv.{{pn(natureLevel)}} [{{natureUpgradeCost}}水晶]</button>
+							</div>
+							<!-- <div v-if="temple>=5&&Math.min(len,magicStone,gem)>=10">
+								<hr>
+								<strong>真理 {{['','I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'][truthLevel]}}</strong>
+								<button>升级</button>
+							</div> -->
 						</div>
-						<button @click="pray"
-						:disabled="moValue<prayCost">祈求恩赐 [{{pn(prayCost)}}次膜拜]</button>
+						<div class="col" v-if="wisdomLevel>=5">
+							<h4>朝圣地</h4>
+							<div>宝石:{{pn(gem)}}</div>
+							<div>
+								<button @click="makeGem"
+								:disabled="makeGemEarn<1" >雕琢 (+{{pn(makeGemEarn)}}宝石)</button>	
+							</div>
+							<div v-if="gem>0||altar>0">
+								<hr>
+								<div>神学:{{pn(theology)}}</div>
+								<button @click="buyAltar"
+								:disabled="gem<altarCost">神坛*{{pn(altar)}} [{{pn(altarCost)}}宝石]</button>
+							</div>
+						</div>
 					</div>
-					<div v-if="wisdomLevel>0||crystal>0">
-						<hr>
-						<button @click="wisdomUpgrade"
-						:disabled="crystal<wisdomUpgradeCost">智慧Lv.{{pn(wisdomLevel)}} [{{wisdomUpgradeCost}}水晶]</button>
-					</div>
-					<div v-if="temple>=2&&(mysteryLevel>0||wisdomLevel>=1)">
-						<hr>
-						<button @click="mysteryUpgrade"
-						:disabled="crystal<mysteryUpgradeCost">奥秘Lv.{{pn(mysteryLevel)}} [{{mysteryUpgradeCost}}水晶]</button>
-					</div>
-					<div v-if="temple>=3&&(natureLevel>0||mysteryLevel>=1)">
-						<hr>
-						<button @click="natureUpgrade"
-						:disabled="crystal<natureUpgradeCost">本质Lv.{{pn(natureLevel)}} [{{natureUpgradeCost}}水晶]</button>
+					<div class="area">
+						<div class="col" v-if="mysteryLevel>=5">
+							<h4>炼金区</h4>
+							<div>魔法石:{{pn(magicStone)}}</div>
+							<div>
+								<button @click="makeMagicStone"
+								:disabled="makeMagicStoneEarn<1" >赋能 (+{{pn(makeMagicStoneEarn)}}魔法石)</button>	
+							</div>
+							<div v-if="magicStone>0||magician>0">
+								<hr>
+								<div>魔力:{{pn(magic)}}</div>
+								<button @click="buyMagician"
+								:disabled="magicStone<magicianCost">魔法师*{{pn(magician)}} [{{pn(magicianCost)}}魔法石]</button>
+							</div>
+						</div>
+						<div class="col" v-if="natureLevel>=5">
+							<h4>实验室</h4>
+							<div>透镜:{{pn(len)}}</div>
+							<button @click="makeLen"
+							:disabled="makeLenEarn<1" >打磨 (+{{pn(makeLenEarn)}}透镜)</button>		
+							<div v-if="len>0">
+								<hr>
+								<div>研究:{{pn(science)}}/{{pn(scienceLimit)}}</div>
+								<button @click="buyScientist"
+								:disabled="len<scientistCost">科学家*{{pn(scientist)}} [{{pn(scientistCost)}}透镜]</button>
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -111,12 +166,73 @@
 						在探索荒野的时候，人们发现了一些来自失落文明的文档。它们现在看起来奥妙重重，难以读懂，但也许对将来文明的重建有巨大的帮助。
 					</p>
 				</blockquote>
-				<div class="col">
-					<h4>
-						<a href="./documentA.pdf">文档A</a>
-					</h4>
-					<iframe v-if="moCount>1e6" src="./documentA.pdf" width="100%" height="250">
-					</iframe>
+				<div class="area">
+					<div class="col" v-if="moCount>1e6">
+						<h4>
+							文档A
+						</h4>
+						<p>
+							以这个文明的现有技术水平还不能解读这篇<a href="./documentA.pdf">“天书”</a>中的东西，但<span class="siyuan"></span>一定可以。
+						</p>
+						<iframe src="./documentA.pdf" class="docblock">
+						</iframe>
+					</div>
+
+					<div class="col" v-if="moCount>1e7">
+						<h4>
+							文档B
+						</h4>
+						<p>
+							似乎是一张<a href="./documentB.html">实验数据表</a>，记载了过去文明探索真理的过程。可惜，真理已有改变，不能直接套用其中的实验数据。
+						</p>
+						<iframe src="./documentB.html" class="docblock">
+						</iframe>
+					</div>
+					<div class="col" v-else-if="moCount>=1e6">
+						<h4>锟斤拷</h4>
+						<p>
+							还需要{{pn(1e7-moCount)}}次点击
+						</p>
+					</div>
+				</div>
+				<div class="area">
+					<div class="col" v-if="moCount>3e7">
+						<h4>
+							文档C
+						</h4>
+						<p>
+							一份发言记录(有删减)与一张截图，表现了一位高手在膜拜<span class="siyuan"></span>后取得了丰硕战果时的<a href="https://majsoul.union-game.com/0/">快乐</a>。
+						</p>
+						<div class="docblock">
+							<image src="./documentC1.png" width="100%">
+							</image>
+							<image src="./documentC2.png" width="100%">
+							</image>
+						</div>
+					</div>
+					<div class="col" v-else-if="moCount>=1e7">
+						<h4>烫烫烫</h4>
+						<p>
+							还需要{{pn(3e7-moCount)}}次点击
+						</p>
+					</div>
+
+					<div class="col" v-if="moCount>5e8">
+						<h4>
+							文档D
+						</h4>
+						<p>
+							一些php和md文件，似乎是一个<a href="http://orzsiyuan.com/archives/Algorithm/Simulate-Anneal">个人博客</a>。从博客名(orzsiyuan.com)可以看出即使对于个人，膜拜<span class="siyuan"></span>也十分重要。
+						</p>
+						<iframe src="http://orzsiyuan.com/archives/Algorithm/Simulate-Anneal" class="docblock">
+						</iframe>
+					</div>
+					<div class="col" v-else-if="moCount>=1e7">
+						<h4>屯屯屯</h4>
+						<p>
+							还需要{{pn(5e8-moCount)}}次点击
+						</p>
+					</div>
 				</div>
 			</div>
 			<div class="area">
