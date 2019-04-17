@@ -67,21 +67,36 @@ function pnr(num){
 
 function dailyMessage(){
 	const msgs=[
+		'“膜拜Siyuan就是无脑硬肝，现在除了真理等级外的东西我都购买了。第8次尝试怎么这么贵啊！”',
 		'你强归你强，Siyuan比你强！',
 		'你可以按住<code>Enter</code>来快速点击一个按钮。',
 		'Siyuan是我们的红太阳，没有她我们会死！',
 		'你<strong>不能</strong>通过按住<code>Shift</code>点击一个按钮以直接购买最大数量的事物。',
 		'今天又是美好的一天~',
-		'那些文档有些真的有用……',
+		'若不是Siyuan相助，也许我到现在还不知道我做错了什么。现在我知道了，是<code>LCT</code>上<code>splay</code>的时候判断父亲是否为根直接用了<code>if(fa->fa)</code>。',
+		'洁白的光点游走于漆黑的天幕之上，暗紫色的薄纱在其间舞动。在此无月之夜，是否可以知晓：“后缀自动机怎么写？”',
+		'那些文档有一部分真的有用……',
 		'Siyuan 膜 她 自 己',
+		'如果你花掉了一些东西，它的花费也会降低，就像你从没买过它一样。',
 		'<a href="https://lmoliver.github.io">QAQ</a>',
 		'要想探寻真理，不仅要虔诚膜拜Siyuan，领导者的实力也是很重要的。',
 		'<code>code.replace(/\\n\\s*\\{/mg,\'{\');</code>',
 		'嘤嘤嘤',
+		'传说Siyuan会在被她抛弃的终端上执行<code>rm -rf /*</code>。',
 		'Siyuan太强了，所以你复制不了这个网站中的任何一个Siyuan。',
-		'空谈误国，实干兴邦。'
+		'空谈误国，实干兴邦。',
+		'<img src="./daily1.png">',
+		'OrzSiyuan 就来 <a href="https://orzsiyuan.com">orzsiyuan.com</a>！',
+		'你知道吗？Siyuan几乎每天都会上一次<a href="http://lydsy.online">http://lydsy.online</a>！(难道网址中的<code>dsy</code>是天意？)',
+		'追寻真理的各种花费与你本轮尝试次数有关。',
+		'追寻真理时重置会将当前成功轮数也清空！',
+		'<iframe src="http://majsoul.union-game.com/0/">窝当然知道这是什么qwq</iframe>'
 	];
-	return msgs[Math.floor(Math.random()*msgs.length)].replace(/Siyuan/g,'<span class="siyuan"></span>');
+	try{
+		return msgs[Math.floor(Math.random()*msgs.length)].replace(/Siyuan/g,'<span class="siyuan"></span>');
+	}catch(e){
+		return 'emm...';
+	}
 }
 
 const SAVE_ITEMS={
@@ -258,6 +273,31 @@ const TECH={
 				];
 			},
 		},
+		glasses:{
+			name:'眼镜',
+			description:'黑色的框架配上镜片，足以使老龄科学家与神学家看得更清楚。',
+			require:[
+				['optics',3],
+			],
+			cost(lv){
+				return [
+					['len',Math.pow(lv+1,1.5)*10],
+					['science',Math.pow(lv+1,2)*1000],
+					['magic',Math.pow(1.5,lv)],
+				];
+			}
+		},
+		xuanxue:{
+			name:'玄学',
+			description:'经过她手里的随机事件便受她掌控，但没被她看到的呢？玄学便是为了探究这个问题而生。',
+			require:[],
+			cost(lv){
+				return [
+					['crystal',Math.pow(lv+1,2)*10],
+					['magicStone',Math.pow(lv+1,2.5)*10],
+				];
+			},
+		},
 	},
 	2:{
 	},
@@ -290,12 +330,12 @@ const TRUTH_UPGRADES={
 		stages:3,
 		attempts:6,
 		minCost:50,
-		maxCost:200,
+		maxCost:100,
 		gen(){
 			return {
-				x:Math.floor(Math.random()*150+50),
-				y:Math.floor(Math.random()*150+50),
-				z:Math.floor(Math.random()*150+50),
+				x:Math.floor(Math.random()*50+50),
+				y:Math.floor(Math.random()*50+50),
+				z:Math.floor(Math.random()*50+50),
 			};
 		},
 		dis(x,y,z,tx,ty,tz){
@@ -308,13 +348,13 @@ const TRUTH_UPGRADES={
 	2:{
 		stages:3,
 		attempts:30,
-		minCost:200,
-		maxCost:300,
+		minCost:100,
+		maxCost:160,
 		gen(){
 			return {
-				x:Math.floor(Math.random()*100+200),
-				y:Math.floor(Math.random()*100+200),
-				z:Math.floor(Math.random()*100+200),
+				x:Math.floor(Math.random()*60+100),
+				y:Math.floor(Math.random()*60+100),
+				z:Math.floor(Math.random()*60+100),
 			};
 		},
 		dis(x,y,z,tx,ty,tz){
@@ -547,9 +587,6 @@ Vue.component('hint-message',{
 			moDelta(){
 				return Math.ceil((1+this.advancedMoLevel)*(1+this.moers)*(1+this.wisdomLevel)*this.devotionInductionFactor);
 			},
-			moText(){
-				return '膜拜Siyuan'+(this.moDelta>1?(pn(this.moDelta)+'次'):'');
-			},
 
 			advancedMoText(){
 				return `真诚膜拜${this.advancedMoLevel>0?` Lv.${pn(this.advancedMoLevel)}`:''} [${pn(this.advancedMoCost)}次膜拜]`;
@@ -631,7 +668,7 @@ Vue.component('hint-message',{
 				return 16*Math.pow(1.5,this.altar);
 			},
 			theologyPerSec(){
-				return Math.max(0,Math.sqrt(this.moDelta*this.gem)-(1+this.theology)/this.altar)/1e4;
+				return Math.max(0,Math.sqrt(this.moDelta*this.gem)-(1+this.theology)/this.altar)/1e4*(1+this.techLevel('glasses'));
 			},
 			magicianCost(){
 				return 16*Math.pow(1.5,this.magician);
@@ -646,10 +683,10 @@ Vue.component('hint-message',{
 				return 16*Math.pow(1.5,this.scientist);
 			},
 			sciencePerSec(){
-				return Math.max(0,Math.sqrt(this.len*this.scientist)/2);
+				return Math.max(0,Math.sqrt(this.len*this.scientist)/2)*Math.sqrt(1+this.techLevel('glasses'));
 			},
 			scienceLimit(){
-				return 50*Math.pow(this.scientist,2);
+				return 50*Math.pow(this.scientist,2)*(1+this.techLevel('glasses'));
 			},
 
 			truthUpgradeAttemptFactor(){

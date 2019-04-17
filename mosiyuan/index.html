@@ -27,7 +27,7 @@
 						<div>
 							<span>您已膜拜{{pn(moValue)}}次</span>
 						</div>
-						<button @click="moSiyuan(1)" style="color:red">{{moText}}</button>
+						<button @click="moSiyuan(1)" style="color:red">膜拜<span class="siyuan"></span><span v-if="moDelta!==1">{{pn(moDelta)}}次</span></button>
 						<span v-if="bookEffect>0">{{moSiyuanTag}}</span>
 					</div>
 					<div v-if="moCount>=10">
@@ -313,9 +313,7 @@
 						</p>
 						<div class="docblock">
 							<image src="./documentC1.png" width="100%">
-							</image>
 							<image src="./documentC2.png" width="100%">
-							</image>
 						</div>
 					</div>
 					<div class="col" v-else-if="moCount>=1e7">
@@ -324,7 +322,6 @@
 							还需要{{pn(3e7-moCount)}}次点击
 						</p>
 					</div>
-
 					<div class="col" v-if="moCount>5e9">
 						<h4>
 							文档D
@@ -347,9 +344,9 @@
 				<br v-for="_ in 4">
 			</div>
 		</div>
+		<script src="./mosiyuan.js"></script>
+		<link rel="stylesheet" href="../normalize.css">
+		<link rel="stylesheet" href="../default.css">
+		<link rel="stylesheet" href="./mosiyuan.css">
 	</body>
-	<script src="./mosiyuan.js"></script>
-	<link rel="stylesheet" href="../normalize.css">
-	<link rel="stylesheet" href="../default.css">
-	<link rel="stylesheet" href="./mosiyuan.css">
 </html>
