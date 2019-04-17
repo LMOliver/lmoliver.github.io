@@ -323,7 +323,7 @@ const TRUTH_UPGRADES={
 			return Math.abs(x-tx)+Math.abs(y-ty)+Math.abs(z-tz);
 		},
 		message(x,y,z,tx,ty,tz,dis){
-			return `误差:${pn(dis)}`;
+			return `差距:${pn(dis)}`;
 		},
 	},
 	1:{
@@ -339,7 +339,7 @@ const TRUTH_UPGRADES={
 			};
 		},
 		dis(x,y,z,tx,ty,tz){
-			return Math.sqrt((x-tx)**2+(y-ty)**2)+(z-tz)**2;
+			return Math.sqrt((x-tx)**2+(y-ty)**2+(z-tz)**2);
 		},
 		message(x,y,z,tx,ty,tz,dis){
 			return `距离:${pn(dis)}`;
@@ -370,9 +370,9 @@ const TRUTH_UPGRADES={
 		},
 		message(x,y,z,tx,ty,tz,dis){
 			if(dis.length===3){
-				return '所有误差相同';
+				return '所有差距相同';
 			}else{
-				return `${dis.join('、')}误差最大`;
+				return `${dis.join('、')}差距最大`;
 			}
 		},
 	},
