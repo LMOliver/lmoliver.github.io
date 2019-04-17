@@ -8,6 +8,7 @@
 	<body>
 		<div id="app">
 			<h1>膜拜<span class="siyuan"></span></h1>
+			<p v-html="dailyMessage"></p>
 			<div class="area">
 				<h2>荒野</h2>
 				<blockquote>
@@ -96,23 +97,18 @@
 							<div v-if="wisdomLevel>0||crystal>0">
 								<hr>
 								<button @click="wisdomUpgrade"
-								:disabled="crystal<wisdomUpgradeCost">智慧Lv.{{pn(wisdomLevel)}} [{{wisdomUpgradeCost}}水晶]</button>
+								:disabled="crystal<wisdomUpgradeCost">智慧 Lv.{{pn(wisdomLevel)}} [{{wisdomUpgradeCost}}水晶]</button>
 							</div>
 							<div v-if="temple>=2&&(mysteryLevel>0||wisdomLevel>=1)">
 								<hr>
 								<button @click="mysteryUpgrade"
-								:disabled="crystal<mysteryUpgradeCost">奥秘Lv.{{pn(mysteryLevel)}} [{{mysteryUpgradeCost}}水晶]</button>
+								:disabled="crystal<mysteryUpgradeCost">奥秘 Lv.{{pn(mysteryLevel)}} [{{mysteryUpgradeCost}}水晶]</button>
 							</div>
 							<div v-if="temple>=3&&(natureLevel>0||mysteryLevel>=1)">
 								<hr>
 								<button @click="natureUpgrade"
-								:disabled="crystal<natureUpgradeCost">本质Lv.{{pn(natureLevel)}} [{{natureUpgradeCost}}水晶]</button>
+								:disabled="crystal<natureUpgradeCost">本质 Lv.{{pn(natureLevel)}} [{{natureUpgradeCost}}水晶]</button>
 							</div>
-							<!-- <div v-if="temple>=5&&Math.min(len,magicStone,gem)>=10">
-								<hr>
-								<strong>真理 {{['','I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'][truthLevel]}}</strong>
-								<button>升级</button>
-							</div> -->
 						</div>
 						<div class="col" v-if="wisdomLevel>=5">
 							<h4>朝圣地</h4>
@@ -149,13 +145,125 @@
 							<div>透镜:{{pn(len)}}</div>
 							<button @click="makeLen"
 							:disabled="makeLenEarn<1" >打磨 (+{{pn(makeLenEarn)}}透镜)</button>		
-							<div v-if="len>0">
+							<div v-if="len>0||scientist>0">
 								<hr>
 								<div>研究:{{pn(science)}}/{{pn(scienceLimit)}}</div>
 								<button @click="buyScientist"
 								:disabled="len<scientistCost">科学家*{{pn(scientist)}} [{{pn(scientistCost)}}透镜]</button>
 							</div>
 						</div>
+					</div>
+				</div>
+			</div>
+			<div class="area" v-if="temple>=5&&altar>=5&&magician>=5&&scientist>=5">
+				<h2>城镇</h2>
+				<blockquote>
+					<p>在遗迹中的发现与收获振奋了信徒们。愚昧逐渐远离，新的知识填充了信徒们的内心。</p>
+					<p>但新的挑战也已来临：天灾人祸随时可能发生，只有居安思危，稳妥前行，才能防止在灾难发生时遭到重创。</p>
+				</blockquote>
+				<div class="col">
+					<h4>真理之路</h4>
+					<p><strong v-if="truthLevel>0">你已探索到真理{{pnr(truthLevel)}}</strong></p>
+					<div v-if="hasUpgrade(truthLevel)">
+						<p>
+							真理{{pnr(truthLevel+1)}}，阶段{{truthUpgradeStage}}/{{TRUTH_UPGRADES[truthLevel].stages}}，
+							已进行{{truthUpgradeAttempt}}次尝试
+							<button @click="resetTruthUpgrade">重置</button>
+						</p>
+						<hr>
+						<table>
+							<tbody>
+								<tr>
+									<th>材料</th>
+									<th colspan="2">数量({{pn(TRUTH_UPGRADES[truthLevel].minCost)}}~{{pn(TRUTH_UPGRADES[truthLevel].maxCost)}})</th>
+								</tr>
+								<tr class="truthupgrade">
+									<th :class="{needed:gem<gemChosen}">宝石</th>
+									<td>
+										<input type="range" :min="TRUTH_UPGRADES[truthLevel].minCost" :max="TRUTH_UPGRADES[truthLevel].maxCost" step="1" v-model.number="gemChosen">
+									</td>
+									<td>
+										<input type="number" :min="TRUTH_UPGRADES[truthLevel].minCost" :max="TRUTH_UPGRADES[truthLevel].maxCost" step="1" v-model.number="gemChosen">
+									</td>
+								</tr>
+								<tr class="truthupgrade">
+									<th :class="{needed:magicStone<magicStoneChosen}">魔法石</th>
+									<td>
+										<input type="range" :min="TRUTH_UPGRADES[truthLevel].minCost" :max="TRUTH_UPGRADES[truthLevel].maxCost" step="1" v-model.number="magicStoneChosen">
+									</td>
+									<td>
+										<input type="number" :min="TRUTH_UPGRADES[truthLevel].minCost" :max="TRUTH_UPGRADES[truthLevel].maxCost" step="1" v-model.number="magicStoneChosen">
+									</td>
+								</tr>
+								<tr class="truthupgrade">
+									<th :class="{needed:len<lenChosen}">透镜</th>
+									<td>
+										<input type="range" :min="TRUTH_UPGRADES[truthLevel].minCost" :max="TRUTH_UPGRADES[truthLevel].maxCost" step="1" v-model.number="lenChosen">
+									</td>
+									<td>
+										<input type="number" :min="TRUTH_UPGRADES[truthLevel].minCost" :max="TRUTH_UPGRADES[truthLevel].maxCost" step="1" v-model.number="lenChosen">
+									</td>
+								</tr>
+								<tr>
+									<th></th>
+									<th colspan="2">本次消耗</th>
+								</tr>
+								<tr>
+									<th :class="{needed:crystal<truthUpgradeCrystalCost}">水晶</th>
+									<td colspan="2">{{pn(truthUpgradeCrystalCost)}}</td>
+								</tr>
+								<tr>
+									<th :class="{needed:theology<truthUpgradeTheologyCost}">神学</th>
+									<td colspan="2">{{pn(truthUpgradeTheologyCost)}}</td>
+								</tr>
+								<tr>
+									<th :class="{needed:magic<truthUpgradeMagicCost}">魔力</th>
+									<td colspan="2">{{pn(truthUpgradeMagicCost)}}</td>
+								</tr>
+								<tr>
+									<th :class="{needed:science<truthUpgradeScienceCost}">研究</th>
+									<td colspan="2">{{pn(truthUpgradeScienceCost)}}</td>
+								</tr>
+							</tbody>
+						</table>
+						<hr>
+						<div>
+							<button @click="truthUpgrade"
+							:disabled="!canUpgradeTruth">
+								<span v-if="truthUpgradeVaild">
+									追寻真理
+								</span>
+								<span v-else>
+									<em>将来实验数据上有偏差，你是要负责任的！</em>
+								</span>
+							</button>
+							<hint-message :value="truthUpgradeResult" :update="truthUpgradeMessageUpdate"></hint-message>
+							<hint-message :value="truthUpgradeMessage" :update="truthUpgradeMessageUpdate"></hint-message>
+						</div>
+						<div v-if="techLevel('devotionInduction')>0">
+							<h4>感应</h4>
+							<button @click="getDevotion">虔诚</button>
+							<span>强度:{{pn(devotion)}}</span>
+							<span>膜拜x{{pn(devotionInductionFactor)}}</span>
+						</div>
+					</div>
+				</div>
+				<div class="col">
+					<div v-for="lv in truthLevel">
+						<h4>真理{{pnr(lv)}}</h4>
+						<p v-if="Object.keys(TECH[lv]).length===0">
+							<del>咕咕咕……</del>
+						</p>
+						<ul v-else>
+							<li v-for="(tech,id) in TECH[lv]" v-if="tech.require.every(([id,cnt])=>techLevel(id)>=cnt)">
+								<button @click="buyTech(lv,id)"
+								:disabled="!canBuyTech(lv,id)">
+									{{tech.name}} Lv.{{techLevel(id)}}
+									[{{tech.cost(techLevel(id)).map(([item,value])=>SAVE_ITEMS[item].format.replace(/VALUE/g,pn(value))).join(',')}}]
+								</button>
+								<div>{{tech.description}}</div>
+							</li>
+						</ul>
 					</div>
 				</div>
 			</div>
@@ -217,7 +325,7 @@
 						</p>
 					</div>
 
-					<div class="col" v-if="moCount>5e8">
+					<div class="col" v-if="moCount>5e9">
 						<h4>
 							文档D
 						</h4>
@@ -230,7 +338,7 @@
 					<div class="col" v-else-if="moCount>=1e7">
 						<h4>屯屯屯</h4>
 						<p>
-							还需要{{pn(5e8-moCount)}}次点击
+							还需要{{pn(5e9-moCount)}}次点击
 						</p>
 					</div>
 				</div>

@@ -16,6 +16,19 @@
 	border: 2px #444444 solid;
 }
 
+
+.truthupgrade input[type=range]{
+	max-width: 180px;
+}
+
+.truthupgrade input[type=number]{
+	max-width: 90px;
+}
+
+.needed{
+	color: gray;
+}
+
 .siyuan{
 	display: inline-block;
 }

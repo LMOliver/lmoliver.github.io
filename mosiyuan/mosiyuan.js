@@ -57,31 +57,61 @@ function pn(num){
 	}
 	return `${val.toPrecision(3)}${suf}`;
 }
+function pnr(num){
+	const s=['','I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'];
+	if(typeof num!=='number')return String(num);
+	if(!Number.isFinite(num))return num.toString();
+	if(!Number.isSafeInteger(num)||num<0||num>=s.length)return pn(num);
+	return s[num];
+}
 
-const RESOURCES={
+function dailyMessage(){
+	const msgs=[
+		'你强归你强，Siyuan比你强！',
+		'你可以按住<code>Enter</code>来快速点击一个按钮。',
+		'Siyuan是我们的红太阳，没有她我们会死！',
+		'你<strong>不能</strong>通过按住<code>Shift</code>点击一个按钮以直接购买最大数量的事物。',
+		'今天又是美好的一天~',
+		'那些文档有些真的有用……',
+		'Siyuan 膜 她 自 己',
+		'<a href="https://lmoliver.github.io">QAQ</a>',
+		'要想探寻真理，不仅要虔诚膜拜Siyuan，领导者的实力也是很重要的。',
+		'<code>code.replace(/\\n\\s*\\{/mg,\'{\');</code>',
+		'嘤嘤嘤',
+		'Siyuan太强了，所以你复制不了这个网站中的任何一个Siyuan。',
+		'空谈误国，实干兴邦。'
+	];
+	return msgs[Math.floor(Math.random()*msgs.length)].replace(/Siyuan/g,'<span class="siyuan"></span>');
+}
+
+const SAVE_ITEMS={
 	moValue:{
 		name:'膜拜次数',
-		format:'您已膜拜VALUE次',
+		format:'VALUE次膜拜',
+	},
+	moCount:{
+		name:'点击次数',
+		format:'VALUE次点击',
 	},
 	advancedMoLevel:{
 		name:'真诚膜拜等级',
 		format:'真诚膜拜Lv.VALUE',
 	},
-	moer:{
+	moers:{
 		name:'信徒',
-		format:'信徒*VALUE',
+		format:'VALUE位信徒',
 	},
-	church:{
+	churchs:{
 		name:'教堂',
-		format:'教堂*VALUE',
+		format:'VALUE座教堂',
 	},
 	XY:{
 		name:'信仰',
-		format:'信仰:VALUE',
+		format:'VALUE信仰',
 	},
-	book:{
+	books:{
 		name:'经书',
-		format:'经书*VALUE',
+		format:'VALUE本经书',
 	},
 	temple:{
 		name:'遗迹',
@@ -89,11 +119,11 @@ const RESOURCES={
 	},
 	hugeStone:{
 		name:'巨石',
-		format:'巨石*VALUE',
+		format:'VALUE巨石',
 	},
 	crystal:{
 		name:'水晶',
-		format:'水晶*VALUE',
+		format:'VALUE水晶',
 	},
 	wisdomLevel:{
 		name:'智慧',
@@ -113,58 +143,234 @@ const RESOURCES={
 	},
 	len:{
 		name:'透镜',
-		format:'透镜*VALUE',
+		format:'VALUE枚透镜',
 	},
 	gem:{
 		name:'宝石',
-		format:'宝石*VALUE',
+		format:'VALUE枚宝石',
 	},
 	magicStone:{
 		name:'魔法石',
-		format:'魔法石*VALUE',
+		format:'VALUE枚魔法石',
 	},
 	altar:{
 		name:'神坛',
-		format:'神坛*VALUE',
+		format:'VALUE座神坛',
 	},
 	theology:{
 		name:'神学',
-		format:'神学:VALUE',
+		format:'VALUE神学',
 	},
 	magician:{
 		name:'魔法师',
-		format:'魔法师*VALUE',
+		format:'VALUE位魔法师',
 	},
 	magic:{
 		name:'魔力',
-		format:'魔力:VALUE',
+		format:'VALUE魔力',
 	},
 	scientist:{
 		name:'科学家',
-		format:'科学家*VALUE',
+		format:'VALUE名科学家',
 	},
 	science:{
 		name:'研究',
-		format:'研究:VALUE',
+		format:'VALUE研究',
+	},
+	truthUpgradeStage:{
+		name:'升级真理阶段',
+		format:'第VALUE阶段',
+	},
+	truthUpgradeAttempt:{
+		name:'升级真理尝试次数',
+		format:'第VALUE次尝试',
+	},
+	truthUpgradeGemNeed:{
+		name:'升级真理所需宝石',
+		format:'需要VALUE宝石',
+	},
+	truthUpgradeMagicStoneNeed:{
+		name:'升级真理所需魔法石',
+		format:'需要VALUE魔法石',
+	},
+	truthUpgradeLenNeed:{
+		name:'升级真理所需透镜',
+		format:'需要VALUE透镜',
+	},
+	tech:{
+		name:'科技',
+		format:'...',
+		default:{},
+	},
+	devotion:{
+		name:'虔诚',
+		format:'VALUE虔诚',
 	},
 };
 
-var gameData;
+const TECH={
+	1:{
+		optics:{
+			name:'光学',
+			description:'水晶的获取使光学成为最先被发展的科学学科。',
+			require:[],
+			cost(lv){
+				return [
+					['len',(Math.pow(lv,2)+1)*50],
+					['science',(Math.pow(lv,3)+1)*50],
+				];
+			},
+		},
+		focus:{
+			name:'聚焦',
+			description:'用水晶打磨成镜片，利用阳光增幅信仰获取。',
+			require:[
+				['optics',1],
+			],
+			cost(lv){
+				return [
+					['crystal',(Math.pow(lv,2)+1)*100],
+				];
+			},
+		},
+		magnifier:{
+			name:'放大镜',
+			description:'让你的魔法师不用超凡的眼力也能弄清魔法石内部的魔力结构。',
+			require:[
+				['optics',2],
+			],
+			cost(lv){
+				return [
+					['crystal',(Math.pow(lv,3)+1)*75],
+				];
+			},
+		},
+		devotionInduction:{
+			name:'虔诚感应',
+			description:'一束玄妙的魔力丝通向天空，让她知道你正在认真地膜拜她。',
+			require:[
+				['focus',1],
+			],
+			cost(lv){
+				return [
+					['theology',Math.pow(2,lv)*1000],
+					['magic',Math.pow(lv+1,3)*1000],
+				];
+			},
+		},
+	},
+	2:{
+	},
+	3:{
 
-const ACTIONS={
-	moSiyuan:{
-		display:()=>true,
-		disabled:()=>false,
-		cost:()=>({}),
-		effect(r){
-			this.moValue+=r*this.moDelta;
-		}
 	},
 };
 
-function isResource(name){
-	return name in RESOURCES;
+const TRUTH_UPGRADES={
+	0:{
+		stages:3,
+		attempts:5,
+		minCost:10,
+		maxCost:50,
+		gen(){
+			return {
+				x:Math.floor(Math.random()*40+10),
+				y:Math.floor(Math.random()*40+10),
+				z:Math.floor(Math.random()*40+10),
+			};
+		},
+		dis(x,y,z,tx,ty,tz){
+			return Math.abs(x-tx)+Math.abs(y-ty)+Math.abs(z-tz);
+		},
+		message(x,y,z,tx,ty,tz,dis){
+			return `误差:${pn(dis)}`;
+		},
+	},
+	1:{
+		stages:3,
+		attempts:6,
+		minCost:50,
+		maxCost:200,
+		gen(){
+			return {
+				x:Math.floor(Math.random()*150+50),
+				y:Math.floor(Math.random()*150+50),
+				z:Math.floor(Math.random()*150+50),
+			};
+		},
+		dis(x,y,z,tx,ty,tz){
+			return Math.sqrt((x-tx)**2+(y-ty)**2)+(z-tz)**2;
+		},
+		message(x,y,z,tx,ty,tz,dis){
+			return `距离:${pn(dis)}`;
+		},
+	},
+	2:{
+		stages:3,
+		attempts:30,
+		minCost:200,
+		maxCost:300,
+		gen(){
+			return {
+				x:Math.floor(Math.random()*100+200),
+				y:Math.floor(Math.random()*100+200),
+				z:Math.floor(Math.random()*100+200),
+			};
+		},
+		dis(x,y,z,tx,ty,tz){
+			var dx=Math.abs(x-tx);
+			var dy=Math.abs(y-ty);
+			var dz=Math.abs(z-tz);
+			var md=Math.min(dx,dy,dz);
+			var res=[];
+			if(dx===md)res.push('宝石');
+			if(dy===md)res.push('魔法石');
+			if(dz===md)res.push('透镜');
+			return res;
+		},
+		message(x,y,z,tx,ty,tz,dis){
+			if(dis.length===3){
+				return '所有误差相同';
+			}else{
+				return `${dis.join('、')}误差最大`;
+			}
+		},
+	},
+};
+
+function hasUpgrade(lv){
+	return lv in TRUTH_UPGRADES;
 }
+
+Vue.component('hint-message',{
+	props:['value','update'],
+	template:`
+		<span class="message" :style="{opacity:op}" v-if="op>0">
+			{{value}}
+		</span>`,
+	watch:{
+		update(){
+			if(this.value){
+				this.sec=0;
+			}
+		},
+	},
+	computed:{
+		op(){
+			return Math.max(0,Math.min(1,3-this.sec/5));
+		},
+	},
+	data(){
+		return {
+			sec:Infinity,
+		};
+	},
+	mounted(){
+		setInterval(()=>{
+			this.sec+=0.1;
+		},100);
+	},
+});
 
 !function(){
 	var _=new Vue({
@@ -196,10 +402,11 @@ function isResource(name){
 			},
 			sp(){
 				this.books-=this.spCost;
-				var s=1+this.natureLevel;
+				var s=1+Math.sqrt(this.natureLevel);
 				while(Math.random()<4/5){
-					s*=5/4*0.999;
+					s*=5/4*0.9;
 				}
+				s=Math.min(s,300);
 				this.moers+=Math.round(s);
 			},
 			exploreTemple(){
@@ -250,20 +457,101 @@ function isResource(name){
 				this.len-=this.scientistCost;
 				this.scientist+=1;
 			},
+
+			genTruthUpgradeNeed(){
+				var s=TRUTH_UPGRADES[this.truthLevel].gen();
+				this.truthUpgradeGemNeed=s.x;
+				this.truthUpgradeMagicStoneNeed=s.y;
+				this.truthUpgradeLenNeed=s.z;
+			},
+			truthUpgrade(){
+				if(!this.canUpgradeTruth){
+					return;
+				}
+
+				this.gem-=this.gemChosen;
+				this.magicStone-=this.magicStoneChosen;
+				this.len-=this.lenChosen;
+				this.crystal-=this.truthUpgradeCrystalCost;
+				this.theology-=this.truthUpgradeTheologyCost;
+				this.magic-=this.truthUpgradeMagicCost;
+				this.science-=this.truthUpgradeScienceCost;
+
+				var tu=TRUTH_UPGRADES[this.truthLevel];
+
+				if(this.truthUpgradeAttempt==0){
+					this.genTruthUpgradeNeed();
+				}
+				this.truthUpgradeAttempt++;
+
+				if(this.gemChosen===this.truthUpgradeGemNeed
+					&&this.magicStoneChosen===this.truthUpgradeMagicStoneNeed
+					&&this.lenChosen===this.truthUpgradeLenNeed){
+
+					this.truthUpgradeResult='实验成功';
+					this.truthUpgradeStage++;
+					this.truthUpgradeAttempt=0;
+					if(this.truthUpgradeStage>=tu.stages){
+						this.truthUpgradeMessage='发现新的真理！';
+						this.truthUpgradeStage=0;
+					}else{
+						this.truthUpgradeMessage='离真理更进一步';
+					}
+				}else{
+					var xyzt=[this.gemChosen,
+						this.magicStoneChosen,
+						this.lenChosen,
+						this.truthUpgradeGemNeed,
+						this.truthUpgradeMagicStoneNeed,
+						this.truthUpgradeLenNeed
+					];
+					var dis=tu.dis(...xyzt);
+					this.truthUpgradeResult='实验失败';
+					this.truthUpgradeMessage=tu.message(...xyzt,dis);
+				}
+				this.updateTruthUpgradeMessage();
+			},
+			resetTruthUpgrade(){
+				this.truthUpgradeStage=0;
+				this.truthUpgradeAttempt=0;
+				this.truthUpgradeResult='';
+				this.truthUpgradeMessage='';
+				this.updateTruthUpgradeMessage();
+			},
+			updateTruthUpgradeMessage(){
+				this.truthUpgradeMessageUpdate=(new Date()).getTime();
+			},
+			techLevel(id){
+				return Number(this.tech[id]|0);
+			},
+			canBuyTech(lv,id){
+				return TECH[lv][id].cost(this.techLevel(id)).every(([item,value])=>(this[item]>=value));
+			},
+			buyTech(lv,id){
+				if(this.canBuyTech(lv,id)){
+					TECH[lv][id].cost(this.techLevel(id)).forEach(([item,value]) => {
+						this[item]-=value;
+					});
+					this.tech[id]=this.techLevel(id)+1;
+				}
+			},
+			getDevotion(){
+				this.devotion+=Math.pow(this.techLevel('devotionInduction'),2);
+			},
 		},
 		computed:{
 			moSiyuanTag(){
 				return this.books?(`(${pn(this.bookEffect)}点击/秒)`):'';
 			},
 			moDelta(){
-				return (1+this.advancedMoLevel)*(1+this.moers)*(1+this.wisdomLevel);
+				return Math.ceil((1+this.advancedMoLevel)*(1+this.moers)*(1+this.wisdomLevel)*this.devotionInductionFactor);
 			},
 			moText(){
 				return '膜拜Siyuan'+(this.moDelta>1?(pn(this.moDelta)+'次'):'');
 			},
 
 			advancedMoText(){
-				return `真诚膜拜${this.advancedMoLevel>0?`Lv.${pn(this.advancedMoLevel)}`:''} [${pn(this.advancedMoCost)}次膜拜]`;
+				return `真诚膜拜${this.advancedMoLevel>0?` Lv.${pn(this.advancedMoLevel)}`:''} [${pn(this.advancedMoCost)}次膜拜]`;
 			},
 			advancedMoCost(){
 				return Math.floor(10*Math.pow(1+0.2/(this.churchs+1)+0.1/Math.sqrt(this.mysteryLevel+1),this.advancedMoLevel));
@@ -273,7 +561,7 @@ function isResource(name){
 				return `信徒${this.moers>0?`*${pn(this.moers)}`:''} [${pn(this.moerCost)}次膜拜]`;
 			},
 			moerCost(){
-				return Math.floor(100*Math.pow(1e3*Math.pow(1.6**(1/2.5),this.moers)/(1e3+this.XY*(1+this.natureLevel)),2.5));
+				return Math.ceil(100*Math.pow(1e3*Math.pow(1.6**(1/2.5),this.moers)/(1e3+this.XY*(1+this.natureLevel)),2.5));
 			},
 
 			churchText(){
@@ -287,14 +575,14 @@ function isResource(name){
 				return `转化信仰 (+${pn(this.XYEarn)}信仰)`;
 			},
 			XYEarn(){
-				return this.moValue/2000*this.churchs*(1+this.wisdomLevel);
+				return this.moValue/2000*this.churchs*(1+this.wisdomLevel)*(1+this.techLevel('focus')/4);
 			},
 
 			spText(){
 				return `传教 [${pn(this.spCost)}经书]`;
 			},
 			spCost(){
-				return Math.sqrt(Math.max(this.moers,10))+Math.ceil(Math.pow(Math.max(this.moers-this.advancedMoLevel/3,0),1.12))-1;
+				return Math.sqrt(Math.max(this.moers,10))+Math.ceil(Math.pow(Math.max(this.moers-this.advancedMoLevel/3,0),1.2))-1;
 			},
 
 			bookText(){
@@ -348,10 +636,10 @@ function isResource(name){
 				return 16*Math.pow(1.5,this.magician);
 			},
 			magicCostPerSec(){
-				return Math.max(0.01,Math.sqrt(this.magician)/1e2*this.magicStone);
+				return Math.max(0.01,this.magicStone/5e2)*Math.sqrt(this.magician);
 			},
 			magicRate(){
-				return 0.9;
+				return 1.2*this.magician*(1+this.techLevel('magnifier')/4);
 			},
 			scientistCost(){
 				return 16*Math.pow(1.5,this.scientist);
@@ -362,82 +650,97 @@ function isResource(name){
 			scienceLimit(){
 				return 50*Math.pow(this.scientist,2);
 			},
+
+			truthUpgradeAttemptFactor(){
+				return Math.max(1,Math.pow(3.5,this.truthUpgradeAttempt-TRUTH_UPGRADES[this.truthLevel].attempts+1));
+			},
+			truthUpgradeTheologyCost(){
+				return this.gemChosen*Math.pow(2.5,this.truthLevel)*64*this.truthUpgradeAttemptFactor;
+			},
+			truthUpgradeMagicCost(){
+				return this.magicStoneChosen*Math.pow(2.5,this.truthLevel)*36*this.truthUpgradeAttemptFactor;
+			},
+			truthUpgradeScienceCost(){
+				return this.lenChosen*Math.pow(2.5,this.truthLevel)*12*this.truthUpgradeAttemptFactor;
+			},
+			truthUpgradeCrystalCost(){
+				return Math.ceil(
+					this.truthUpgradeAttemptFactor
+					*Math.pow(2.5,this.truthLevel)
+					*(this.gemChosen+this.magicStoneChosen+this.lenChosen)
+					*(5/4)
+				);
+			},
+			truthUpgradeVaild(){
+				function isVaild(l,x,u){
+					return typeof(x)==='number'&&!isNaN(x)&&l<=x&&x<=u;
+				}
+				var t=TRUTH_UPGRADES[this.truthLevel];
+				return isVaild(t.minCost,this.gemChosen,t.maxCost)
+					&& isVaild(t.minCost,this.magicStoneChosen,t.maxCost)
+					&& isVaild(t.minCost,this.lenChosen,t.maxCost);
+			},
+			canUpgradeTruth(){
+				return this.truthUpgradeVaild
+					&& this.gem>=this.gemChosen
+					&& this.magicStone>=this.magicStoneChosen
+					&& this.len>=this.lenChosen
+					&& this.crystal>=this.truthUpgradeCrystalCost
+					&& this.theology>=this.truthUpgradeTheologyCost
+					&& this.magic>=this.truthUpgradeMagicCost
+					&& this.science>=this.truthUpgradeScienceCost;
+			},
+			devotionInductionFactor(){
+				var x=this.devotion;
+				return Math.pow(1.2,Math.sin(Math.pow(x,1/3))*Math.log2(x+1));
+			},
 		},
 		data:function(){
-			this.PADDING='WW91JTIwYXJlJTIwdG9vJTIweWF1bmclMjB0b28lMjBzaW1wbGUldUZGMENzb21ldGltZXMlMjBuYWl2ZS4lMEE=';
-			var save=localStorage.getItem('game-mosiyuan-save');
-			if(!save){
-				save={
-					moCount:0,
-					moValue:0,
-					advancedMoLevel:0,
-					moers:0,
-					churchs:0,
-					books:0,
-					XY:0,
-					temple:0,
-					hugeStone:0,
-					crystal:0,
-					wisdomLevel:0,
-					mysteryLevel:0,
-					natureLevel:0,
-					truthLevel:0,
-					len:0,
-					gem:0,
-					magicStone:0,
-					altar:0,
-					theology:0,
-					magician:0,
-					magic:0,
-					scientist:0,
-					science:0,
-				};
+			const PADDING='WW91JTIwYXJlJTIwdG9vJTIweWF1bmclMjB0b28lMjBzaW1wbGUldUZGMENzb21ldGltZXMlMjBuYWl2ZS4lMEE=';
+			var data=localStorage.getItem('game-mosiyuan-save');
+			if(!data){
+				data={};
 			}else{
-				save=decode.call(this,save);
+				data=decode.call({
+					PADDING,
+				},data);
 			}
-			save.PADDING='WW91JTIwYXJlJTIwdG9vJTIweWF1bmclMjB0b28lMjBzaW1wbGUldUZGMENzb21ldGltZXMlMjBuYWl2ZS4lMEE=';
-			return save;
+			for(var resName in SAVE_ITEMS){
+				if(!data[resName]){
+					if(typeof SAVE_ITEMS[resName].default!=='undefined'){
+						data[resName]=SAVE_ITEMS[resName].default;
+					}else{
+						data[resName]=0;
+					}
+				}
+			}
+			data.PADDING=PADDING;
+			if(hasUpgrade(data.truthLevel)){
+				data.gemChosen=TRUTH_UPGRADES[data.truthLevel].minCost;
+				data.magicStoneChosen=TRUTH_UPGRADES[data.truthLevel].minCost;
+				data.lenChosen=TRUTH_UPGRADES[data.truthLevel].minCost;
+			}else{
+				data.gemChosen=0;
+				data.magicStoneChosen=0;
+				data.lenChosen=0;
+			}
+			data.truthUpgradeResult='';
+			data.truthUpgradeMessage='';
+			data.truthUpgradeMessageUpdate=(new Date()).getTime();
+			data.dailyMessage=dailyMessage();
+			return data;
 		},
 		created(){
-			for(var resName in RESOURCES){
-				if(!this[resName]){
-					this[resName]=0;
-				}
-			}
 		},
 		mounted(){
-			for(var resName in RESOURCES){
-				if(!this[resName]){
-					this[resName]=0;
-				}
-			}
 			setInterval(()=>{
-				localStorage.setItem('game-mosiyuan-save',encode.call(this,{
-					moCount:this.moCount,
-					moValue:this.moValue,
-					advancedMoLevel:this.advancedMoLevel,
-					moers:this.moers,
-					churchs:this.churchs,
-					books:this.books,
-					XY:this.XY,
-					temple:this.temple,
-					hugeStone:this.hugeStone,
-					crystal:this.crystal,
-					wisdomLevel:this.wisdomLevel,
-					mysteryLevel:this.mysteryLevel,
-					natureLevel:this.natureLevel,
-					truthLevel:this.truthLevel,
-					PADDING:this.PADDING,
-					len:this.len,
-					gem:this.gem,
-					magicStone:this.magicStone,
-					altar:this.altar,
-					theology:this.theology,
-					magician:this.magician,
-					magic:this.magic,
-					scientist:this.scientist,
-					science:this.science,
-				}));
+				save={};
+				for(var resName in SAVE_ITEMS){
+					if(!save[resName]){
+						save[resName]=this[resName];
+					}
+				}
+				localStorage.setItem('game-mosiyuan-save',encode.call(this,save));
 			});
 			var now=(new Date()).getTime();
 			var loop=()=>{
@@ -454,6 +757,9 @@ function isResource(name){
 				sci+=s*this.sciencePerSec;
 				sci=Math.min(sci,this.scienceLimit);
 				this.science=sci;
+
+				var dd=Math.min(this.devotion,s*Math.max(this.devotion*0.001*Math.max(1,Math.sqrt(this.devotionInductionFactor)),2));
+				this.devotion-=dd;
 
 				now=nt;
 			};
