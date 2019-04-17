@@ -493,6 +493,7 @@ Vue.component('hint-message',{
 					this.truthUpgradeAttempt=0;
 					if(this.truthUpgradeStage>=tu.stages){
 						this.truthUpgradeMessage='发现新的真理！';
+						this.truthLevel++;
 						this.truthUpgradeStage=0;
 					}else{
 						this.truthUpgradeMessage='离真理更进一步';
@@ -639,7 +640,7 @@ Vue.component('hint-message',{
 				return Math.max(0.01,this.magicStone/5e2)*Math.sqrt(this.magician);
 			},
 			magicRate(){
-				return 1.2*this.magician*(1+this.techLevel('magnifier')/4);
+				return 5*this.magician*(1+this.techLevel('magnifier')/4);
 			},
 			scientistCost(){
 				return 16*Math.pow(1.5,this.scientist);
