@@ -631,7 +631,7 @@ Vue.component('hint-message',{
 				return 16*Math.pow(1.5,this.altar);
 			},
 			theologyPerSec(){
-				return Math.max(0,Math.sqrt(this.moDelta*this.gem)-(1+this.theology)/this.altar)/3e4;
+				return Math.max(0,Math.sqrt(this.moDelta*this.gem)-(1+this.theology)/this.altar)/1e4;
 			},
 			magicianCost(){
 				return 16*Math.pow(1.5,this.magician);
@@ -656,20 +656,20 @@ Vue.component('hint-message',{
 				return Math.max(1,Math.pow(3.5,this.truthUpgradeAttempt-TRUTH_UPGRADES[this.truthLevel].attempts+1));
 			},
 			truthUpgradeTheologyCost(){
-				return this.gemChosen*Math.pow(2.5,this.truthLevel)*64*this.truthUpgradeAttemptFactor;
+				return this.gemChosen*Math.pow(2.5,this.truthLevel)*16*this.truthUpgradeAttemptFactor;
 			},
 			truthUpgradeMagicCost(){
 				return this.magicStoneChosen*Math.pow(2.5,this.truthLevel)*36*this.truthUpgradeAttemptFactor;
 			},
 			truthUpgradeScienceCost(){
-				return this.lenChosen*Math.pow(2.5,this.truthLevel)*12*this.truthUpgradeAttemptFactor;
+				return this.lenChosen*Math.pow(2.5,this.truthLevel)*64*this.truthUpgradeAttemptFactor;
 			},
 			truthUpgradeCrystalCost(){
 				return Math.ceil(
 					this.truthUpgradeAttemptFactor
 					*Math.pow(2.5,this.truthLevel)
 					*(this.gemChosen+this.magicStoneChosen+this.lenChosen)
-					*(5/4)
+					*(2/3)
 				);
 			},
 			truthUpgradeVaild(){
