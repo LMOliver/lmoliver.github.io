@@ -536,8 +536,19 @@ Vue.component('hint-message',{
 				this.moers+=1;
 			},
 			buyChurch(){
+				if(!this.canBuyChurch)return;
 				this.moers-=this.churchCost;
 				this.churchs+=1;
+			},
+			buyChurchMax(){
+				while(this.canBuyChurch||this.canBuyMoer){
+					while(this.canBuyChurch){
+						this.buyChurch();
+					}
+					while(this.canBuyMoer){
+						this.buyMoer();
+					}
+				}
 			},
 			buyXY(){
 				this.XY+=this.XYEarn;
@@ -566,17 +577,51 @@ Vue.component('hint-message',{
 				this.crystal+=1;
 			},
 			wisdomUpgrade(){
+				if(!this.canUpgradeWisdom)return;
 				this.crystal-=this.wisdomUpgradeCost;
 				this.wisdomLevel+=1;
 			},
 			mysteryUpgrade(){
+				if(!this.canUpgradeMystery)return;
 				this.crystal-=this.mysteryUpgradeCost;
 				this.mysteryLevel+=1;
 			},
 			natureUpgrade(){
+				if(!this.canUpgradeNature)return;
 				this.crystal-=this.natureUpgradeCost;
 				this.natureLevel+=1;
 			},
+			wisdomUpgradeMax(){
+				while(this.canPray||this.canUpgradeWisdom){
+					while(this.canUpgradeWisdom){
+						this.wisdomUpgrade();
+					}
+					while(this.canPray){
+						this.pray();
+					}
+				}
+			},
+			mysteryUpgradeMax(){
+				while(this.canPray||this.canUpgradeMystery){
+					while(this.canUpgradeMystery){
+						this.mysteryUpgrade();
+					}
+					while(this.canPray){
+						this.pray();
+					}
+				}
+			},
+			natureUpgradeMax(){
+				while(this.canPray||this.canUpgradeNature){
+					while(this.canUpgradeNature){
+						this.natureUpgrade();
+					}
+					while(this.canPray){
+						this.pray();
+					}
+				}
+			},
+
 			makeLen(){
 				this.len+=this.makeLenEarn;
 				this.crystal=0;
@@ -719,6 +764,9 @@ Vue.component('hint-message',{
 			churchText(){
 				return `教堂${this.churchs>0?`*${pn(this.churchs)}`:''} [${pn(this.churchCost)}位信徒]`;
 			},
+			canBuyChurch(){
+				return this.moers>=this.churchCost;
+			},
 			churchCost(){
 				return Math.floor(5+Math.pow(this.churchs,1.2));
 			},
@@ -763,11 +811,20 @@ Vue.component('hint-message',{
 			prayCost(){
 				return Math.pow(1.6,this.crystal/this.temple/(1+this.truthLevel))*1e10/Math.pow(this.XY,1/3);
 			},
+			canUpgradeWisdom(){
+				return this.crystal>=this.wisdomUpgradeCost;
+			},
 			wisdomUpgradeCost(){
 				return Math.ceil(Math.pow(this.wisdomLevel/(1+this.truthLevel)+1.5,2)/(1+this.altar/3));
 			},
+			canUpgradeMystery(){
+				return this.crystal>=this.mysteryUpgradeCost;
+			},
 			mysteryUpgradeCost(){
 				return Math.ceil(Math.pow(this.mysteryLevel/(1+this.truthLevel)+4.5,3)/this.wisdomLevel/(1+this.magician/3));
+			},
+			canUpgradeNature(){
+				return this.crystal>=this.natureUpgradeCost;
 			},
 			natureUpgradeCost(){
 				return Math.ceil(Math.pow(this.natureLevel/(1+this.truthLevel)+4.5,3)/this.mysteryLevel/(1+this.scientist/3));

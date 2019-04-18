@@ -49,7 +49,10 @@
 					<div v-if="advancedMoLevel>=20">
 						<hr>
 						<button @click="buyChurch"
-						:disabled="moers<churchCost">{{churchText}}</button>
+						:disabled="!canBuyChurch">{{churchText}}</button>
+						<button v-if="techLevel('xuanxue')>=6"
+						@click="buyChurchMax"
+						:disabled="!canBuyChurch&&!canBuyMoer">自动购买</button>
 					</div>
 				</div>
 				<div class="col">
@@ -109,17 +112,26 @@
 							<div v-if="wisdomLevel>0||crystal>0">
 								<hr>
 								<button @click="wisdomUpgrade"
-								:disabled="crystal<wisdomUpgradeCost">智慧 Lv.{{pn(wisdomLevel)}} [{{wisdomUpgradeCost}}水晶]</button>
+								:disabled="!canUpgradeWisdom">智慧 Lv.{{pn(wisdomLevel)}} [{{wisdomUpgradeCost}}水晶]</button>
+								<button v-if="techLevel('xuanxue')>=5"
+								@click="wisdomUpgradeMax"
+								:disabled="!canUpgradeWisdom&&!canPray">自动购买</button>
 							</div>
 							<div v-if="temple>=2&&(mysteryLevel>0||wisdomLevel>=1)">
 								<hr>
 								<button @click="mysteryUpgrade"
-								:disabled="crystal<mysteryUpgradeCost">奥秘 Lv.{{pn(mysteryLevel)}} [{{mysteryUpgradeCost}}水晶]</button>
+								:disabled="!canUpgradeMystery">奥秘 Lv.{{pn(mysteryLevel)}} [{{mysteryUpgradeCost}}水晶]</button>
+								<button v-if="techLevel('xuanxue')>=6"
+								@click="mysteryUpgradeMax"
+								:disabled="!canUpgradeMystery&&!canPray">自动购买</button>
 							</div>
 							<div v-if="temple>=3&&(natureLevel>0||mysteryLevel>=1)">
 								<hr>
 								<button @click="natureUpgrade"
-								:disabled="crystal<natureUpgradeCost">本质 Lv.{{pn(natureLevel)}} [{{natureUpgradeCost}}水晶]</button>
+								:disabled="!canUpgradeNature">本质 Lv.{{pn(natureLevel)}} [{{natureUpgradeCost}}水晶]</button>
+								<button v-if="techLevel('xuanxue')>=7"
+								@click="natureUpgradeMax"
+								:disabled="!canUpgradeNature&&!canPray">自动购买</button>
 							</div>
 						</div>
 						<div class="col" v-if="wisdomLevel>=5">
@@ -371,10 +383,9 @@
 					<div class="doc">
 						<div class="col" v-if="moCount>5e8">
 							<h4>文档E</h4>
-							<p>只有大家的领导者才能解读<a href="./documentE.cpp">这篇文档</a>。</p>
-							<div class="docblock">
-								<p>文档加载中……</p>
-							</div>
+							<p>只有大家的领导者才能解读<a href="./documentE.html">这篇文档</a>。</p>
+							<iframe src="./documentE.html" class="docblock">
+							</iframe>
 						</div>
 						<div class="col" v-else-if="moCount>=1e8">
 							<h4>诺诺诺</h4>
