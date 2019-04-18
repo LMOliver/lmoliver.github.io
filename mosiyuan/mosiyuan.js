@@ -394,7 +394,7 @@ const TRUTH_UPGRADES={
 			var dx=Math.abs(x-tx);
 			var dy=Math.abs(y-ty);
 			var dz=Math.abs(z-tz);
-			var md=Math.min(dx,dy,dz);
+			var md=Math.max(dx,dy,dz);
 			var res=[];
 			if(dx===md)res.push('宝石');
 			if(dy===md)res.push('魔法石');
