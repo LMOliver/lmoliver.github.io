@@ -93,6 +93,7 @@ function dailyMessage(){
 		'<img src="./daily1.png">',
 		'<img src="./daily2.png">',
 		'<img src="./daily3.png">',
+		'<img src="./daily4.png">',
 		'OrzSiyuan 就来 <a href="https://orzsiyuan.com">orzsiyuan.com</a>！',
 		'你知道吗？Siyuan几乎每天都会上几次<a href="http://lydsy.online">http://lydsy.online</a>！(难道网址中的<code>dsy</code>是天意？)',
 		'追寻真理的各种花费与你本轮尝试次数有关。',
