@@ -314,8 +314,8 @@ const TECH={
 			],
 			cost(lv){
 				return [
-					['theology',2333+Math.pow(lv,1.1)*4333],
-					['magic',Math.pow(lv+1,1.1)*6666],
+					['theology',2333+Math.pow(lv,2)*4333],
+					['magic',Math.pow(lv+1,2)*6666],
 				];
 			},
 		},
@@ -341,15 +341,15 @@ const TECH={
 
 const TRUTH_UPGRADES={
 	0:{
-		stages:3,
+		stages:2,
 		attempts:5,
 		minCost:10,
 		maxCost:50,
 		gen(){
 			return {
-				x:Math.floor(Math.random()*40+10),
-				y:Math.floor(Math.random()*40+10),
-				z:Math.floor(Math.random()*40+10),
+				x:Math.floor(Math.random()*41+10),
+				y:Math.floor(Math.random()*41+10),
+				z:Math.floor(Math.random()*41+10),
 			};
 		},
 		dis(x,y,z,tx,ty,tz){
@@ -361,14 +361,14 @@ const TRUTH_UPGRADES={
 	},
 	1:{
 		stages:3,
-		attempts:6,
+		attempts:5,
 		minCost:50,
 		maxCost:100,
 		gen(){
 			return {
-				x:Math.floor(Math.random()*50+50),
-				y:Math.floor(Math.random()*50+50),
-				z:Math.floor(Math.random()*50+50),
+				x:Math.floor(Math.random()*51+50),
+				y:Math.floor(Math.random()*51+50),
+				z:Math.floor(Math.random()*51+50),
 			};
 		},
 		dis(x,y,z,tx,ty,tz){
@@ -380,14 +380,14 @@ const TRUTH_UPGRADES={
 	},
 	2:{
 		stages:3,
-		attempts:30,
+		attempts:2+3*6+1,
 		minCost:100,
 		maxCost:160,
 		gen(){
 			return {
-				x:Math.floor(Math.random()*60+100),
-				y:Math.floor(Math.random()*60+100),
-				z:Math.floor(Math.random()*60+100),
+				x:Math.floor(Math.random()*61+100),
+				y:Math.floor(Math.random()*61+100),
+				z:Math.floor(Math.random()*61+100),
 			};
 		},
 		dis(x,y,z,tx,ty,tz){
@@ -739,20 +739,20 @@ Vue.component('hint-message',{
 				return Math.max(1,Math.pow(3.5,this.truthUpgradeAttempt-TRUTH_UPGRADES[this.truthLevel].attempts+1));
 			},
 			truthUpgradeTheologyCost(){
-				return this.gemChosen*Math.pow(2.5,this.truthLevel)*16*this.truthUpgradeAttemptFactor;
+				return this.gemChosen*Math.pow(4,this.truthLevel)*16*this.truthUpgradeAttemptFactor;
 			},
 			truthUpgradeMagicCost(){
-				return this.magicStoneChosen*Math.pow(2.5,this.truthLevel)*36*this.truthUpgradeAttemptFactor;
+				return this.magicStoneChosen*Math.pow(4,this.truthLevel)*36*this.truthUpgradeAttemptFactor;
 			},
 			truthUpgradeScienceCost(){
-				return this.lenChosen*Math.pow(2.5,this.truthLevel)*64*this.truthUpgradeAttemptFactor;
+				return this.lenChosen*Math.pow(4,this.truthLevel)*64*this.truthUpgradeAttemptFactor;
 			},
 			truthUpgradeCrystalCost(){
 				return Math.ceil(
 					this.truthUpgradeAttemptFactor
 					*Math.pow(2.5,this.truthLevel)
 					*(this.gemChosen+this.magicStoneChosen+this.lenChosen)
-					*(2/(3+this.techLevel('dunai')/3))
+					*(2/(3+Math.sqrt(this.techLevel('dunai'))))
 				);
 			},
 			truthUpgradeVaild(){
