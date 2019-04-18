@@ -67,7 +67,7 @@ function pnr(num){
 
 function dailyMessage(){
 	const msgs=[
-		'“膜拜Siyuan就是无脑硬肝，现在除了真理等级外的东西我都购买了。第8次尝试怎么这么贵啊！”',
+		'“膜拜Siyuan就是无脑硬肝，现在除了真理等级外的东西我都购买了。第6次尝试怎么这么贵啊！”',
 		'你强归你强，Siyuan比你强！',
 		'你可以按住<code>Enter</code>来快速点击一个按钮。',
 		'Siyuan是我们的红太阳，没有她我们会死！',
@@ -77,20 +77,28 @@ function dailyMessage(){
 		'洁白的光点游走于漆黑的天幕之上，暗紫色的薄纱在其间舞动。在此无月之夜，是否可以知晓：“后缀自动机怎么写？”',
 		'那些文档有一部分真的有用……',
 		'Siyuan 膜 她 自 己',
+		'Siyuan D 她 自 己',
 		'如果你花掉了一些东西，它的花费也会降低，就像你从没买过它一样。',
-		'<a href="https://lmoliver.github.io">QAQ</a>',
+		'<a href="https://lmoliver.github.io">qwq</a>',
 		'要想探寻真理，不仅要虔诚膜拜Siyuan，领导者的实力也是很重要的。',
 		'<code>code.replace(/\\n\\s*\\{/mg,\'{\');</code>',
 		'嘤嘤嘤',
-		'传说Siyuan会在被她抛弃的终端上执行<code>rm -rf /*</code>。',
+		'Hello world!',
+		'在夕阳的照耀下，教堂的圆顶散发出金色的光辉。',
+		'这一刻，我们都是Siyuan的忠实粉丝。',
+		'Do the magic!',
+		'传说Siyuan会在被她抛弃的终端上用 root 权限执行<code>rm -rf /*</code>。',
 		'Siyuan太强了，所以你复制不了这个网站中的任何一个Siyuan。',
 		'空谈误国，实干兴邦。',
 		'<img src="./daily1.png">',
+		'<img src="./daily2.png">',
 		'OrzSiyuan 就来 <a href="https://orzsiyuan.com">orzsiyuan.com</a>！',
-		'你知道吗？Siyuan几乎每天都会上一次<a href="http://lydsy.online">http://lydsy.online</a>！(难道网址中的<code>dsy</code>是天意？)',
+		'你知道吗？Siyuan几乎每天都会上几次<a href="http://lydsy.online">http://lydsy.online</a>！(难道网址中的<code>dsy</code>是天意？)',
 		'追寻真理的各种花费与你本轮尝试次数有关。',
 		'追寻真理时重置会将当前成功轮数也清空！',
-		'<iframe src="http://majsoul.union-game.com/0/">窝当然知道这是什么qwq</iframe>'
+		'<iframe src="https://majsoul.union-game.com/0/">这是什么呀qwq</iframe>',
+		'在真理之路上，要不畏艰辛，敢于推翻重来，才不会在错误的道路上越走越远。',
+		'窝 又 被 Siyuan D 了 QAQ',
 	];
 	try{
 		return msgs[Math.floor(Math.random()*msgs.length)].replace(/Siyuan/g,'<span class="siyuan"></span>');
@@ -256,7 +264,7 @@ const TECH={
 			],
 			cost(lv){
 				return [
-					['crystal',(Math.pow(lv,3)+1)*75],
+					['crystal',(Math.pow(lv,1.5)+1)*75],
 				];
 			},
 		},
@@ -281,9 +289,9 @@ const TECH={
 			],
 			cost(lv){
 				return [
-					['len',Math.pow(lv+1,1.5)*10],
-					['science',Math.pow(lv+1,2)*1000],
-					['magic',Math.pow(1.5,lv)],
+					['len',Math.ceil(Math.pow(lv+1,1.5)*10)],
+					['science',Math.ceil(Math.pow(lv+1,2)*1000)],
+					['magic',Math.ceil(Math.pow(1.5,lv))],
 				];
 			}
 		},
@@ -293,8 +301,33 @@ const TECH={
 			require:[],
 			cost(lv){
 				return [
-					['crystal',Math.pow(lv+1,2)*10],
-					['magicStone',Math.pow(lv+1,2.5)*10],
+					['crystal',Math.pow(lv+1,2.5)*10],
+					['magicStone',Math.pow(lv+1,3)*10],
+				];
+			},
+		},
+		dunai:{
+			name:'毒奶',
+			description:'通过反向毒奶可以减少实验时不该产生的误差，进而减少水晶消耗。',
+			require:[
+				['xuanxue',3],
+			],
+			cost(lv){
+				return [
+					['theology',2333+Math.pow(lv,1.1)*4333],
+					['magic',Math.pow(lv+1,1.1)*6666],
+				];
+			},
+		},
+		tidy:{
+			name:'整洁',
+			description:'洗个澡，把衣服穿戴整齐，往往运气会更好！只在水晶个数模 50 为零时有效。',
+			require:[
+				['xuanxue',4],
+			],
+			cost(lv){
+				return [
+					['crystal',50*(lv+1)**2],
 				];
 			},
 		},
@@ -425,6 +458,7 @@ Vue.component('hint-message',{
 				this.advancedMoLevel+=1;
 			},
 			buyMoer(){
+				if(!this.canBuyMoer)return;
 				this.moValue-=this.moerCost;
 				this.moers+=1;
 			},
@@ -454,6 +488,7 @@ Vue.component('hint-message',{
 				this.temple+=1;
 			},
 			pray(){
+				if(!this.canPray)return;
 				this.moValue-=this.prayCost;
 				this.crystal+=1;
 			},
@@ -588,6 +623,9 @@ Vue.component('hint-message',{
 				return Math.ceil((1+this.advancedMoLevel)*(1+this.moers)*(1+this.wisdomLevel)*this.devotionInductionFactor);
 			},
 
+			canBuyAdvancedMo(){
+				return this.moValue>=this.advancedMoCost;
+			},
 			advancedMoText(){
 				return `真诚膜拜${this.advancedMoLevel>0?` Lv.${pn(this.advancedMoLevel)}`:''} [${pn(this.advancedMoCost)}次膜拜]`;
 			},
@@ -595,11 +633,14 @@ Vue.component('hint-message',{
 				return Math.floor(10*Math.pow(1+0.2/(this.churchs+1)+0.1/Math.sqrt(this.mysteryLevel+1),this.advancedMoLevel));
 			},
 
+			canBuyMoer(){
+				return this.moValue>=this.moerCost;
+			},
 			moerText(){
 				return `信徒${this.moers>0?`*${pn(this.moers)}`:''} [${pn(this.moerCost)}次膜拜]`;
 			},
 			moerCost(){
-				return Math.ceil(100*Math.pow(1e3*Math.pow(1.6**(1/2.5),this.moers)/(1e3+this.XY*(1+this.natureLevel)),2.5));
+				return Math.ceil(100*Math.pow(1e3*Math.pow(1.6**(1/2.5),this.moers/this.tidyEffectFactor**1.2)/(1e3+this.XY*(1+this.natureLevel)),2.5));
 			},
 
 			churchText(){
@@ -620,9 +661,12 @@ Vue.component('hint-message',{
 				return `传教 [${pn(this.spCost)}经书]`;
 			},
 			spCost(){
-				return Math.sqrt(Math.max(this.moers,10))+Math.ceil(Math.pow(Math.max(this.moers-this.advancedMoLevel/3,0),1.2))-1;
+				return Math.pow(Math.max(this.moers,10),0.9)+Math.ceil(Math.pow(1.2,Math.max(this.moers-this.advancedMoLevel/4,0)));
 			},
 
+			canBuyBook(){
+				return this.XY>=this.bookCost;
+			},
 			bookText(){
 				return `经书${this.books>0?`*${pn(this.books)}`:''} [${pn(this.bookCost)}信仰]`;
 			},
@@ -640,18 +684,20 @@ Vue.component('hint-message',{
 				return Math.pow(2,Math.pow(1.8,this.temple))*5e6;
 			},
 
-			prayCost(){
-				return Math.pow(1.6,this.crystal/this.temple)*1e10/Math.pow(this.XY,1/3);
+			canPray(){
+				return this.moValue>=this.prayCost;
 			},
-
+			prayCost(){
+				return Math.pow(1.6,this.crystal/this.temple/(1+this.truthLevel))*1e10/Math.pow(this.XY,1/3);
+			},
 			wisdomUpgradeCost(){
-				return Math.ceil(Math.pow(this.wisdomLevel+1.5,2)/(1+this.altar/3));
+				return Math.ceil(Math.pow(this.wisdomLevel/(1+this.truthLevel)+1.5,2)/(1+this.altar/3));
 			},
 			mysteryUpgradeCost(){
-				return Math.ceil(Math.pow(this.mysteryLevel+4.5,3)/this.wisdomLevel/(1+this.magician/3));
+				return Math.ceil(Math.pow(this.mysteryLevel/(1+this.truthLevel)+4.5,3)/this.wisdomLevel/(1+this.magician/3));
 			},
 			natureUpgradeCost(){
-				return Math.ceil(Math.pow(this.natureLevel+4.5,3)/this.mysteryLevel/(1+this.scientist/3));
+				return Math.ceil(Math.pow(this.natureLevel/(1+this.truthLevel)+4.5,3)/this.mysteryLevel/(1+this.scientist/3));
 			},
 
 			makeGemEarn(){
@@ -706,12 +752,12 @@ Vue.component('hint-message',{
 					this.truthUpgradeAttemptFactor
 					*Math.pow(2.5,this.truthLevel)
 					*(this.gemChosen+this.magicStoneChosen+this.lenChosen)
-					*(2/3)
+					*(2/(3+this.techLevel('dunai')/3))
 				);
 			},
 			truthUpgradeVaild(){
 				function isVaild(l,x,u){
-					return typeof(x)==='number'&&!isNaN(x)&&l<=x&&x<=u;
+					return typeof(x)==='number'&&Number.isSafeInteger(x)&&!isNaN(x)&&l<=x&&x<=u;
 				}
 				var t=TRUTH_UPGRADES[this.truthLevel];
 				return isVaild(t.minCost,this.gemChosen,t.maxCost)
@@ -728,10 +774,16 @@ Vue.component('hint-message',{
 					&& this.magic>=this.truthUpgradeMagicCost
 					&& this.science>=this.truthUpgradeScienceCost;
 			},
+
 			devotionInductionFactor(){
 				var x=this.devotion;
 				return Math.pow(1.2,Math.sin(Math.pow(x,1/3))*Math.log2(x+1));
 			},
+
+			tidyEffectFactor(){
+				if(this.crystal%50!==0)return 1;
+				return (1+this.techLevel('tidy')/4);
+			}
 		},
 		data:function(){
 			const PADDING='WW91JTIwYXJlJTIwdG9vJTIweWF1bmclMjB0b28lMjBzaW1wbGUldUZGMENzb21ldGltZXMlMjBuYWl2ZS4lMEE=';
@@ -780,9 +832,9 @@ Vue.component('hint-message',{
 				}
 				localStorage.setItem('game-mosiyuan-save',encode.call(this,save));
 			});
-			var now=(new Date()).getTime();
+			var now=Date.now();
 			var loop=()=>{
-				var nt=(new Date()).getTime();
+				var nt=Date.now();
 				var s=(nt-now)/1000;
 
 				this.moSiyuan(s*this.bookEffect);
@@ -800,8 +852,10 @@ Vue.component('hint-message',{
 				this.devotion-=dd;
 
 				now=nt;
+
+				requestAnimationFrame(loop);
 			};
-			setInterval(loop);
+			requestAnimationFrame(loop);
 		},
 	});
 	window._=_;

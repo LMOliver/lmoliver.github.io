@@ -33,12 +33,18 @@
 					<div v-if="moCount>=10">
 						<hr>
 						<button @click="buyAdvancedMo"
-						:disabled="moValue<advancedMoCost">{{advancedMoText}}</button>
+						:disabled="!canBuyAdvancedMo">{{advancedMoText}}</button>
+						<button v-if="techLevel('xuanxue')>=1"
+						@click="while(canBuyAdvancedMo)buyAdvancedMo();"
+						:disabled="!canBuyAdvancedMo">最大</button>
 					</div>
 					<div v-if="advancedMoLevel>=10">
 						<hr>
 						<button @click="buyMoer"
-						:disabled="moValue<moerCost">{{moerText}}</button>
+						:disabled="!canBuyMoer">{{moerText}}</button>
+						<button v-if="techLevel('xuanxue')>=2"
+						@click="while(canBuyMoer)buyMoer();"
+						:disabled="!canBuyMoer">最大</button>
 					</div>
 					<div v-if="advancedMoLevel>=20">
 						<hr>
@@ -57,7 +63,10 @@
 					<div v-if="XY>=100||books>0">
 						<hr>
 						<button @click="buyBook"
-						:disabled="XY<=bookCost">{{bookText}}</button>
+						:disabled="!canBuyBook">{{bookText}}</button>
+						<button v-if="techLevel('xuanxue')>=1"
+						@click="while(canBuyBook)buyBook();"
+						:disabled="!canBuyBook">最大</button>
 					</div>
 					<div v-if="books>0">
 						<hr>
@@ -92,7 +101,10 @@
 									<span>水晶:{{pn(crystal)}}</span>
 								</div>
 								<button @click="pray"
-								:disabled="moValue<prayCost">祈求恩赐 [{{pn(prayCost)}}次膜拜]</button>
+								:disabled="!canPray">祈求恩赐 [{{pn(prayCost)}}次膜拜]</button>
+								<button v-if="techLevel('xuanxue')>=2"
+								@click="while(canPray)pray();"
+								:disabled="!canPray">最大</button>
 							</div>
 							<div v-if="wisdomLevel>0||crystal>0">
 								<hr>
@@ -275,68 +287,94 @@
 					</p>
 				</blockquote>
 				<div class="area">
-					<div class="col" v-if="moCount>1e6">
-						<h4>
-							文档A
-						</h4>
-						<p>
-							以这个文明的现有技术水平还不能解读这篇<a href="./documentA.pdf">“天书”</a>中的东西，但<span class="siyuan"></span>一定可以。
-						</p>
-						<iframe src="./documentA.pdf" class="docblock">
-						</iframe>
+					<div class="doc">
+						<div class="col" v-if="moCount>1e6">
+							<h4>
+								文档A
+							</h4>
+							<p>
+								以这个文明的现有技术水平还不能解读这篇<a href="./documentA.pdf">“天书”</a>中的东西，但<span class="siyuan"></span>一定可以。
+							</p>
+							<iframe src="./documentA.pdf" class="docblock">
+							</iframe>
+						</div>
 					</div>
-
-					<div class="col" v-if="moCount>1e7">
-						<h4>
-							文档B
-						</h4>
-						<p>
-							似乎是一张<a href="./documentB.html">实验数据表</a>，记载了过去文明探索真理的过程。可惜，真理已有改变，不能直接套用其中的实验数据。
-						</p>
-						<iframe src="./documentB.html" class="docblock">
-						</iframe>
-					</div>
-					<div class="col" v-else-if="moCount>=1e6">
-						<h4>锟斤拷</h4>
-						<p>
-							还需要{{pn(1e7-moCount)}}次点击
-						</p>
+					<div class="doc">
+						<div class="col" v-if="moCount>1e7">
+							<h4>
+								文档B
+							</h4>
+							<p>
+								似乎是一张<a href="./documentB.html">实验数据表</a>，记载了过去文明探索真理的过程。可惜，真理已有改变，不能直接套用其中的实验数据。
+							</p>
+							<iframe src="./documentB.html" class="docblock">
+							</iframe>
+						</div>
+						<div class="col" v-else-if="moCount>=1e6">
+							<h4>锟斤拷</h4>
+							<p>
+								还需要{{pn(1e7-moCount)}}次点击
+							</p>
+						</div>
 					</div>
 				</div>
 				<div class="area">
-					<div class="col" v-if="moCount>3e7">
-						<h4>
-							文档C
-						</h4>
-						<p>
-							一份发言记录(有删减)与一张截图，表现了一位高手在膜拜<span class="siyuan"></span>后取得了丰硕战果时的<a href="https://majsoul.union-game.com/0/">快乐</a>。
-						</p>
-						<div class="docblock">
-							<image src="./documentC1.png" width="100%">
-							<image src="./documentC2.png" width="100%">
+					<div class="doc">
+						<div class="col" v-if="moCount>3e7">
+							<h4>
+								文档C
+							</h4>
+							<p>
+								一份发言记录(有删减)与一张截图，表现了一位高手在膜拜<span class="siyuan"></span>后取得了丰硕战果时的<a href="https://majsoul.union-game.com/0/">快乐</a>。
+							</p>
+							<div class="docblock">
+								<image src="./documentC1.png" width="100%">
+								<image src="./documentC2.png" width="100%">
+							</div>
+						</div>
+						<div class="col" v-else-if="moCount>=1e7">
+							<h4>烫烫烫</h4>
+							<p>
+								还需要{{pn(3e7-moCount)}}次点击
+							</p>
 						</div>
 					</div>
-					<div class="col" v-else-if="moCount>=1e7">
-						<h4>烫烫烫</h4>
-						<p>
-							还需要{{pn(3e7-moCount)}}次点击
-						</p>
+					<div class="doc">
+						<div class="col" v-if="moCount>1e8">
+							<h4>
+								文档D
+							</h4>
+							<p>
+								一些php和md文件，似乎是一个<a href="https://orzsiyuan.com/archives/Algorithm/Simulate-Anneal">个人博客</a>。从博客名(orzsiyuan.com)可以看出即使对于个人，膜拜<span class="siyuan"></span>也十分重要。
+							</p>
+							<iframe src="https://orzsiyuan.com/archives/Algorithm/Simulate-Anneal" class="docblock">
+							</iframe>
+						</div>
+						<div class="col" v-else-if="moCount>=3e7">
+							<h4>屯屯屯</h4>
+							<p>
+								还需要{{pn(1e8-moCount)}}次点击
+							</p>
+						</div>
 					</div>
-					<div class="col" v-if="moCount>5e9">
-						<h4>
-							文档D
-						</h4>
-						<p>
-							一些php和md文件，似乎是一个<a href="http://orzsiyuan.com/archives/Algorithm/Simulate-Anneal">个人博客</a>。从博客名(orzsiyuan.com)可以看出即使对于个人，膜拜<span class="siyuan"></span>也十分重要。
-						</p>
-						<iframe src="http://orzsiyuan.com/archives/Algorithm/Simulate-Anneal" class="docblock">
-						</iframe>
-					</div>
-					<div class="col" v-else-if="moCount>=1e7">
-						<h4>屯屯屯</h4>
-						<p>
-							还需要{{pn(5e9-moCount)}}次点击
-						</p>
+				</div>
+				<div class="area">
+					<div class="doc">
+						<div class="col" v-if="moCount>5e8">
+							<h4>文档E</h4>
+							<p>
+								<del>咕咕咕……</del>
+							</p>
+							<p>
+								<del>“我千辛万苦点了{{pn(5e8)}}次你就给我看这个？”</del>
+							</p>
+						</div>
+						<div class="col" v-else-if="moCount>=1e8">
+							<h4>QAQ</h4>
+							<p>
+								还需要{{pn(5e8-moCount)}}次点击
+							</p>
+						</div>
 					</div>
 				</div>
 			</div>
