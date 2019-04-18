@@ -37,7 +37,7 @@ function pn(num){
 	const heads=['','U','D','T','q','Q','s','S','O','N'];
 	const tails=['','Dc','Vi','Tg','qg','Qg','sg','Sg','Og','Ng'];
 	if(typeof num!=='number')return String(num);
-	if(!Number.isFinite(num))return num.toString();
+	if(!Number.isFinite(num))return '???';
 	var [val,exp]=num.toExponential(2).split('e').map(parseFloat);
 	if(exp<6){
 		if(Number.isSafeInteger(num))return num.toString();
@@ -92,6 +92,7 @@ function dailyMessage(){
 		'空谈误国，实干兴邦。',
 		'<img src="./daily1.png">',
 		'<img src="./daily2.png">',
+		'<img src="./daily3.png">',
 		'OrzSiyuan 就来 <a href="https://orzsiyuan.com">orzsiyuan.com</a>！',
 		'你知道吗？Siyuan几乎每天都会上几次<a href="http://lydsy.online">http://lydsy.online</a>！(难道网址中的<code>dsy</code>是天意？)',
 		'追寻真理的各种花费与你本轮尝试次数有关。',
@@ -268,19 +269,6 @@ const TECH={
 				];
 			},
 		},
-		devotionInduction:{
-			name:'虔诚感应',
-			description:'一束玄妙的魔力丝通向天空，让她知道你正在认真地膜拜她。',
-			require:[
-				['focus',1],
-			],
-			cost(lv){
-				return [
-					['theology',Math.pow(2,lv)*1000],
-					['magic',Math.pow(lv+1,3)*1000],
-				];
-			},
-		},
 		glasses:{
 			name:'眼镜',
 			description:'黑色的框架配上镜片，足以使老龄科学家与神学家看得更清楚。',
@@ -331,8 +319,71 @@ const TECH={
 				];
 			},
 		},
+		spell:{
+			name:'法术',
+			description:'使用不了法术，还能称之为魔法吗？',
+			require:[],
+			cost(lv){
+				return [
+					['magicStone',500*(lv+1)],
+					['magic',(2.5)**lv *500/3],
+				];
+			},
+		},
+		spellWater:{
+			name:'流水术',
+			description:'江河湖海，皆在掌控。',
+			require:[
+				['spell',2],
+			],
+			cost(lv){
+				return [
+					['magic',Math.pow(3.5,lv)*100],
+				];
+			}
+		},
+		devotionInduction:{
+			name:'虔诚感应',
+			description:'一束玄妙的魔力丝通向天空，让她知道你正在认真地膜拜她。',
+			require:[
+				['focus',1],
+				['spell',4],
+				['spellWind',1],
+			],
+			cost(lv){
+				return [
+					['theology',Math.pow(2,lv)*1000],
+					['magic',Math.pow(lv+1,3)*1000],
+				];
+			},
+		},
 	},
 	2:{
+		spellWind:{
+			name:'风语术',
+			description:'隐匿于气，交谈于风。',
+			require:[
+				['spell',6],
+			],
+			cost(lv){
+				return [
+					['magic',Math.pow(4,lv)*100],
+				];
+			}
+		},
+		spellBird:{
+			name:'御鸟术',
+			description:'与鸟相关？对了一半。这法术确实与麻雀相关……',
+			require:[
+				['spell',8],
+				['spellWind',3],
+			],
+			cost(lv){
+				return [
+					['magic',Math.pow(5,lv)*500],
+				];
+			}
+		},
 	},
 	3:{
 
@@ -407,6 +458,28 @@ const TRUTH_UPGRADES={
 			}else{
 				return `${dis.join('、')}差距最大`;
 			}
+		},
+	},
+	3:{
+		stages:3,
+		attempts:9,
+		minCost:160,
+		maxCost:220,
+		gen(){
+			return {
+				x:Math.floor(Math.random()*61+160),
+				y:Math.floor(Math.random()*61+160),
+				z:Math.floor(Math.random()*61+160),
+			};
+		},
+		dis(x,y,z,tx,ty,tz){
+			var dx=Math.abs(x-tx);
+			var dy=Math.abs(y-ty);
+			var dz=Math.abs(z-tz);
+			return 1+(dx^dy^dz)%9;
+		},
+		message(x,y,z,tx,ty,tz,dis){
+			return `相位:${dis}`;
 		},
 	},
 };
@@ -739,13 +812,13 @@ Vue.component('hint-message',{
 				return Math.max(1,Math.pow(3.5,this.truthUpgradeAttempt-TRUTH_UPGRADES[this.truthLevel].attempts+1));
 			},
 			truthUpgradeTheologyCost(){
-				return this.gemChosen*Math.pow(4,this.truthLevel)*16*this.truthUpgradeAttemptFactor;
+				return this.gemChosen*Math.pow(4,this.truthLevel)*16*this.truthUpgradeAttemptFactor/(1+this.techLevel('spellWater')/20);
 			},
 			truthUpgradeMagicCost(){
-				return this.magicStoneChosen*Math.pow(4,this.truthLevel)*36*this.truthUpgradeAttemptFactor;
+				return this.magicStoneChosen*Math.pow(4,this.truthLevel)*36*this.truthUpgradeAttemptFactor/(1+this.techLevel('spellWater')/10);
 			},
 			truthUpgradeScienceCost(){
-				return this.lenChosen*Math.pow(4,this.truthLevel)*64*this.truthUpgradeAttemptFactor;
+				return this.lenChosen*Math.pow(4,this.truthLevel)*64*this.truthUpgradeAttemptFactor/(1+this.techLevel('spellWater')/5);
 			},
 			truthUpgradeCrystalCost(){
 				return Math.ceil(
@@ -818,6 +891,7 @@ Vue.component('hint-message',{
 			data.truthUpgradeMessage='';
 			data.truthUpgradeMessageUpdate=(new Date()).getTime();
 			data.dailyMessage=dailyMessage();
+			data.selectedTruthLevel=1;
 			return data;
 		},
 		created(){

@@ -252,30 +252,35 @@
 							<hint-message :value="truthUpgradeResult" :update="truthUpgradeMessageUpdate"></hint-message>
 							<hint-message :value="truthUpgradeMessage" :update="truthUpgradeMessageUpdate"></hint-message>
 						</div>
-						<div v-if="techLevel('devotionInduction')>0">
-							<h4>感应</h4>
-							<button @click="getDevotion">虔诚</button>
-							<span>强度:{{pn(devotion)}}</span>
-							<span>膜拜x{{pn(devotionInductionFactor)}}</span>
-						</div>
+					</div>
+					<div v-if="techLevel('devotionInduction')>0">
+						<h4>感应</h4>
+						<button @click="getDevotion">虔诚</button>
+						<span>强度:{{pn(devotion)}}</span>
+						<span>膜拜x{{pn(devotionInductionFactor)}}</span>
 					</div>
 				</div>
 				<div class="col">
 					<div v-for="lv in truthLevel">
 						<h4>真理{{pnr(lv)}}</h4>
-						<p v-if="Object.keys(TECH[lv]).length===0">
-							<del>咕咕咕……</del>
-						</p>
-						<ul v-else>
-							<li v-for="(tech,id) in TECH[lv]" v-if="tech.require.every(([id,cnt])=>techLevel(id)>=cnt)">
-								<button @click="buyTech(lv,id)"
-								:disabled="!canBuyTech(lv,id)">
-									{{tech.name}} Lv.{{techLevel(id)}}
-									[{{tech.cost(techLevel(id)).map(([item,value])=>SAVE_ITEMS[item].format.replace(/VALUE/g,pn(value))).join(',')}}]
-								</button>
-								<div>{{tech.description}}</div>
-							</li>
-						</ul>
+						<div v-if="lv==selectedTruthLevel">
+							<p v-if="Object.keys(TECH[lv]).length===0">
+								<del>咕咕咕……</del>
+							</p>
+							<ul v-else>
+								<li v-for="(tech,id) in TECH[lv]" v-if="tech.require.every(([id,cnt])=>techLevel(id)>=cnt)">
+									<button @click="buyTech(lv,id)"
+									:disabled="!canBuyTech(lv,id)">
+										{{tech.name}} Lv.{{techLevel(id)}}
+										[{{tech.cost(techLevel(id)).map(([item,value])=>SAVE_ITEMS[item].format.replace(/VALUE/g,pn(value))).join(',')}}]
+									</button>
+									<div>{{tech.description}}</div>
+								</li>
+							</ul>
+						</div>
+						<div v-else>
+							<button @click="selectedTruthLevel=lv">展开</button>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -325,11 +330,15 @@
 								文档C
 							</h4>
 							<p>
-								一份发言记录(有删减)与一张截图，表现了一位高手在膜拜<span class="siyuan"></span>后取得了丰硕战果时的<a href="https://majsoul.union-game.com/0/">快乐</a>。
+								一份发言记录(有删减)与一张截图，表现了两位高手在膜拜<span class="siyuan"></span>后取得了丰硕战果时的<a href="https://majsoul.union-game.com/0/">快乐</a>。
 							</p>
 							<div class="docblock">
+								<h3>ニヒル</h3>
 								<image src="./documentC1.png" width="100%">
 								<image src="./documentC2.png" width="100%">
+								<h3>Stepsys</h3>
+								<image src="./documentC3.png" width="100%">
+								<p>(注意 Stepsys 的昵称)</p>
 							</div>
 						</div>
 						<div class="col" v-else-if="moCount>=1e7">
@@ -362,17 +371,32 @@
 					<div class="doc">
 						<div class="col" v-if="moCount>5e8">
 							<h4>文档E</h4>
+							<p>只有大家的领导者才能解读<a href="./documentE.cpp">这篇文档</a>。</p>
+							<div class="docblock">
+								<p>文档加载中……</p>
+							</div>
+						</div>
+						<div class="col" v-else-if="moCount>=1e8">
+							<h4>诺诺诺</h4>
+							<p>
+								还需要{{pn(5e8-moCount)}}次点击
+							</p>
+						</div>
+					</div>
+					<div class="doc">
+						<div class="col" v-if="moCount>1e9">
+							<h4>文档F</h4>
 							<p>
 								<del>咕咕咕……</del>
 							</p>
 							<p>
-								<del>“我千辛万苦点了{{pn(5e8)}}次你就给我看这个？”</del>
+								<del>“我千辛万苦点了{{pn(1e9)}}次你就给我看这个？”</del>
 							</p>
 						</div>
-						<div class="col" v-else-if="moCount>=1e8">
-							<h4>QAQ</h4>
+						<div class="col" v-else-if="moCount>=5e8">
+							<h4>咕咕咕</h4>
 							<p>
-								还需要{{pn(5e8-moCount)}}次点击
+								还需要{{pn(1e9-moCount)}}次点击
 							</p>
 						</div>
 					</div>
