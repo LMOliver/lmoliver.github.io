@@ -533,7 +533,7 @@ Vue.component('hint-message',{
 			buyMoer(){
 				if(!this.canBuyMoer)return;
 				this.moValue-=this.moerCost;
-				this.moers+=1;
+				this.moers+=1+7*Math.min(this.techLevel('spell'),5);
 			},
 			buyChurch(){
 				if(!this.canBuyChurch)return;
@@ -545,7 +545,7 @@ Vue.component('hint-message',{
 					while(this.canBuyChurch){
 						this.buyChurch();
 					}
-					while(this.canBuyMoer){
+					while(this.canBuyMoer&&!this.canBuyChurch){
 						this.buyMoer();
 					}
 				}
@@ -574,7 +574,7 @@ Vue.component('hint-message',{
 			pray(){
 				if(!this.canPray)return;
 				this.moValue-=this.prayCost;
-				this.crystal+=1;
+				this.crystal+=1+7*Math.min(this.techLevel('optics'),5);
 			},
 			wisdomUpgrade(){
 				if(!this.canUpgradeWisdom)return;
@@ -596,7 +596,7 @@ Vue.component('hint-message',{
 					while(this.canUpgradeWisdom){
 						this.wisdomUpgrade();
 					}
-					while(this.canPray){
+					while(this.canPray&&!this.canUpgradeWisdom){
 						this.pray();
 					}
 				}
@@ -606,7 +606,7 @@ Vue.component('hint-message',{
 					while(this.canUpgradeMystery){
 						this.mysteryUpgrade();
 					}
-					while(this.canPray){
+					while(this.canPray&&!this.canUpgradeMystery){
 						this.pray();
 					}
 				}
@@ -616,7 +616,7 @@ Vue.component('hint-message',{
 					while(this.canUpgradeNature){
 						this.natureUpgrade();
 					}
-					while(this.canPray){
+					while(this.canPray&&!this.canUpgradeNature){
 						this.pray();
 					}
 				}
