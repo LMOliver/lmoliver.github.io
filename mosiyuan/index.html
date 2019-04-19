@@ -187,13 +187,38 @@
 				</blockquote>
 				<div class="col">
 					<h4>真理之路</h4>
-					<p><strong v-if="truthLevel>0">你已探索到真理{{pnr(truthLevel)}}</strong></p>
+					<p v-if="truthLevel>0">
+						<strong>你已探索到真理{{pnr(truthLevel)}}</strong>
+					</p>
 					<div v-if="hasUpgrade(truthLevel)">
 						<p>
-							真理{{pnr(truthLevel+1)}}，阶段{{truthUpgradeStage}}/{{TRUTH_UPGRADES[truthLevel].stages}}，
-							已进行{{truthUpgradeAttempt}}次尝试
+							正在追寻<strong>真理{{pnr(truthLevel+1)}}</strong>
+							<span v-html="truthAbbrDescription(truthLevel)">
+							</span>
+						</p>
+						<p>
+							阶段{{truthUpgradeStage}}/{{TRUTH_UPGRADES[truthLevel].stages}}，
+							已进行<span :class="{danger:truthUpgradeAttempt>=TRUTH_UPGRADES[truthLevel].attempts}">{{truthUpgradeAttempt}}</span>次尝试
 							<button @click="resetTruthUpgrade">重置</button>
 						</p>
+						<table v-if="truthUpgradeHistory.length>0" style="text-align:center;">
+							<tbody>
+								<tr>
+									<th>编号</th>
+									<th>宝石</th>
+									<th>魔法石</th>
+									<th>水晶</th>
+									<th>结果</th>
+								</tr>
+								<tr v-for="(item,id) in truthUpgradeHistory">
+									<td>{{id+1}}</td>
+									<td>{{item.x}}</td>
+									<td>{{item.y}}</td>
+									<td>{{item.z}}</td>
+									<td>{{TRUTH_UPGRADES[truthLevel].message(item.r)}}</td>
+								</tr>
+							</tbody>
+						</table>
 						<hr>
 						<table>
 							<tbody>
@@ -253,14 +278,14 @@
 						<hr>
 						<div>
 							<button @click="truthUpgrade"
-							:disabled="!canUpgradeTruth">
-								<span v-if="truthUpgradeVaild">
+							:disabled="!canUpgradeTruth||TRUTH_UPGRADES[truthLevel].gugu">
+								<span>
 									追寻真理
 								</span>
-								<span v-else>
-									<em>将来实验数据上有偏差，你是要负责任的！</em>
-								</span>
 							</button>
+							<span v-if="!truthUpgradeVaild">
+								<em>将来实验数据上有偏差，你是要负责任的！</em>
+							</span>
 							<hint-message :value="truthUpgradeResult" :update="truthUpgradeMessageUpdate"></hint-message>
 							<hint-message :value="truthUpgradeMessage" :update="truthUpgradeMessageUpdate"></hint-message>
 						</div>

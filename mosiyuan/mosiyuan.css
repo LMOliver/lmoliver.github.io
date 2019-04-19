@@ -17,17 +17,29 @@
 	background: whitesmoke;
 }
 
+table{
+	width:100%;
+}
 
 .truthupgrade input[type=range]{
-	max-width: 180px;
+	width: 100%;
 }
 
 .truthupgrade input[type=number]{
-	max-width: 90px;
+	max-width: 100px;
 }
 
 .needed{
 	color: gray;
+}
+
+.danger{
+	color:red;
+}
+
+.help{
+	cursor: help;
+	border-bottom: 1px gray dashed;
 }
 
 .siyuan{

@@ -98,7 +98,6 @@ function dailyMessage(){
 		'你知道吗？Siyuan几乎每天都会上几次<a href="http://lydsy.online">http://lydsy.online</a>！(难道网址中的<code>dsy</code>是天意？)',
 		'追寻真理的各种花费与你本轮尝试次数有关。',
 		'追寻真理时重置会将当前成功轮数也清空！',
-		'<iframe src="https://majsoul.union-game.com/0/">这是什么呀qwq</iframe>',
 		'在真理之路上，要不畏艰辛，敢于推翻重来，才不会在错误的道路上越走越远。',
 		'窝 又 被 Siyuan D 了 QAQ',
 	];
@@ -201,6 +200,11 @@ const SAVE_ITEMS={
 	science:{
 		name:'研究',
 		format:'VALUE研究',
+	},
+	truthUpgradeHistory:{
+		name:'升级真理历史',
+		format:'...',
+		default:[],
 	},
 	truthUpgradeStage:{
 		name:'升级真理阶段',
@@ -389,6 +393,12 @@ const TECH={
 	3:{
 
 	},
+	4:{
+
+	},
+	5:{
+
+	},
 };
 
 const TRUTH_UPGRADES={
@@ -397,6 +407,8 @@ const TRUTH_UPGRADES={
 		attempts:5,
 		minCost:10,
 		maxCost:50,
+		dark:false,
+		fog:false,
 		gen(){
 			return {
 				x:Math.floor(Math.random()*41+10),
@@ -407,8 +419,8 @@ const TRUTH_UPGRADES={
 		dis(x,y,z,tx,ty,tz){
 			return Math.abs(x-tx)+Math.abs(y-ty)+Math.abs(z-tz);
 		},
-		message(x,y,z,tx,ty,tz,dis){
-			return `差距:${pn(dis)}`;
+		message(res){
+			return `差距:${pn(res)}`;
 		},
 	},
 	1:{
@@ -416,6 +428,8 @@ const TRUTH_UPGRADES={
 		attempts:5,
 		minCost:50,
 		maxCost:100,
+		dark:false,
+		fog:false,
 		gen(){
 			return {
 				x:Math.floor(Math.random()*51+50),
@@ -424,10 +438,10 @@ const TRUTH_UPGRADES={
 			};
 		},
 		dis(x,y,z,tx,ty,tz){
-			return Math.sqrt((x-tx)**2+(y-ty)**2+(z-tz)**2);
+			return Math.round(Math.sqrt((x-tx)**2+(y-ty)**2+(z-tz)**2)*100);
 		},
-		message(x,y,z,tx,ty,tz,dis){
-			return `距离:${pn(dis)}`;
+		message(res){
+			return `距离:${pn(res/100)}`;
 		},
 	},
 	2:{
@@ -435,6 +449,8 @@ const TRUTH_UPGRADES={
 		attempts:2+3*6+1,
 		minCost:100,
 		maxCost:160,
+		dark:false,
+		fog:false,
 		gen(){
 			return {
 				x:Math.floor(Math.random()*61+100),
@@ -447,25 +463,31 @@ const TRUTH_UPGRADES={
 			var dy=Math.abs(y-ty);
 			var dz=Math.abs(z-tz);
 			var md=Math.max(dx,dy,dz);
-			var res=[];
-			if(dx===md)res.push('宝石');
-			if(dy===md)res.push('魔法石');
-			if(dz===md)res.push('透镜');
+			var res=0;
+			if(dx===md)res|=1;
+			if(dy===md)res|=2;
+			if(dz===md)res|=4;
 			return res;
 		},
-		message(x,y,z,tx,ty,tz,dis){
-			if(dis.length===3){
+		message(res){
+			var dd=[];
+			if(res&1)dd.push('宝石');
+			if(res&2)dd.push('魔法石');
+			if(res&4)dd.push('透镜');
+			if(dd.length===3){
 				return '所有差距相同';
 			}else{
-				return `${dis.join('、')}差距最大`;
+				return `${dd.join('、')}差距最大`;
 			}
 		},
 	},
 	3:{
-		stages:3,
+		stages:4,
 		attempts:9,
 		minCost:160,
 		maxCost:220,
+		dark:false,
+		fog:false,
 		gen(){
 			return {
 				x:Math.floor(Math.random()*61+160),
@@ -479,11 +501,34 @@ const TRUTH_UPGRADES={
 			var dz=Math.abs(z-tz);
 			return 1+(dx^dy^dz)%9;
 		},
-		message(x,y,z,tx,ty,tz,dis){
-			return `相位:${dis}`;
+		message(res){
+			return `相位:${res}`;
 		},
 	},
+	4:{
+		stages:4,
+		attempts:2+3*6+1,
+		minCost:220,
+		maxCost:280,
+		dark:true,
+		fog:false,
+		gugu:true,
+	}
 };
+
+function truthAbbrDescription(lv){
+	const abbrList=[
+		'dark',
+		'fog',
+		'gugu',
+	].filter(s=>TRUTH_UPGRADES[lv][s]);
+	if(abbrList.length===0)return '';
+	return '('+abbrList.map(x=>({
+		dark:'<span title="真理隐于黑暗，逃避着前来的探索者。\n(目标数据是自适应的。)" class="help">黑暗</span>',
+		fog:'<span title="透过迷雾，真理的影子显得模糊。\n(实验结果不是确定性的。)" class="help">迷雾</span>',
+		gugu:'<span title="鸽子的羽毛落在实验器材上，使实验无法进行。\n(咕咕咕。)" class="help">鸽羽</span>',
+	}[x])).join(', ')+')';
+}
 
 function hasUpgrade(lv){
 	return lv in TRUTH_UPGRADES;
@@ -678,40 +723,56 @@ Vue.component('hint-message',{
 				}
 				this.truthUpgradeAttempt++;
 
+				var res=tu.dis(
+					this.gemChosen,
+					this.magicStoneChosen,
+					this.lenChosen,
+					this.truthUpgradeGemNeed,
+					this.truthUpgradeMagicStoneNeed,
+					this.truthUpgradeLenNeed
+				);
+				this.truthUpgradeHistory.push({
+					x:this.gemChosen,
+					y:this.magicStoneChosen,
+					z:this.lenChosen,
+					r:res,
+				});
+
 				if(this.gemChosen===this.truthUpgradeGemNeed
 					&&this.magicStoneChosen===this.truthUpgradeMagicStoneNeed
 					&&this.lenChosen===this.truthUpgradeLenNeed){
 
-					this.truthUpgradeResult='实验成功';
 					this.truthUpgradeStage++;
-					this.truthUpgradeAttempt=0;
 					if(this.truthUpgradeStage>=tu.stages){
-						this.truthUpgradeMessage='发现新的真理！';
 						this.truthLevel++;
-						this.truthUpgradeStage=0;
+						this.resetTruthUpgrade();
+						this.truthUpgradeResult='实验成功';
+						this.truthUpgradeMessage='发现新的真理！';
 					}else{
+						this.resetStage();
+						this.truthUpgradeResult='实验成功';
 						this.truthUpgradeMessage='离真理更进一步';
 					}
 				}else{
-					var xyzt=[this.gemChosen,
-						this.magicStoneChosen,
-						this.lenChosen,
-						this.truthUpgradeGemNeed,
-						this.truthUpgradeMagicStoneNeed,
-						this.truthUpgradeLenNeed
-					];
-					var dis=tu.dis(...xyzt);
 					this.truthUpgradeResult='实验失败';
-					this.truthUpgradeMessage=tu.message(...xyzt,dis);
+					this.truthUpgradeMessage=tu.message(res);
 				}
+				this.updateTruthUpgradeMessage();
+			},
+			resetStage(){
+				this.truthUpgradeAttempt=0;
+				this.truthUpgradeResult='';
+				this.truthUpgradeMessage='';
+				this.truthUpgradeHistory=[];
+				this.gemChosen
+				=this.magicStoneChosen
+				=this.lenChosen
+				=TRUTH_UPGRADES[this.truthLevel].minCost;
 				this.updateTruthUpgradeMessage();
 			},
 			resetTruthUpgrade(){
 				this.truthUpgradeStage=0;
-				this.truthUpgradeAttempt=0;
-				this.truthUpgradeResult='';
-				this.truthUpgradeMessage='';
-				this.updateTruthUpgradeMessage();
+				this.resetStage();
 			},
 			updateTruthUpgradeMessage(){
 				this.truthUpgradeMessageUpdate=(new Date()).getTime();
