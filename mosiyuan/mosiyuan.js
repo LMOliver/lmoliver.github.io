@@ -534,7 +534,7 @@ Vue.component('hint-message',{
 			buyMoer(){
 				if(!this.canBuyMoer)return;
 				this.moValue-=this.moerCost;
-				this.moers+=1+7*Math.min(this.techLevel('spell'),5);
+				this.moers+=1+7*Math.min(this.tech.spell,5);
 			},
 			buyChurch(){
 				if(!this.canBuyChurch)return;
@@ -575,7 +575,7 @@ Vue.component('hint-message',{
 			pray(){
 				if(!this.canPray)return;
 				this.moValue-=this.prayCost;
-				this.crystal+=1+7*Math.min(this.techLevel('optics'),5);
+				this.crystal+=1+7*Math.min(this.tech.optics,5);
 			},
 			wisdomUpgrade(){
 				if(!this.canUpgradeWisdom)return;
@@ -731,7 +731,7 @@ Vue.component('hint-message',{
 				}
 			},
 			getDevotion(){
-				this.devotion+=Math.pow(this.techLevel('devotionInduction'),2);
+				this.devotion+=Math.pow(this.tech.devotionInduction,2);
 			},
 		},
 		computed:{
@@ -776,7 +776,7 @@ Vue.component('hint-message',{
 				return `转化信仰 (+${pn(this.XYEarn)}信仰)`;
 			},
 			XYEarn(){
-				return this.moValue/2000*this.churchs*(1+this.wisdomLevel)*(1+this.techLevel('focus')/4);
+				return this.moValue/2000*this.churchs*(1+this.wisdomLevel)*(1+this.tech.focus/4);
 			},
 
 			spText(){
@@ -845,7 +845,7 @@ Vue.component('hint-message',{
 				return 16*Math.pow(1.5,this.altar);
 			},
 			theologyPerSec(){
-				return Math.max(0,Math.sqrt(this.moDelta*this.gem)-(1+this.theology)/this.altar)/1e4*(1+this.techLevel('glasses'));
+				return Math.max(0,Math.sqrt(this.moDelta*this.gem)-(1+this.theology)/this.altar)/1e4*(1+this.tech.glasses);
 			},
 			magicianCost(){
 				return 16*Math.pow(1.5,this.magician);
@@ -854,36 +854,36 @@ Vue.component('hint-message',{
 				return Math.max(0.01,this.magicStone/5e2)*Math.sqrt(this.magician);
 			},
 			magicRate(){
-				return 5*this.magician*(1+this.techLevel('magnifier')/4);
+				return 5*this.magician*(1+this.tech.magnifier/4);
 			},
 			scientistCost(){
 				return 16*Math.pow(1.5,this.scientist);
 			},
 			sciencePerSec(){
-				return Math.max(0,Math.sqrt(this.len*this.scientist)/2)*Math.sqrt(1+this.techLevel('glasses'));
+				return Math.max(0,Math.sqrt(this.len*this.scientist)/2)*Math.sqrt(1+this.tech.glasses);
 			},
 			scienceLimit(){
-				return 50*Math.pow(this.scientist,2)*(1+this.techLevel('glasses'));
+				return 50*Math.pow(this.scientist,2)*(1+this.tech.glasses);
 			},
 
 			truthUpgradeAttemptFactor(){
 				return Math.max(1,Math.pow(3.5,this.truthUpgradeAttempt-TRUTH_UPGRADES[this.truthLevel].attempts+1));
 			},
 			truthUpgradeTheologyCost(){
-				return this.gemChosen*Math.pow(4,this.truthLevel)*16*this.truthUpgradeAttemptFactor/(1+this.techLevel('spellWater')/20);
+				return this.gemChosen*Math.pow(4,this.truthLevel)*16*this.truthUpgradeAttemptFactor/(1+this.tech.spellWater/20);
 			},
 			truthUpgradeMagicCost(){
-				return this.magicStoneChosen*Math.pow(4,this.truthLevel)*36*this.truthUpgradeAttemptFactor/(1+this.techLevel('spellWater')/10);
+				return this.magicStoneChosen*Math.pow(4,this.truthLevel)*36*this.truthUpgradeAttemptFactor/(1+this.tech.spellWater/10);
 			},
 			truthUpgradeScienceCost(){
-				return this.lenChosen*Math.pow(4,this.truthLevel)*64*this.truthUpgradeAttemptFactor/(1+this.techLevel('spellWater')/5);
+				return this.lenChosen*Math.pow(4,this.truthLevel)*64*this.truthUpgradeAttemptFactor/(1+this.tech.spellWater/5);
 			},
 			truthUpgradeCrystalCost(){
 				return Math.ceil(
 					this.truthUpgradeAttemptFactor
 					*Math.pow(2.5,this.truthLevel)
 					*(this.gemChosen+this.magicStoneChosen+this.lenChosen)
-					*(2/(3+Math.sqrt(this.techLevel('dunai'))))
+					*(2/(3+Math.sqrt(this.tech.dunai)))
 				);
 			},
 			truthUpgradeVaild(){
@@ -913,7 +913,7 @@ Vue.component('hint-message',{
 
 			tidyEffectFactor(){
 				if(this.crystal%50!==0)return 1;
-				return (1+this.techLevel('tidy')/4);
+				return (1+this.tech.tidy/4);
 			}
 		},
 		data:function(){
@@ -944,6 +944,12 @@ Vue.component('hint-message',{
 				data.gemChosen=0;
 				data.magicStoneChosen=0;
 				data.lenChosen=0;
+			}
+			for(lv in TECH){
+				const lvv=TECH[lv];
+				for(id in lvv){
+					data.tech[id]|=0;
+				}
 			}
 			data.truthUpgradeResult='';
 			data.truthUpgradeMessage='';
