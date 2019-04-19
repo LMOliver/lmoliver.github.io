@@ -6,7 +6,10 @@
 		<script src="https://cdn.jsdelivr.net/npm/vue"></script>
 	</head>
 	<body>
-		<div id="app">
+		<div id="global" class="global">
+			加载中……
+		</div>
+		<div id="app" :style="{filter:`brightness(${light**1.5})`}" style="display:none;">
 			<h1>膜拜<span class="siyuan"></span></h1>
 			<p v-html="dailyMessage"></p>
 			<div class="area">
@@ -23,6 +26,7 @@
 					</p>
 				</blockquote>
 				<div class="col">
+					<h4>膜拜</h4>
 					<div>
 						<div>
 							<span>您已膜拜{{pn(moValue)}}次</span>
@@ -55,8 +59,9 @@
 						:disabled="!canBuyChurch&&!canBuyMoer">自动购买</button>
 					</div>
 				</div>
-				<div class="col">
-					<div v-if="churchs>=5">
+				<div class="col" v-if="churchs>=5">
+					<h4>信仰</h4>
+					<div>
 						<div>
 							<span>信仰:{{pn(XY)}}</span>
 						</div>
@@ -147,6 +152,11 @@
 								<button @click="buyAltar"
 								:disabled="gem<altarCost">神坛*{{pn(altar)}} [{{pn(altarCost)}}宝石]</button>
 							</div>
+							<div v-if="tech.hugeStoneBuilding>0">
+								<hr>
+								<button @click="buyHugeStone"
+								:disabled="!canBuyHugeStone">巨石*{{pn(hugeStone)}} [{{pn(hugeStoneCost)}}信仰]</button>
+							</div>
 						</div>
 					</div>
 					<div class="area">
@@ -162,6 +172,11 @@
 								<div>魔力:{{pn(magic)}}</div>
 								<button @click="buyMagician"
 								:disabled="magicStone<magicianCost">魔法师*{{pn(magician)}} [{{pn(magicianCost)}}魔法石]</button>
+							</div>
+							<div v-if="tech.fazhenBuilding>0">
+								<hr>
+								<button @click="buyFazhen"
+								:disabled="!canBuyFazhen">法阵*{{pn(fazhen)}} [{{pn(fazhenCost)}}巨石]</button>
 							</div>
 						</div>
 						<div class="col" v-if="natureLevel>=5">
@@ -321,6 +336,45 @@
 					</div>
 				</div>
 			</div>
+			<div class="area" v-if="tech.explore>0">
+				<h2>外域</h2>
+				<blockquote>
+					<p>
+						随着文明的重新建立，人们意识到这个星球上遗留的文明不止一个。他们是否仍膜拜着<span class="siyuan"></span>呢？比平凡与愚昧更可怕的是失去光明。
+					</p>
+					<p>
+						不管如何，人们已经不甘于平凡的生活了。当得知关于敌人的消息后，他们反而热血沸腾，渴望通过战斗来获得全新的资源。
+					</p>
+				</blockquote>
+				<div class="area">
+					<div class="col">
+						<h4>防御</h4>
+						<div>
+							<strong>光明:{{pn(light*100)}}%</strong>
+							阵地:{{0}}/{{pn(position)}}
+						</div>
+						<div>
+							<button @click="buyElementTower"
+							:disabled="!canBuyElementTower">元素塔*{{elementTower}} [{{elementTowerHugeStoneCost}}块巨石,{{elementTowerFazhenCost}}座法阵,{{elementTowerLenCost}}枚透镜]</button>
+						</div>
+						<hr>
+						<table v-for="elementTower>0">
+							<tbody>
+								<tr>
+									<th>元素</th>
+									<th>拥有量</th>
+									<th>变化率</th>
+								</tr>
+								<tr v-for="(el,id) in ELEMENTS" v-if="element[id]>0">
+									<td>{{el.name}}</td>
+									<td>{{pn(element[id])}}</td>
+									<td>{{pn(basicElementEarn)}}/秒</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
 			<div class="area" v-if="moCount>1e6">
 				<h2>文档</h2>
 				<blockquote>
@@ -337,8 +391,9 @@
 							<p>
 								以这个文明的现有技术水平还不能解读这篇<a href="./documentA.pdf">“天书”</a>中的东西，但<span class="siyuan"></span>一定可以。
 							</p>
-							<iframe src="./documentA.pdf" class="docblock">
-							</iframe>
+							<div class="docblock">
+								<strong>因文档过大(约11.2MB)，请点击链接访问。</strong>
+							</div>
 						</div>
 					</div>
 					<div class="doc">
@@ -393,8 +448,9 @@
 							<p>
 								一些php和md文件，似乎是一个<a href="https://orzsiyuan.com/archives/Algorithm/Simulate-Anneal">个人博客</a>。从博客名(orzsiyuan.com)可以看出即使对于个人，膜拜<span class="siyuan"></span>也十分重要。
 							</p>
-							<iframe src="https://orzsiyuan.com/archives/Algorithm/Simulate-Anneal" class="docblock">
-							</iframe>
+							<div class="docblock">
+								<strong>因博客作者太强，大幅影响加载速度，请点击链接访问。</strong>
+							</div>
 						</div>
 						<div class="col" v-else-if="moCount>=3e7">
 							<h4>屯屯屯</h4>

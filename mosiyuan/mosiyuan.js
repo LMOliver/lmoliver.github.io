@@ -100,6 +100,8 @@ function dailyMessage(){
 		'追寻真理时重置会将当前成功轮数也清空！',
 		'在真理之路上，要不畏艰辛，敢于推翻重来，才不会在错误的道路上越走越远。',
 		'窝 又 被 Siyuan D 了 QAQ',
+		'道路千万条，光明第一条。防御没做好，黑屏两行泪。',
+		'元素和光明在你下线时也会增加！',
 	];
 	try{
 		return msgs[Math.floor(Math.random()*msgs.length)].replace(/Siyuan/g,'<span class="siyuan"></span>');
@@ -143,7 +145,11 @@ const SAVE_ITEMS={
 	},
 	hugeStone:{
 		name:'巨石',
-		format:'VALUE巨石',
+		format:'VALUE块巨石',
+	},
+	fazhen:{
+		name:'法阵',
+		format:'VALUE座法阵',
 	},
 	crystal:{
 		name:'水晶',
@@ -234,6 +240,25 @@ const SAVE_ITEMS={
 	devotion:{
 		name:'虔诚',
 		format:'VALUE虔诚',
+	},
+	light:{
+		name:'亮度',
+		format:'VALUE亮度',
+		default:1,
+	},
+	elementTower:{
+		name:'元素塔',
+		format:'VALUE座元素塔',
+	},
+	element:{
+		name:'元素',
+		format:'...',
+		default:{},
+	},
+	lastTime:{
+		name:'上次运行时间',
+		format:'<VALUE>',
+		default:Date.now(),
 	},
 };
 
@@ -353,7 +378,6 @@ const TECH={
 			require:[
 				['focus',1],
 				['spell',4],
-				['spellWind',1],
 			],
 			cost(lv){
 				return [
@@ -364,6 +388,32 @@ const TECH={
 		},
 	},
 	2:{
+		geometry:{
+			name:'几何学',
+			description:'花纹与光斑启发了人们对图形的思考。',
+			require:[
+				['focus',5],
+				['tidy',1],
+			],
+			cost(lv){
+				return [
+					['science',2.5e5*(lv+2)**2],
+				];
+			},
+		},
+		hugeStoneBuilding:{
+			name:'巨石',
+			description:'她是如此之巨，以至于巨石都听从她的号令！',
+			require:[
+				['geometry',1],
+			],
+			cost(lv){
+				return [
+					['theology',1e6*(lv+2)**2],
+					['books',1e2+lv*20],
+				];
+			},
+		},
 		spellWind:{
 			name:'风语术',
 			description:'隐匿于气，交谈于风。',
@@ -388,6 +438,48 @@ const TECH={
 					['magic',Math.pow(5,lv)*500],
 				];
 			}
+		},
+		fazhenBuilding:{
+			name:'法阵',
+			description:'将施法过程描述出来，静态化，就变成了法阵。',
+			require:[
+				['geometry',1],
+				['spell',10],
+			],
+			cost(lv){
+				return [
+					['moers',3e2*lv],
+					['magician',3+lv],
+				];
+			},
+		},
+		fireFazhen:{
+			name:'烈焰阵',
+			description:'燃烧！不过好像没有什么东西该被烧掉呢。',
+			require:[
+				['geometry',3],
+				['fazhenBuilding',2],
+			],
+			cost(lv){
+				return [
+					['crystal',300*(lv+1)],
+					['magic',Math.pow(3,lv)*4],
+				];
+			},
+		},
+		explore:{
+			name:'探索',
+			description:'城镇的远处时常有微光传来，那似乎不仅仅是自然的造物……',
+			require:[
+				['fireFazhen',2],
+				['optics',12],
+			],
+			cost(lv){
+				return [
+					['moValue',1e17*1e2**lv],
+					['len',Math.pow(4,lv)*2],
+				];
+			},
 		},
 	},
 	3:{
@@ -516,6 +608,33 @@ const TRUTH_UPGRADES={
 	}
 };
 
+const ELEMENTS={
+	water:{
+		name:'水',
+		basic:true,
+	},
+	fire:{
+		name:'火',
+		basic:true,
+	},
+	earth:{
+		name:'土',
+		basic:true,
+	},
+	wind:{
+		name:'风',
+		basic:true,
+	},
+};
+
+const DEFENSE_BUILDING={
+
+};
+
+class Enemy{
+
+};
+
 function truthAbbrDescription(lv){
 	const abbrList=[
 		'dark',
@@ -567,7 +686,15 @@ Vue.component('hint-message',{
 !function(){
 	var _=new Vue({
 		el:'#app',
+		watch:{
+			light(v){	
+				this.setLight(v);
+			},
+		},
 		methods:{
+			setLight(v){
+				document.getElementById('global').style.backgroundColor=`rgb(${v**1.5*255},${v**1.5*255},${v**1.5*255})`;
+			},
 			moSiyuan(r=1){
 				this.moCount+=r;
 				this.moValue+=r*this.moDelta;
@@ -794,6 +921,23 @@ Vue.component('hint-message',{
 			getDevotion(){
 				this.devotion+=Math.pow(this.tech.devotionInduction,2);
 			},
+			buyHugeStone(){
+				if(!this.canBuyHugeStone)return;
+				this.XY-=this.hugeStoneCost;
+				this.hugeStone+=1;
+			},
+			buyFazhen(){
+				if(!this.canBuyFazhen)return;
+				this.hugeStone-=this.fazhenCost;
+				this.fazhen+=1;
+			},
+			buyElementTower(){
+				if(!this.canBuyElementTower)return;
+				this.hugeStone-=this.elementTowerHugeStoneCost;
+				this.fazhen-=this.elementTowerFazhenCost;
+				this.len-=this.elementTowerLenCost;
+				this.elementTower+=1;
+			}
 		},
 		computed:{
 			moSiyuanTag(){
@@ -830,7 +974,7 @@ Vue.component('hint-message',{
 				return this.moers>=this.churchCost;
 			},
 			churchCost(){
-				return Math.floor(5+Math.pow(this.churchs,1.2));
+				return Math.ceil(5+Math.pow(this.churchs,1.1+0.1/(1+this.hugeStoneEffectFactor)));
 			},
 
 			XYText(){
@@ -912,10 +1056,10 @@ Vue.component('hint-message',{
 				return 16*Math.pow(1.5,this.magician);
 			},
 			magicCostPerSec(){
-				return Math.max(0.01,this.magicStone/5e2)*Math.sqrt(this.magician);
+				return Math.max(0.01,this.magicStone/5e2)*Math.sqrt(this.magician)/this.fazhenEffectFactor;
 			},
 			magicRate(){
-				return 5*this.magician*(1+this.tech.magnifier/4);
+				return 5*this.magician*(1+this.tech.magnifier/4)*this.fazhenEffectFactor;
 			},
 			scientistCost(){
 				return 16*Math.pow(1.5,this.scientist);
@@ -975,7 +1119,47 @@ Vue.component('hint-message',{
 			tidyEffectFactor(){
 				if(this.crystal%50!==0)return 1;
 				return (1+this.tech.tidy/4);
-			}
+			},
+
+			canBuyHugeStone(){
+				return this.XY>=this.hugeStoneCost;
+			},
+			hugeStoneCost(){
+				return 1e18*Math.pow(2.5,this.hugeStone);
+			},
+			hugeStoneEffectFactor(){
+				return (1+this.hugeStone)*Math.sqrt(1+this.tech.hugeStoneBuilding);
+			},
+			canBuyFazhen(){
+				return this.hugeStone>=this.fazhenCost;
+			},
+			fazhenCost(){
+				return 3*Math.pow(this.fazhen+1,2);
+			},
+			fazhenEffectFactor(){
+				return (1+this.fazhen)*Math.sqrt(1+this.tech.fazhenBuilding);
+			},
+
+			canBuyElementTower(){
+				return this.hugeStone>=this.elementTowerHugeStoneCost
+					&& this.fazhen>=this.elementTowerFazhenCost
+					&& this.len>=this.elementTowerLenCost;
+			},
+			elementTowerHugeStoneCost(){
+				return 3+Math.floor(2*this.elementTower);
+			},
+			elementTowerFazhenCost(){
+				return 1+Math.floor(0.25*this.elementTower);
+			},
+			elementTowerLenCost(){
+				return Math.pow(4,this.elementTower)*100;
+			},
+			position(){
+				return Math.ceil(3*this.elementTower);
+			},
+			basicElementEarn(){
+				return 0.001*this.elementTower;
+			},
 		},
 		data:function(){
 			const PADDING='WW91JTIwYXJlJTIwdG9vJTIweWF1bmclMjB0b28lMjBzaW1wbGUldUZGMENzb21ldGltZXMlMjBuYWl2ZS4lMEE=';
@@ -988,7 +1172,8 @@ Vue.component('hint-message',{
 				},data);
 			}
 			for(var resName in SAVE_ITEMS){
-				if(!data[resName]){
+				var dd=data[resName];
+				if(typeof dd==='undefined'||(typeof dd==='number'&&!Number.isFinite(dd))){
 					if(typeof SAVE_ITEMS[resName].default!=='undefined'){
 						data[resName]=SAVE_ITEMS[resName].default;
 					}else{
@@ -1009,7 +1194,14 @@ Vue.component('hint-message',{
 			for(lv in TECH){
 				const lvv=TECH[lv];
 				for(id in lvv){
-					data.tech[id]|=0;
+					if(typeof data.tech[id]==='undefined'){
+						data.tech[id]=0;
+					}
+				}
+			}
+			for(el in ELEMENTS){
+				if(typeof data.element[id]==='undefined'){
+					data.element[id]=0;
 				}
 			}
 			data.truthUpgradeResult='';
@@ -1020,21 +1212,31 @@ Vue.component('hint-message',{
 			return data;
 		},
 		created(){
+			this.setLight(this.light);
 		},
 		mounted(){
+			const passTimeLoop=(s)=>{
+				const BASIC_ELEMENTS=['water','fire','earth','wind'];
+				for(id of BASIC_ELEMENTS){
+					this.element[id]+=s*this.basicElementEarn;
+				}
+				this.light=Math.min(1,this.light+s/6/3600*this.basicElementEarn);
+			}
+
+			passTimeLoop((Date.now()-this.lastTime)/1000);
+			this.lastTime=Date.now();
+
 			setInterval(()=>{
 				save={};
 				for(var resName in SAVE_ITEMS){
-					if(!save[resName]){
-						save[resName]=this[resName];
-					}
+					save[resName]=this[resName];
 				}
 				localStorage.setItem('game-mosiyuan-save',encode.call(this,save));
 			});
-			var now=Date.now();
+			
 			var loop=()=>{
 				var nt=Date.now();
-				var s=(nt-now)/1000;
+				var s=(nt-this.lastTime)/1000;
 
 				this.moSiyuan(s*this.bookEffect);
 				
@@ -1050,11 +1252,14 @@ Vue.component('hint-message',{
 				var dd=Math.min(this.devotion,s*Math.max(this.devotion*0.001*Math.max(1,Math.sqrt(this.devotionInductionFactor)),2));
 				this.devotion-=dd;
 
-				now=nt;
+				passTimeLoop(s);
 
+				this.lastTime=nt;
 				requestAnimationFrame(loop);
 			};
 			requestAnimationFrame(loop);
+			this.$el.style.display='block';
+			document.getElementById('global').innerText='';
 		},
 	});
 	window._=_;
