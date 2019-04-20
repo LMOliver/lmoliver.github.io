@@ -1220,7 +1220,7 @@ Vue.component('hint-message',{
 				for(id of BASIC_ELEMENTS){
 					this.element[id]+=s*this.basicElementEarn;
 				}
-				this.light=Math.min(1,this.light+s/6/3600*this.basicElementEarn);
+				this.light=Math.min(1,this.light+s/3600*this.basicElementEarn);
 			}
 
 			passTimeLoop((Date.now()-this.lastTime)/1000);
