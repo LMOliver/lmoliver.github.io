@@ -397,7 +397,7 @@ const TECH={
 			],
 			cost(lv){
 				return [
-					['science',2.5e5*(lv+2)**2],
+					['science',2e5*(lv+2)**2],
 				];
 			},
 		},
@@ -609,21 +609,71 @@ const TRUTH_UPGRADES={
 };
 
 const ELEMENTS={
+	fals:{
+		name:'谬',
+		basic:false,
+		color:'pink',
+		token:'⋄',
+	},
+	noth:{
+		name:'无',
+		basic:false,
+		color:'purple',
+		token:'▪',
+	},
+	void:{
+		name:'空',
+		basic:false,
+		color:'black',
+		token:'☉',
+	},
 	water:{
 		name:'水',
 		basic:true,
+		color:'lightblue',
+		token:'α',
 	},
 	fire:{
 		name:'火',
 		basic:true,
+		color:'orange',
+		token:'β',
 	},
 	earth:{
 		name:'土',
 		basic:true,
+		color:'brown',
+		token:'γ',
 	},
 	wind:{
 		name:'风',
 		basic:true,
+		color:'#dddd00',
+		token:'δ',
+	},
+	air:{
+		name:'气',
+		basic:true,
+		color:'skyblue',
+		token:'ε',
+	},
+	rain:{
+		name:'雨',
+		basic:true,
+		color:'blue',
+		token:'ζ',
+	},
+	wood:{
+		name:'木',
+		basic:true,
+		color:'#44dd00',
+		token:'η',
+	},
+	coal:{
+		name:'炭',
+		basic:true,
+		color:'#666644',
+		token:'θ',
 	},
 };
 

@@ -216,7 +216,7 @@
 							已进行<span :class="{danger:truthUpgradeAttempt>=TRUTH_UPGRADES[truthLevel].attempts}">{{truthUpgradeAttempt}}</span>次尝试
 							<button @click="resetTruthUpgrade">重置</button>
 						</p>
-						<table v-if="truthUpgradeHistory.length>0" style="text-align:center;">
+						<table v-if="truthUpgradeHistory.length>0" style="text-align:center;" class="ww">
 							<tbody>
 								<tr>
 									<th>编号</th>
@@ -235,7 +235,7 @@
 							</tbody>
 						</table>
 						<hr>
-						<table>
+						<table class="ww">
 							<tbody>
 								<tr>
 									<th>材料</th>
@@ -358,7 +358,7 @@
 							:disabled="!canBuyElementTower">元素塔*{{elementTower}} [{{elementTowerHugeStoneCost}}块巨石,{{elementTowerFazhenCost}}座法阵,{{elementTowerLenCost}}枚透镜]</button>
 						</div>
 						<hr>
-						<table v-for="elementTower>0">
+						<table v-for="elementTower>0" class="ww">
 							<tbody>
 								<tr>
 									<th>元素</th>
@@ -366,7 +366,11 @@
 									<th>变化率</th>
 								</tr>
 								<tr v-for="(el,id) in ELEMENTS" v-if="element[id]>0">
-									<td>{{el.name}}</td>
+									<td>
+										<strong :style="{color:el.color}">
+											{{el.name}}
+										</strong>
+									</td>
 									<td>{{pn(element[id])}}</td>
 									<td>{{pn(basicElementEarn)}}/秒</td>
 								</tr>
@@ -478,17 +482,50 @@
 					<div class="doc">
 						<div class="col" v-if="moCount>1e9">
 							<h4>文档F</h4>
+							<div class="docblock">
+								<table>
+									<tbody>
+										<tr>
+											<th>⊕</th>
+											<th v-for="el in ELEMENTS" :style="{color:el.color}">
+												{{el.token}}
+											</th>
+										</tr>
+										<tr v-for="el in ELEMENTS">
+											<th :style="{color:el.color}">
+												{{el.token}}
+											</th>
+											<td v-for="el in ELEMENTS">
+												咕
+											</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+						</div>
+						<div class="col" v-else-if="moCount>=5e8">
+							<h4>QAQ</h4>
+							<p>
+								还需要{{pn(1e9-moCount)}}次点击
+							</p>
+						</div>
+					</div>
+				</div>
+				<div class="area">
+					<div class="doc">
+						<div class="col" v-if="moCount>5e9">
+							<h4>文档G</h4>
 							<p>
 								<del>咕咕咕……</del>
 							</p>
 							<p>
-								<del>“我千辛万苦点了{{pn(1e9)}}次你就给我看这个？”</del>
+								<del>“我千辛万苦点了{{pn(5e9)}}次你就给我看这个？”</del>
 							</p>
 						</div>
-						<div class="col" v-else-if="moCount>=5e8">
+						<div class="col" v-else-if="moCount>=1e9">
 							<h4>咕咕咕</h4>
 							<p>
-								还需要{{pn(1e9-moCount)}}次点击
+								还需要{{pn(5e9-moCount)}}次点击
 							</p>
 						</div>
 					</div>

@@ -21,10 +21,10 @@
 	height:250px;
 	overflow: auto;
 	border: 2px #444444 solid;
-	background: whitesmoke;
+	/* color:#bbff00 */
 }
 
-table{
+.ww{
 	width:100%;
 }
 
