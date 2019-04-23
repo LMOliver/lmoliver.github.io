@@ -65,6 +65,10 @@ button{
 	color:black !important;
 }
 
+.nya{
+	color: palevioletred;
+}
+
 .global{
 	position: fixed;
 	left:0;

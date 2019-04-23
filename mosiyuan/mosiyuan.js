@@ -1,4 +1,3 @@
-
 const C=126-33+1;
 const ENCODE_P={33:125,34:84,35:44,36:102,37:57,38:68,39:50,40:69,41:59,42:83,43:100,44:72,45:116,46:35,47:108,48:89,49:92,50:51,51:65,52:73,53:124,54:119,55:90,56:45,57:47,58:75,59:60,60:95,61:96,62:91,63:63,64:111,65:46,66:101,67:36,68:120,69:104,70:97,71:42,72:55,73:99,74:113,75:53,76:112,77:122,78:114,79:106,80:33,81:79,82:74,83:121,84:61,85:85,86:76,87:49,88:93,89:82,90:40,91:117,92:105,93:62,94:94,95:39,96:78,97:86,98:109,99:41,100:66,101:70,102:48,103:58,104:88,105:103,106:64,107:115,108:80,109:81,110:43,111:123,112:67,113:56,114:107,115:110,116:52,117:118,118:77,119:126,120:87,121:98,122:34,123:71,124:38,125:37,126:54,};
 const DECODE_P={125:33,84:34,44:35,102:36,57:37,68:38,50:39,69:40,59:41,83:42,100:43,72:44,116:45,35:46,108:47,89:48,92:49,51:50,65:51,73:52,124:53,119:54,90:55,45:56,47:57,75:58,60:59,95:60,96:61,91:62,63:63,111:64,46:65,101:66,36:67,120:68,104:69,97:70,42:71,55:72,99:73,113:74,53:75,112:76,122:77,114:78,106:79,33:80,79:81,74:82,121:83,61:84,85:85,76:86,49:87,93:88,82:89,40:90,117:91,105:92,62:93,94:94,39:95,78:96,86:97,109:98,41:99,66:100,70:101,48:102,58:103,88:104,103:105,64:106,115:107,80:108,81:109,43:110,123:111,67:112,56:113,107:114,110:115,52:116,118:117,77:118,126:119,87:120,98:121,34:122,71:123,38:124,37:125,54:126,};
@@ -32,29 +31,29 @@ function decode(x){
 	}
 	return JSON.parse(encodeArr(arr));
 }
+
+const EXP_BASE=10;
+const FIRSTS=['K','M','B'];
+const NUM_HEADS=['','U','D','T','q','Q','s','S','O','N'];
+const NUM_TAILS=['','Dc','Vi','Tg','qg','Qg','sg','Sg','Og','Ng'];
 function pn(num){
-	const EXP_BASE=10;
-	const heads=['','U','D','T','q','Q','s','S','O','N'];
-	const tails=['','Dc','Vi','Tg','qg','Qg','sg','Sg','Og','Ng'];
 	if(typeof num!=='number')return String(num);
 	if(!Number.isFinite(num))return '???';
 	var [val,exp]=num.toExponential(2).split('e').map(parseFloat);
-	if(exp<6){
+	if(exp<5){
 		if(Number.isSafeInteger(num))return num.toString();
 		else if(exp<-4)return num.toExponential(3);
-		else if(exp<-2)return num.toPrecision(2);
+		else if(exp<0)return num.toFixed(3);
 		else return num.toFixed(2);
+	}else if(exp>3*EXP_BASE**2){
+		return num.toExponential(2);
 	}
 	val*=Math.pow(10,exp%3);
-	var elv=Math.floor(exp/3)-1;
-	var suf;
-	if(elv<=2){
-		suf=['K','M','B'][elv];
-	}else if(elv>=EXP_BASE*EXP_BASE){
-		return num.toExponential(2);
-	}else{
-		suf=(heads[elv%EXP_BASE]+tails[Math.floor(elv/EXP_BASE)]).slice(0,2);
-	}
+	let elv=Math.floor(exp/3)-1;
+	let suf=elv<=2?
+		FIRSTS[elv]
+	:
+		(NUM_HEADS[elv%EXP_BASE]+NUM_TAILS[Math.floor(elv/EXP_BASE)]).slice(0,2);
 	return `${val.toPrecision(3)}${suf}`;
 }
 function pnr(num){
@@ -102,9 +101,17 @@ function dailyMessage(){
 		'窝 又 被 Siyuan D 了 QAQ',
 		'道路千万条，光明第一条。防御没做好，黑屏两行泪。',
 		'元素和光明在你下线时也会增加！',
+		'贪 D 的(9^0+9^1+...+9^n+...)头 Siyuan',
+		'Siyuan:“辣鸡，真辣鸡！”',
+		'Siyuan:“泥萌怎么这么菜 nya？”',
+		'Siyuan:“我就 D 你怎么了？”',
+		'萌新三连:“窝怎么立直了 nya？胡是什么 nya，可以跳过吗？自摸是不是每巡都有的，好烦 nya！”',
+		'[https://orzsiyuan.com](https://lmoliver.github.io/mosiyuan)',
 	];
 	try{
-		return msgs[Math.floor(Math.random()*msgs.length)].replace(/Siyuan/g,'<span class="siyuan"></span>');
+		return msgs[Math.floor(Math.random()*msgs.length)]
+			.replace(/Siyuan/g,'<span class="siyuan"></span>')
+			.replace(/nya/g,'<span class="nya">nya</span>');
 	}catch(e){
 		return 'emm...';
 	}
@@ -255,10 +262,34 @@ const SAVE_ITEMS={
 		format:'...',
 		default:{},
 	},
+	elementOwned:{
+		name:'已拥有元素',
+		format:'...',
+		default:{},
+	},
 	lastTime:{
 		name:'上次运行时间',
 		format:'<VALUE>',
 		default:Date.now(),
+	},
+	rngSeed:{
+		name:'随机数生成器种子',
+		format:'...',
+		default:{},
+	},
+	defBuildings:{
+		name:'阵地建筑',
+		format:'...',
+		default:[],
+	},
+	enemy:{
+		name:'敌人',
+		format:'...',
+		default:{
+			current:[],
+			arr:[],
+			pop:[],
+		},
 	},
 };
 
@@ -388,6 +419,17 @@ const TECH={
 		},
 	},
 	2:{
+		pscience:{
+			name:'科普',
+			description:'用一些神秘的小东西唤起孩子们对科学的好奇。',
+			require:[],
+			cost(lv){
+				return [
+					['gem',30*Math.pow(lv+1,2.2)],
+					['magic',5e5*Math.pow(lv+1,0.1)],
+				];
+			},
+		},
 		geometry:{
 			name:'几何学',
 			description:'花纹与光斑启发了人们对图形的思考。',
@@ -397,7 +439,7 @@ const TECH={
 			],
 			cost(lv){
 				return [
-					['science',2e5*(lv+2)**2],
+					['science',5e4*(lv+4)**2],
 				];
 			},
 		},
@@ -503,9 +545,9 @@ const TRUTH_UPGRADES={
 		fog:false,
 		gen(){
 			return {
-				x:Math.floor(Math.random()*41+10),
-				y:Math.floor(Math.random()*41+10),
-				z:Math.floor(Math.random()*41+10),
+				x:Math.floor(this.random('truthUpgrade')*41+10),
+				y:Math.floor(this.random('truthUpgrade')*41+10),
+				z:Math.floor(this.random('truthUpgrade')*41+10),
 			};
 		},
 		dis(x,y,z,tx,ty,tz){
@@ -524,9 +566,9 @@ const TRUTH_UPGRADES={
 		fog:false,
 		gen(){
 			return {
-				x:Math.floor(Math.random()*51+50),
-				y:Math.floor(Math.random()*51+50),
-				z:Math.floor(Math.random()*51+50),
+				x:Math.floor(this.random('truthUpgrade')*51+50),
+				y:Math.floor(this.random('truthUpgrade')*51+50),
+				z:Math.floor(this.random('truthUpgrade')*51+50),
 			};
 		},
 		dis(x,y,z,tx,ty,tz){
@@ -545,9 +587,9 @@ const TRUTH_UPGRADES={
 		fog:false,
 		gen(){
 			return {
-				x:Math.floor(Math.random()*61+100),
-				y:Math.floor(Math.random()*61+100),
-				z:Math.floor(Math.random()*61+100),
+				x:Math.floor(this.random('truthUpgrade')*61+100),
+				y:Math.floor(this.random('truthUpgrade')*61+100),
+				z:Math.floor(this.random('truthUpgrade')*61+100),
 			};
 		},
 		dis(x,y,z,tx,ty,tz){
@@ -582,9 +624,9 @@ const TRUTH_UPGRADES={
 		fog:false,
 		gen(){
 			return {
-				x:Math.floor(Math.random()*61+160),
-				y:Math.floor(Math.random()*61+160),
-				z:Math.floor(Math.random()*61+160),
+				x:Math.floor(this.random('truthUpgrade')*61+160),
+				y:Math.floor(this.random('truthUpgrade')*61+160),
+				z:Math.floor(this.random('truthUpgrade')*61+160),
 			};
 		},
 		dis(x,y,z,tx,ty,tz){
@@ -677,12 +719,65 @@ const ELEMENTS={
 	},
 };
 
-const DEFENSE_BUILDING={
+const ENEMY_ABBR=[
+	'attack',
+	'defendx',
+	'defendy',
+	'defendz',
+	'speed',
+	'health',
+];
 
+function damage(e,tp,val){
+	e.abbr.health-=val/(val+e.abbr['defend'+tp])*val;
+}
+
+const DEFENSE_BUILDING={
+	waterArrowTower:{
+		name:'水箭塔',
+		description:'0.1魔法伤害(0.3s冷却) 消耗0.002水元素',
+		require:{
+			tech:[
+				['spellWater',3],
+			],
+			element:[
+				'water',
+			],
+		},
+		cost(){
+			return {
+				resource:[
+					['fazhen',1],
+					['hugeStone',5],
+				],
+				element:[
+					['water',2],
+				],
+			};
+		},
+		attack(e,s){
+			damage(e,'y',0.1);
+			return {
+				cooldown:0.3,
+			};
+		},
+	},
 };
 
-class Enemy{
+const DB_PROI={
+	0:{
+		name:'最早出现',
+		cmp:(a,b)=>'TODO',
+	},
+	1:{
 
+	},
+	2:{
+
+	},
+	3:{
+
+	},
 };
 
 function truthAbbrDescription(lv){
@@ -701,6 +796,40 @@ function truthAbbrDescription(lv){
 
 function hasUpgrade(lv){
 	return lv in TRUTH_UPGRADES;
+}
+
+const PADDING='WW91JTIwYXJlJTIwdG9vJTIweWF1bmclMjB0b28lMjBzaW1wbGUldUZGMENzb21ldGltZXMlMjBuYWl2ZS4lMEE=';
+function initData(data){
+	data.PADDING=PADDING;
+	if(hasUpgrade(data.truthLevel)){
+		data.gemChosen=TRUTH_UPGRADES[data.truthLevel].minCost;
+		data.magicStoneChosen=TRUTH_UPGRADES[data.truthLevel].minCost;
+		data.lenChosen=TRUTH_UPGRADES[data.truthLevel].minCost;
+	}else{
+		data.gemChosen=0;
+		data.magicStoneChosen=0;
+		data.lenChosen=0;
+	}
+	for(lv in TECH){
+		const lvv=TECH[lv];
+		for(id in lvv){
+			if(typeof data.tech[id]==='undefined'){
+				data.tech[id]=0;
+			}
+		}
+	}
+	for(el in ELEMENTS){
+		if(typeof data.element[id]==='undefined'){
+			data.element[id]=0;
+		}
+	}
+	data.truthUpgradeResult='';
+	data.truthUpgradeMessage='';
+	data.truthUpgradeMessageUpdate=(new Date()).getTime();
+	data.dailyMessage=dailyMessage();
+	data.selectedTruthLevel=1;
+
+	data.saveInput='';
 }
 
 Vue.component('hint-message',{
@@ -784,7 +913,7 @@ Vue.component('hint-message',{
 			sp(){
 				this.books-=this.spCost;
 				var s=1+Math.sqrt(this.natureLevel);
-				while(Math.random()<4/5){
+				while(this.random('sp')<4/5){
 					s*=5/4*0.9;
 				}
 				s=Math.min(s,300);
@@ -875,7 +1004,7 @@ Vue.component('hint-message',{
 			},
 
 			genTruthUpgradeNeed(){
-				var s=TRUTH_UPGRADES[this.truthLevel].gen();
+				var s=TRUTH_UPGRADES[this.truthLevel].gen.call(this);
 				this.truthUpgradeGemNeed=s.x;
 				this.truthUpgradeMagicStoneNeed=s.y;
 				this.truthUpgradeLenNeed=s.z;
@@ -987,7 +1116,162 @@ Vue.component('hint-message',{
 				this.fazhen-=this.elementTowerFazhenCost;
 				this.len-=this.elementTowerLenCost;
 				this.elementTower+=1;
-			}
+			},
+			saveImport(){
+				try{
+					var data=decode.call({
+						PADDING,
+					},this.saveInput.trim());
+					for(name in SAVE_ITEMS){
+						this.$set(this,name,data[name]);
+					}
+					initData.call(this,this);
+					this.saveInput='导入成功！';
+					this.solvePTL();
+				}catch(e){
+					this.saveInput='导入失败！';
+				}
+			},
+			saveExport(){
+				var save={};
+				for(let name in SAVE_ITEMS){
+					save[name]=this[name];
+				}
+				this.saveInput=encode.call(this,save);
+			},
+			random(name){
+				if(typeof this.rngSeed[name]==='undefined'){
+					this.rngSeed[name]=Date.now()%233280;
+				}
+				this.rngSeed[name]=(this.rngSeed[name]*9301+49297)%233280;
+				return this.rngSeed[name]/233280;
+			},
+
+			genEnemyDNA(...parentsDNA){
+				var dna={};
+				for(let abbr of ENEMY_ABBR){
+					dna[abbr]=Math.random()*0.01;
+					for(let e of parentsDNA){
+						dna[abbr]+=e[abbr];
+					}
+					dna[abbr]/=(parentsDNA.length+0.01);
+					if(Math.random()<0.002){
+						dna[abbr]*=2*Math.random();
+					}
+				}
+				return dna;
+			},
+			getEnemyAbbr(dna,strength){
+				var r=strength/Math.sqrt(ENEMY_ABBR.map(a=>dna[a]**2).reduce((a,b)=>a+b,0));
+				if(!isFinite(r))r=1e10;
+				var res={};
+				for(let abbr of ENEMY_ABBR){
+					res[abbr]=dna[abbr]*r;
+				}
+				return res;
+			},
+			takePop(f=Math.min){
+				var p=this.enemy.pop;
+				var x=f(...(p.map(x=>x.score)));
+				for(let i=0;i<p.length;i++){
+					if(p[i].score===x){
+						return p.splice(i,1)[0].dna;
+					}
+				}
+			},
+			fillArr(){
+				var e=this.enemy;
+				while(e.arr.length<5&&e.pop.length){
+					arr.push(this.takePop(Math.max)).dna;
+				}
+			},
+			enemyDNAback(dna,score){
+				var e=this.enemy;
+				e.pop.push({dna,score},{dna,score});
+				this.fillArr();
+				while(e.pop.length>50){
+					takePop(Math.min);
+				}
+			},
+			getName(dna){
+				var {attack,defendx,defendy,defendz,speed,health}
+					=this.getEnemyAbbr(dna,1);
+
+				var low=0.1;
+				var mid=0.18;
+				var high=0.6;
+
+				var strs=[];
+
+				if(health>high)strs.push('巨');
+				else if(attack>high)strs.push('血');
+				else if(speed>high)strs.push('灵');
+
+				if(attack*speed*health>low)strs.push('烈焰');
+				else if(defendx*defendy*defendz>low)strs.push('寒冰');
+
+				else if(defendx>high)strs.push('妖');
+				else if(defendy>high)strs.push('魔');
+				else if(defendz>high)strs.push('金');
+
+				if(attack*defendz>mid)strs.push('雄狮');
+				else if(speed*defendx>mid)strs.push('恶狼');
+				else if(health*defendy>mid)strs.push('青蛙');
+				else strs.push('白狐');
+
+				return strs.map((s,i)=>Number(i)===0?s:s.substr(1)).join('');
+			},
+			spawnEnemy(strength){
+				var e=this.enemy;
+				this.fillArr();
+				if(e.arr.length===0){
+					e.arr.push(this.genEnemyDNA());
+				}
+				var dnas=[e.arr.shift()];
+				for(let i=0;i<e.arr.length&&Math.random()<0.5;i++){
+					dnas.push(e.arr[i]);
+				}
+				var dna=this.genEnemyDNA(...dnas);
+				e.current.push({
+					strength,
+					dna,
+					abbr:this.getEnemyAbbr(dna,strength),
+					pos:1,
+					score:0,
+				});
+			},
+			passTimeLoop(s){
+				const BASIC_ELEMENTS=['water','fire','earth','wind'];
+				for(id of BASIC_ELEMENTS){
+					this.element[id]+=s*this.basicElementEarn;
+					if(this.element[id]>0){
+						this.elementOwned[id]=true;
+					}
+				}
+				this.light=Math.min(1,this.light+s/3600*this.basicElementEarn);
+			},
+			solvePTL(){
+				var nt=Date.now();
+				this.passTimeLoop((nt-this.lastTime)/1000);
+				this.lastTime=nt;
+			},
+			canBuildDB(id){
+				var {resource,element}=DEFENSE_BUILDING[id].cost();
+				return element.every(([id,value])=>this.element[id]>=value)
+					&& resource.every(([id,value])=>this[id]>=value);
+			},
+			buildDB(id){
+				var {resource,element}=DEFENSE_BUILDING[id].cost();
+				if(!this.canBuildDB(id))return;
+				element.forEach(([id,value])=>{this.element[id]-=value});
+				resource.forEach(([id,value])=>{this[id]-=value});
+				this.defBuildings.push({
+					id,
+					cooldown:0,
+					priority:0,
+				});
+			},
+
 		},
 		computed:{
 			moSiyuanTag(){
@@ -1115,10 +1399,10 @@ Vue.component('hint-message',{
 				return 16*Math.pow(1.5,this.scientist);
 			},
 			sciencePerSec(){
-				return Math.max(0,Math.sqrt(this.len*this.scientist)/2)*Math.sqrt(1+this.tech.glasses);
+				return Math.max(0,Math.sqrt(this.len*this.scientist)/2)*Math.sqrt(1+this.tech.glasses)*(1+Math.sqrt(this.tech.pscience)/4);
 			},
 			scienceLimit(){
-				return 50*Math.pow(this.scientist,2)*(1+this.tech.glasses);
+				return 50*Math.pow(this.scientist,2)*(1+this.tech.glasses)*(1+Math.sqrt(this.tech.pscience)/4);
 			},
 
 			truthUpgradeAttemptFactor(){
@@ -1211,15 +1495,16 @@ Vue.component('hint-message',{
 				return 0.001*this.elementTower;
 			},
 		},
-		data:function(){
-			const PADDING='WW91JTIwYXJlJTIwdG9vJTIweWF1bmclMjB0b28lMjBzaW1wbGUldUZGMENzb21ldGltZXMlMjBuYWl2ZS4lMEE=';
-			var data=localStorage.getItem('game-mosiyuan-save');
-			if(!data){
-				data={};
-			}else{
-				data=decode.call({
-					PADDING,
-				},data);
+		data:function(){var save=localStorage.getItem('game-mosiyuan-save');
+			var data={};
+			if(save){
+				try{
+					data=decode.call({
+						PADDING,
+					},save);
+				}catch(e){
+					window.prompt(`无法读取存档。\n${e}\n请全选复制以下存档文本，以备日后恢复。`,save);
+				}
 			}
 			for(var resName in SAVE_ITEMS){
 				var dd=data[resName];
@@ -1231,59 +1516,23 @@ Vue.component('hint-message',{
 					}
 				}
 			}
-			data.PADDING=PADDING;
-			if(hasUpgrade(data.truthLevel)){
-				data.gemChosen=TRUTH_UPGRADES[data.truthLevel].minCost;
-				data.magicStoneChosen=TRUTH_UPGRADES[data.truthLevel].minCost;
-				data.lenChosen=TRUTH_UPGRADES[data.truthLevel].minCost;
-			}else{
-				data.gemChosen=0;
-				data.magicStoneChosen=0;
-				data.lenChosen=0;
-			}
-			for(lv in TECH){
-				const lvv=TECH[lv];
-				for(id in lvv){
-					if(typeof data.tech[id]==='undefined'){
-						data.tech[id]=0;
-					}
-				}
-			}
-			for(el in ELEMENTS){
-				if(typeof data.element[id]==='undefined'){
-					data.element[id]=0;
-				}
-			}
-			data.truthUpgradeResult='';
-			data.truthUpgradeMessage='';
-			data.truthUpgradeMessageUpdate=(new Date()).getTime();
-			data.dailyMessage=dailyMessage();
-			data.selectedTruthLevel=1;
+			initData.call(this,data);
 			return data;
 		},
 		created(){
 			this.setLight(this.light);
 		},
 		mounted(){
-			const passTimeLoop=(s)=>{
-				const BASIC_ELEMENTS=['water','fire','earth','wind'];
-				for(id of BASIC_ELEMENTS){
-					this.element[id]+=s*this.basicElementEarn;
-				}
-				this.light=Math.min(1,this.light+s/3600*this.basicElementEarn);
-			}
-
-			passTimeLoop((Date.now()-this.lastTime)/1000);
-			this.lastTime=Date.now();
-
 			setInterval(()=>{
 				save={};
 				for(var resName in SAVE_ITEMS){
 					save[resName]=this[resName];
 				}
 				localStorage.setItem('game-mosiyuan-save',encode.call(this,save));
-			});
+			},1000);
 			
+			this.solvePTL();
+
 			var loop=()=>{
 				var nt=Date.now();
 				var s=(nt-this.lastTime)/1000;
@@ -1302,12 +1551,11 @@ Vue.component('hint-message',{
 				var dd=Math.min(this.devotion,s*Math.max(this.devotion*0.001*Math.max(1,Math.sqrt(this.devotionInductionFactor)),2));
 				this.devotion-=dd;
 
-				passTimeLoop(s);
+				this.passTimeLoop(s);
 
 				this.lastTime=nt;
-				requestAnimationFrame(loop);
 			};
-			requestAnimationFrame(loop);
+			setInterval(loop);
 			this.$el.style.display='block';
 			document.getElementById('global').innerText='';
 		},

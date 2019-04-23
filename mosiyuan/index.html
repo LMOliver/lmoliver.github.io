@@ -194,7 +194,7 @@
 					</div>
 				</div>
 			</div>
-			<div class="area" v-if="temple>=5&&altar>=5&&magician>=5&&scientist>=5">
+			<div class="area" v-if="(temple>=5&&altar>=5&&magician>=5&&scientist>=5)||this.truthLevel>0">
 				<h2>城镇</h2>
 				<blockquote>
 					<p>在遗迹中的发现与收获振奋了信徒们。愚昧逐渐远离，新的知识填充了信徒们的内心。</p>
@@ -340,7 +340,7 @@
 				<h2>外域</h2>
 				<blockquote>
 					<p>
-						随着文明的重新建立，人们意识到这个星球上遗留的文明不止一个。他们是否仍膜拜着<span class="siyuan"></span>呢？比平凡与愚昧更可怕的是失去光明。
+						随着文明的重新建立，人们意识到这个星球上遗留的文明不止一个。“比平凡与愚昧更可怕的是失去光明。”他们是否仍膜拜着<span class="siyuan"></span>呢？
 					</p>
 					<p>
 						不管如何，人们已经不甘于平凡的生活了。当得知关于敌人的消息后，他们反而热血沸腾，渴望通过战斗来获得全新的资源。
@@ -348,32 +348,117 @@
 				</blockquote>
 				<div class="area">
 					<div class="col">
-						<h4>防御</h4>
-						<div>
-							<strong>光明:{{pn(light*100)}}%</strong>
+						<div class="area">
+							<h4>元素</h4>
+							<div>
+								<strong>光明:{{pn(light*100)}}%</strong>
+							</div>
+							<div>
+								<button @click="buyElementTower"
+								:disabled="!canBuyElementTower">元素塔*{{elementTower}} [{{elementTowerHugeStoneCost}}块巨石,{{elementTowerFazhenCost}}座法阵,{{elementTowerLenCost}}枚透镜]</button>
+							</div>
+							<hr>
+							<table v-for="elementTower>0" class="ww">
+								<tbody>
+									<tr>
+										<th>元素</th>
+										<th>拥有量</th>
+										<th>变化率</th>
+									</tr>
+									<tr v-for="(el,id) in ELEMENTS" v-if="elementOwned[id]">
+										<td>
+											<strong :style="{color:el.color}">
+												{{el.name}}
+											</strong>
+										</td>
+										<td>{{pn(element[id])}}</td>
+										<td>{{pn(basicElementEarn)}}/秒</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+						<div class="area" v-if="position>0">
+							<h4>建设</h4>
+							<p>
+								(按钮现在还按不了)
+							</p>
+							<ul>
+								<li v-for="(t,id) in DEFENSE_BUILDING"
+								v-if="showDB(id)">
+									<div>
+										<button :click="buildDB(id)"
+										:disabled="canBuildDB(id)">
+											{{t.name}}
+											[{{
+												[
+													...(
+														t.cost().resource.map(
+															([id,value])=>SAVE_ITEMS[id]
+																.format.replace(/VALUE/g,value)
+														)
+													),
+													...(
+														t.cost().element.map(
+															([id,value])=>value+ELEMENTS[id].name+'元素'
+														)
+													)
+												].join(',')
+											}}]
+										</button>
+									</div>
+									{{t.description}}
+								</li>
+							</ul>
+						</div>
+						<div class="area" v-if="position>0">
+							<h4>防御</h4>
 							阵地:{{0}}/{{pn(position)}}
 						</div>
+					</div>
+					<div class="col" v-if="position>0">
+						<h4>入侵</h4>
 						<div>
-							<button @click="buyElementTower"
-							:disabled="!canBuyElementTower">元素塔*{{elementTower}} [{{elementTowerHugeStoneCost}}块巨石,{{elementTowerFazhenCost}}座法阵,{{elementTowerLenCost}}枚透镜]</button>
+							<!-- <progress class="ww"></progress> -->
 						</div>
-						<hr>
-						<table v-for="elementTower>0" class="ww">
+						<div>
+							<!-- <progress class="ww"></progress> -->
+						</div>
+						<table v-if="enemy.current.length>0" class="ww">
 							<tbody>
 								<tr>
-									<th>元素</th>
-									<th>拥有量</th>
-									<th>变化率</th>
+									<th colspan="2">敌人</th>
+									<th>生命</th>
+									<th>距离</th>
+									<th>攻击</th>
+									<th>速度</th>
 								</tr>
-								<tr v-for="(el,id) in ELEMENTS" v-if="element[id]>0">
-									<td>
-										<strong :style="{color:el.color}">
-											{{el.name}}
-										</strong>
-									</td>
-									<td>{{pn(element[id])}}</td>
-									<td>{{pn(basicElementEarn)}}/秒</td>
+								<tr>
+									<th>等级</th>
+									<th>功勋</th>
+									<th></th>
+									<th>意志</th>
+									<th>圣盾</th>
+									<th>护甲</th>
 								</tr>
+								<template v-for="(e,id) in enemy.current">
+									<tr :style="{background:id%2?'#f0f0f0':'#ffffff'}">
+										<td colspan="2">
+											{{getName(e.dna)}}
+										</td>
+										<td>{{pn(e.abbr.health)}}</td>
+										<td>{{pn(e.pos)}}</td>
+										<td>{{pn(e.abbr.attack)}}</td>
+										<td>{{pn(e.abbr.speed)}}</td>
+									</tr>
+									<tr :style="{background:id%2?'#f0f0f0':'#ffffff'}">
+										<td>{{pn(Math.round(Math.log(e.strength)/Math.log(1.2)+1))}}</td>
+										<td>{{pn(e.score)}}☆</td>
+										<td><button>集火</button></td>
+										<td>{{pn(e.abbr.defendx)}}</td>
+										<td>{{pn(e.abbr.defendy)}}</td>
+										<td>{{pn(e.abbr.defendz)}}</td>
+									</tr>
+								</template>
 							</tbody>
 						</table>
 					</div>
@@ -530,6 +615,13 @@
 						</div>
 					</div>
 				</div>
+			</div>
+			<div class="area">
+				<h2>存档</h2>
+				<p>导出时请<strong><code>Ctrl + A</code></strong>选中，切勿双击选中！</p>
+				<input v-model="saveInput">
+				<button @click="saveImport">导入</button>
+				<button @click="saveExport">导出</button>
 			</div>
 			<div class="area">
 				<br v-for="_ in 4">
