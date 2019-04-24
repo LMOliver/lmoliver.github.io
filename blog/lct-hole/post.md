@@ -1,3 +1,27 @@
+**感谢 Siyuan 的帮助！终于AC了qwq**
+
+在~~看上去长达数月的~~ Debug 后，我最终决定膜拜 <span class="cf-black-red">Siyuan</span> 。
+
+具体操作：
+
+1. 试图让她使用指针写`LCT`；
+
+2. 在 Siyuan 秒掉模板题后要一份代码；
+
+3. 对于`LCT`中的每个函数：
+
+   1. 将此函数替换为 Siyuan 的代码;
+   
+   2. 提交，如果**AC**，`break`；
+   
+   3. 撤销操作。
+
+在替换`splay`的时候**AC**了，寻找 BUG ，发现是判父亲是否为`splay`根直接用了`if(fa->fa)`……
+
+[AC](https://www.luogu.org/recordnew/show/17432144)
+
+----
+
 [WA+TLE 30](https://www.luogu.org/recordnew/show/16694154)
 
 有没有大佬帮我查查错啊QAQ
