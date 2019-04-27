@@ -1255,6 +1255,10 @@ Vue.component('hint-message',{
 				this.passTimeLoop((nt-this.lastTime)/1000);
 				this.lastTime=nt;
 			},
+			showDB(id){
+				var {resource,element}=DEFENSE_BUILDING[id].require;
+				return true;
+			},
 			canBuildDB(id){
 				var {resource,element}=DEFENSE_BUILDING[id].cost();
 				return element.every(([id,value])=>this.element[id]>=value)
