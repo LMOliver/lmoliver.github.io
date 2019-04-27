@@ -386,8 +386,8 @@
 								<li v-for="(t,id) in DEFENSE_BUILDING"
 								v-if="showDB(id)">
 									<div>
-										<button :click="buildDB(id)"
-										:disabled="canBuildDB(id)">
+										<button @click="buildDB(id)"
+										:disabled="!canBuildDB(id)">
 											{{t.name}}
 											[{{
 												[
