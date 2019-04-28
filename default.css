@@ -87,13 +87,20 @@ a:active{
 	color:rgb(255, 96, 0);
 }
 
-button{
+button,select{
 	border: 1px gray solid;
 	border-radius: 5px;
 	background: white;
 	color:black;
 	padding: 4px 8px;
+	line-height: 18px;
 }
+
+select{
+	height: 28px;
+	padding: 0 0 !important;
+}
+
 button:hover{
 	background: whitesmoke;
 
