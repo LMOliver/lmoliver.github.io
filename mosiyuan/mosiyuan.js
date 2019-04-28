@@ -105,6 +105,8 @@ function dailyMessage(){
 		'Siyuan:“辣鸡，真辣鸡！”',
 		'Siyuan:“泥萌怎么这么菜 nya？”',
 		'Siyuan:“我就 D 你怎么了？”',
+		'Siyuan:“那场 ** CF 连样例解释都没有？”',
+		'Siyuan:“tourist 能过，那窝肯定也能过”',
 		'萌新三连:“窝怎么立直了 nya？胡是什么 nya，可以跳过吗？自摸是不是每巡都有的，好烦 nya！”',
 		'[https://orzsiyuan.com](https://lmoliver.github.io/mosiyuan)',
 	];
@@ -290,6 +292,21 @@ const SAVE_ITEMS={
 			arr:[],
 			pop:[],
 		},
+	},
+	warMind:{
+		name:'战意',
+		format:'VALUE战意',
+		default:0,
+	},
+	warLevel:{
+		name:'战争等级',
+		format:'VALUE',
+		default:0,
+	},
+	enemyProgress:{
+		name:'产敌进程',
+		format:'VALUE',
+		default:0,
 	},
 };
 
@@ -523,6 +540,21 @@ const TECH={
 				];
 			},
 		},
+		warMindInduction:{
+			name:'战意感应',
+			description:'法阵与乌云以红色的光柱连接，让她知道人们渴望战斗。',
+			require:[
+				['explore',3],
+				['fireFazhen',5],
+				['devotionInduction',5],
+			],
+			cost(lv){
+				return [
+					['theology',Math.pow(3,lv)*1000],
+					['fazhen',lv+1],
+				];
+			},
+		},
 	},
 	3:{
 
@@ -653,71 +685,67 @@ const TRUTH_UPGRADES={
 const ELEMENTS={
 	fals:{
 		name:'谬',
-		basic:false,
 		color:'pink',
 		token:'⋄',
 	},
-	noth:{
-		name:'无',
-		basic:false,
-		color:'purple',
+	luan:{
+		name:'乱',
+		color:'fuchsia',
 		token:'▪',
 	},
 	void:{
-		name:'空',
-		basic:false,
+		name:'虚',
 		color:'black',
 		token:'☉',
 	},
 	water:{
 		name:'水',
-		basic:true,
 		color:'lightblue',
 		token:'α',
 	},
 	fire:{
 		name:'火',
-		basic:true,
 		color:'orange',
 		token:'β',
 	},
 	earth:{
 		name:'土',
-		basic:true,
 		color:'brown',
 		token:'γ',
 	},
 	wind:{
 		name:'风',
-		basic:true,
 		color:'#dddd00',
 		token:'δ',
 	},
+	magic:{
+		name:'魔',
+		color:'purple',
+		token:'λ',
+	},
 	air:{
 		name:'气',
-		basic:true,
 		color:'skyblue',
 		token:'ε',
 	},
 	rain:{
 		name:'雨',
-		basic:true,
 		color:'blue',
 		token:'ζ',
 	},
 	wood:{
 		name:'木',
-		basic:true,
 		color:'#44dd00',
 		token:'η',
 	},
 	coal:{
 		name:'炭',
-		basic:true,
 		color:'#666644',
 		token:'θ',
 	},
 };
+
+const BASIC_ELEMENTS=['water','fire','earth','wind'];
 
 const ENEMY_ABBR=[
 	'attack',
@@ -728,14 +756,14 @@ const ENEMY_ABBR=[
 	'health',
 ];
 
-function damage(e,tp,val){
-	e.abbr.health-=val/(val+e.abbr['defend'+tp])*val;
+function damage(e,tp,val,st){
+	e.abbr.health-=st/(st+e.abbr['defend'+tp])*val;
 }
 
 const DEFENSE_BUILDING={
 	waterArrowTower:{
 		name:'水箭塔',
-		description:'0.1魔法伤害(0.3s冷却) 消耗0.002水元素',
+		description:'0.1魔法伤害(0.8s冷却) 0.01水元素/秒',
 		require:{
 			tech:[
 				['spellWater',3],
@@ -744,6 +772,10 @@ const DEFENSE_BUILDING={
 				'water',
 			],
 		},
+		runCost:[
+			['water',0.01],
+		],
+		buildTime:20,
 		cost(){
 			return {
 				resource:[
@@ -756,27 +788,79 @@ const DEFENSE_BUILDING={
 			};
 		},
 		attack(e,s){
-			damage(e,'y',0.1);
+			damage(e,'y',0.1,0.1);
 			return {
-				cooldown:0.3,
+				cooldown:0.8,
 			};
 		},
+	},
+	fireTrap:{
+		name:'火焰陷阱',
+		description:'0.3物理伤害/秒 0.01火元素/秒',
+		require:{
+			tech:[
+				['fireFazhen',3],
+			],
+			element:[
+				'fire',
+			],
+		},
+		runCost:[
+			['fire',0.01],
+		],
+		buildTime:30,
+		cost(){
+			return {
+				resource:[
+					['fazhen',1],
+					['hugeStone',5],
+				],
+				element:[
+					['fire',5],
+				],
+			};
+		},
+		attack(e,s){
+			damage(e,'z',0.3*s,0.3);
+			return {};
+		},
+	},
+};
+
+const DB_ABBRS={
+	id(){
+		return 'waterArrowTower';
+	},
+	priorityID(){
+		return 0;
+	},
+	cooldown(){
+		return 0;
+	},
+	buildTime(){
+		return 0;
+	},
+	lastCooldown(){
+		return 0;
 	},
 };
 
 const DB_PROI={
 	0:{
 		name:'最早出现',
-		cmp:(a,b)=>'TODO',
+		func:(e,id)=>id,
 	},
 	1:{
-
+		name:'血量最少',
+		func:(e,id)=>-e.abbr.health,
 	},
 	2:{
-
+		name:'距离最近',
+		func:(e,id)=>-e.pos,
 	},
 	3:{
-
+		name:'功勋最高',
+		func:(e,id)=>e.score,
 	},
 };
 
@@ -810,24 +894,35 @@ function initData(data){
 		data.magicStoneChosen=0;
 		data.lenChosen=0;
 	}
-	for(lv in TECH){
-		const lvv=TECH[lv];
-		for(id in lvv){
+	for(let lv in TECH){
+		let lvv=TECH[lv];
+		for(let id in lvv){
 			if(typeof data.tech[id]==='undefined'){
 				data.tech[id]=0;
 			}
 		}
 	}
-	for(el in ELEMENTS){
-		if(typeof data.element[id]==='undefined'){
-			data.element[id]=0;
+
+	for(let el in ELEMENTS){
+		if(!isFinite(data.element[el])){
+			data.element[el]=0;
 		}
 	}
+
 	data.truthUpgradeResult='';
 	data.truthUpgradeMessage='';
 	data.truthUpgradeMessageUpdate=(new Date()).getTime();
 	data.dailyMessage=dailyMessage();
-	data.selectedTruthLevel=1;
+
+	data.showEnemyArr=false;
+
+	data.selectedTruthLevel={};
+
+	for(let db of data.defBuildings){
+		for(let a in DB_ABBRS){
+			if(typeof db[a]==='undefined')db[a]=DB_ABBRS[a](db.id);
+		}
+	}
 
 	data.saveInput='';
 }
@@ -866,13 +961,17 @@ Vue.component('hint-message',{
 	var _=new Vue({
 		el:'#app',
 		watch:{
-			light(v){	
-				this.setLight(v);
+			light(v){
+				if(Math.random()<0.001){
+					this.setLight(v);
+				}
 			},
 		},
 		methods:{
 			setLight(v){
-				document.getElementById('global').style.backgroundColor=`rgb(${v**1.5*255},${v**1.5*255},${v**1.5*255})`;
+				document.getElementById('global')
+					.style.backgroundColor
+					=`rgb(${v**1.5*255},${v**1.5*255},${v**1.5*255})`;
 			},
 			moSiyuan(r=1){
 				this.moCount+=r;
@@ -1122,7 +1221,7 @@ Vue.component('hint-message',{
 					var data=decode.call({
 						PADDING,
 					},this.saveInput.trim());
-					for(name in SAVE_ITEMS){
+					for(let name in SAVE_ITEMS){
 						this.$set(this,name,data[name]);
 					}
 					initData.call(this,this);
@@ -1150,12 +1249,12 @@ Vue.component('hint-message',{
 			genEnemyDNA(...parentsDNA){
 				var dna={};
 				for(let abbr of ENEMY_ABBR){
-					dna[abbr]=Math.random()*0.01;
+					dna[abbr]=Math.random()*0.05;
 					for(let e of parentsDNA){
 						dna[abbr]+=e[abbr];
 					}
-					dna[abbr]/=(parentsDNA.length+0.01);
-					if(Math.random()<0.002){
+					dna[abbr]/=(parentsDNA.length+0.05);
+					if(Math.random()<0.02){
 						dna[abbr]*=2*Math.random();
 					}
 				}
@@ -1182,7 +1281,7 @@ Vue.component('hint-message',{
 			fillArr(){
 				var e=this.enemy;
 				while(e.arr.length<5&&e.pop.length){
-					arr.push(this.takePop(Math.max)).dna;
+					e.arr.push(this.takePop(Math.max));
 				}
 			},
 			enemyDNAback(dna,score){
@@ -1190,7 +1289,7 @@ Vue.component('hint-message',{
 				e.pop.push({dna,score},{dna,score});
 				this.fillArr();
 				while(e.pop.length>50){
-					takePop(Math.min);
+					this.takePop(Math.min);
 				}
 			},
 			getName(dna){
@@ -1232,17 +1331,19 @@ Vue.component('hint-message',{
 					dnas.push(e.arr[i]);
 				}
 				var dna=this.genEnemyDNA(...dnas);
+				let abbr=this.getEnemyAbbr(dna,strength);
 				e.current.push({
 					strength,
 					dna,
-					abbr:this.getEnemyAbbr(dna,strength),
-					pos:1,
+					abbr:abbr,
+					pos:10,
 					score:0,
+					focus:false,
 				});
+				this.fillArr();
 			},
 			passTimeLoop(s){
-				const BASIC_ELEMENTS=['water','fire','earth','wind'];
-				for(id of BASIC_ELEMENTS){
+				for(let id of BASIC_ELEMENTS){
 					this.element[id]+=s*this.basicElementEarn;
 					if(this.element[id]>0){
 						this.elementOwned[id]=true;
@@ -1256,10 +1357,12 @@ Vue.component('hint-message',{
 				this.lastTime=nt;
 			},
 			showDB(id){
-				var {resource,element}=DEFENSE_BUILDING[id].require;
-				return true;
+				var {tech,element}=DEFENSE_BUILDING[id].require;
+				return tech.every(([id,value])=>this.tech[id]>=value)
+					&& element.every((id)=>this.elementOwned[id]);
 			},
 			canBuildDB(id){
+				if(this.defBuildings.length>=this.position)return false;
 				var {resource,element}=DEFENSE_BUILDING[id].cost();
 				return element.every(([id,value])=>this.element[id]>=value)
 					&& resource.every(([id,value])=>this[id]>=value);
@@ -1272,10 +1375,13 @@ Vue.component('hint-message',{
 				this.defBuildings.push({
 					id,
 					cooldown:0,
-					priority:0,
+					priorityID:0,
+					buildTime:DEFENSE_BUILDING[id].buildTime,
 				});
 			},
-
+			getWarMind(){
+				this.warMind+=this.tech.warMindInduction**3*10;
+			},
 		},
 		computed:{
 			moSiyuanTag(){
@@ -1493,7 +1599,7 @@ Vue.component('hint-message',{
 				return Math.pow(4,this.elementTower)*100;
 			},
 			position(){
-				return Math.ceil(3*this.elementTower);
+				return Math.ceil(Math.min(3*this.elementTower,15));
 			},
 			basicElementEarn(){
 				return 0.001*this.elementTower;
@@ -1510,7 +1616,7 @@ Vue.component('hint-message',{
 					window.prompt(`无法读取存档。\n${e}\n请全选复制以下存档文本，以备日后恢复。`,save);
 				}
 			}
-			for(var resName in SAVE_ITEMS){
+			for(let resName in SAVE_ITEMS){
 				var dd=data[resName];
 				if(typeof dd==='undefined'||(typeof dd==='number'&&!Number.isFinite(dd))){
 					if(typeof SAVE_ITEMS[resName].default!=='undefined'){
@@ -1529,7 +1635,7 @@ Vue.component('hint-message',{
 		mounted(){
 			setInterval(()=>{
 				save={};
-				for(var resName in SAVE_ITEMS){
+				for(let resName in SAVE_ITEMS){
 					save[resName]=this[resName];
 				}
 				localStorage.setItem('game-mosiyuan-save',encode.call(this,save));
@@ -1552,10 +1658,117 @@ Vue.component('hint-message',{
 				sci=Math.min(sci,this.scienceLimit);
 				this.science=sci;
 
-				var dd=Math.min(this.devotion,s*Math.max(this.devotion*0.001*Math.max(1,Math.sqrt(this.devotionInductionFactor)),2));
+				let dd=Math.min(this.devotion,s*Math.max(this.devotion*0.001*Math.max(1,Math.sqrt(this.devotionInductionFactor)),2));
 				this.devotion-=dd;
 
+				let wd=Math.min(this.warMind,s*Math.max(this.warMind*0.01,1));
+				
+				if(this.warLevel>=0.1){
+					let tt=Math.max(this.warLevel,1);
+					this.enemyProgress+=wd/(100*Math.sqrt(tt));
+					while(this.enemyProgress>=1){
+						this.enemyProgress-=1;
+						this.spawnEnemy(tt);
+					}
+				}
+
+				this.warMind-=wd;
+				if(this.warMind<=0){
+					this.warMind=0;
+					let wl=Math.max(this.warLevel-0.2*s,0);
+					this.warLevel=wl;
+				}
+				if(this.warMind>=1e3){
+					this.warLevel+=0.05*s;
+				}
+
+
 				this.passTimeLoop(s);
+
+				let cur=this.enemy.current;
+
+				for(let db of this.defBuildings){
+					let t=db.buildTime-s;
+					db.buildTime=Math.max(t,0);
+				}
+				
+				// DB target
+				for(let db of this.defBuildings){
+					delete db.targetID;
+					if(db.buildTime>0)continue;
+					let v=-Infinity;
+					for(let i in this.enemy.current){
+						let e=this.enemy.current[i];
+						let sv=DB_PROI[db.priorityID].func(e,s);
+						if(e.focus)s=Infinity;
+						if(sv>v){
+							db.targetID=i;
+							v=sv;
+						}
+					}
+				}
+
+				// DB action
+				for(let db of this.defBuildings){
+					if(db.buildTime>0)continue;
+					if(db.cooldown||typeof db.targetID!=='undefined'){
+						let el=DEFENSE_BUILDING[db.id].runCost;
+						if(el.some(([id,value])=>
+							this.element[id]<Math.max(value*s,1)
+						)){
+							continue;
+						}else{
+							el.forEach(([id,value])=>{
+								this.element[id]-=value*s;
+							});
+						}
+					}
+					let cd=db.cooldown-s;
+					if(typeof db.targetID!=='undefined'){
+						while(cd<=0){
+							let e=this.enemy.current[db.targetID];
+							let res=DEFENSE_BUILDING[db.id].attack(e,s);
+							if(res.cooldown){
+								cd+=res.cooldown;
+								db.lastCooldown=res.cooldown;
+							}else{
+								break;
+							}
+						}
+					}
+					db.cooldown=Math.max(cd,0);
+				}
+
+				// enemy action
+				for(let e of this.enemy.current.filter(e=>e.abbr.health>0)){
+					if(!isFinite(e.score))e.score=0;
+					let p=e.pos-e.abbr.speed*s;
+					p=Math.max(p,0);
+					let dis=e.pos-p;
+					e.score+=dis/e.strength;
+					e.pos=p;
+					if(p===0){
+						let ss=dis===0?s:(s-dis/e.abbr.speed);
+						let dmg=e.abbr.attack*ss;
+						this.light-=dmg/1e4;
+						if(this.light<0)this.light=0;
+						e.score+=dmg/e.strength;
+					}
+				}
+
+				// kill dead enemies
+				for(let db of this.defBuildings){
+					if(typeof db.targetID!=='undefined'&&cur[db.targetID].abbr.health<=0){
+						delete db.targetID;
+					}
+				}
+
+				while(cur.some(e=>e.abbr.health<=0)){
+					let e=cur.splice(cur.findIndex(e=>e.abbr.health<=0),1)[0];
+					this.enemyDNAback(e.dna,e.score);
+					this.element.magic+=e.strength;
+				}
+
 
 				this.lastTime=nt;
 			};

@@ -307,15 +307,30 @@
 					</div>
 					<div v-if="techLevel('devotionInduction')>0">
 						<h4>感应</h4>
-						<button @click="getDevotion">虔诚</button>
-						<span>强度:{{pn(devotion)}}</span>
-						<span>膜拜x{{pn(devotionInductionFactor)}}</span>
+						<div>
+							<button @click="getDevotion">虔诚</button>
+							<span>强度:{{pn(devotion)}}</span>
+							<span>膜拜x{{pn(devotionInductionFactor)}}</span>
+						</div>
+						<div v-if="techLevel('warMindInduction')>0">
+							<hr>
+							<button @click="getWarMind">战意</button>
+							<span :class="{danger:warMind>=1000}">强度:{{pn(warMind)}}</span>
+							<span>战争等级:{{pn(Math.ceil(warLevel))}}</span>
+						</div>
 					</div>
 				</div>
 				<div class="col">
 					<div v-for="lv in truthLevel">
 						<h4>真理{{pnr(lv)}}</h4>
-						<div v-if="lv==selectedTruthLevel">
+						<div>
+							<!--  undefined ^ 1 === 1  -->
+							<button @click="selectedTruthLevel[lv]^=1">
+								<span v-if="!selectedTruthLevel[lv]">展开</span>
+								<span v-else>收起</span>
+							</button>
+						</div>
+						<div v-if="selectedTruthLevel[lv]">
 							<p v-if="Object.keys(TECH[lv]).length===0">
 								<del>咕咕咕……</del>
 							</p>
@@ -329,9 +344,6 @@
 									<div>{{tech.description}}</div>
 								</li>
 							</ul>
-						</div>
-						<div v-else>
-							<button @click="selectedTruthLevel=lv">展开</button>
 						</div>
 					</div>
 				</div>
@@ -355,7 +367,7 @@
 							</div>
 							<div>
 								<button @click="buyElementTower"
-								:disabled="!canBuyElementTower">元素塔*{{elementTower}} [{{elementTowerHugeStoneCost}}块巨石,{{elementTowerFazhenCost}}座法阵,{{elementTowerLenCost}}枚透镜]</button>
+								:disabled="!canBuyElementTower">元素塔*{{elementTower}} [{{pn(elementTowerHugeStoneCost)}}块巨石,{{pn(elementTowerFazhenCost)}}座法阵,{{pn(elementTowerLenCost)}}枚透镜]</button>
 							</div>
 							<hr>
 							<table v-for="elementTower>0" class="ww">
@@ -363,7 +375,6 @@
 									<tr>
 										<th>元素</th>
 										<th>拥有量</th>
-										<th>变化率</th>
 									</tr>
 									<tr v-for="(el,id) in ELEMENTS" v-if="elementOwned[id]">
 										<td>
@@ -372,16 +383,100 @@
 											</strong>
 										</td>
 										<td>{{pn(element[id])}}</td>
-										<td>{{pn(basicElementEarn)}}/秒</td>
 									</tr>
 								</tbody>
 							</table>
 						</div>
+						<div class="area">
+							<h4>入侵</h4>
+							<div>
+								<progress class="ww" max="1" :value="enemyProgress"></progress>
+							</div>
+							<table v-if="enemy.current.length>0" class="ww">
+								<tbody>
+									<tr>
+										<th colspan="2">敌人</th>
+										<th>生命</th>
+										<th>距离</th>
+										<th>攻击</th>
+										<th>速度</th>
+									</tr>
+									<tr>
+										<th>等级</th>
+										<th>功勋</th>
+										<th></th>
+										<th>意志</th>
+										<th>符咒</th>
+										<th>护甲</th>
+									</tr>
+									<template v-for="(e,id) in enemy.current">
+										<tr :style="{background:id%2?'#f0f0f0':'#ffffff'}">
+											<td colspan="2">
+												{{getName(e.dna)}}
+											</td>
+											<td>{{pn(e.abbr.health)}}</td>
+											<td>
+												<span :class="{danger:e.pos===0}">{{pn(e.pos)}}</span>
+											</td>
+											<td>{{pn(e.abbr.attack)}}</td>
+											<td>{{pn(e.abbr.speed)}}</td>
+										</tr>
+										<tr :style="{background:id%2?'#f0f0f0':'#ffffff'}">
+											<td>{{pn(Math.round(Math.log(e.strength)/Math.log(1.2)+1))}}</td>
+											<td>{{pn(e.score)}}☆</td>
+											<td>
+												<!-- <button>集火</button> -->
+											</td>
+											<td>{{pn(e.abbr.defendx)}}</td>
+											<td>{{pn(e.abbr.defendy)}}</td>
+											<td>{{pn(e.abbr.defendz)}}</td>
+										</tr>
+									</template>
+								</tbody>
+							</table>
+						</div>
+						<div class="area" v-if="enemy.arr.length+enemy.pop.length>0">
+							<h4>种群</h4>
+							<strong>敌方种群大小:{{pn(enemy.pop.length)}}</strong>
+							<div>
+								<button @click="showEnemyArr^=1">
+									基因继承器 (基因:{{enemy.arr.length}})
+									<span v-if="showEnemyArr">[+]</span>
+									<span v-else>[-]</span>
+								</button>
+								<div v-if="showEnemyArr">
+									<table v-if="enemy.arr.length>0" class="ww">
+										<tbody>
+											<tr>
+												<th>#</th>
+												<th>A</th>
+												<th>S</th>
+												<th>H</th>
+												<th>X</th>
+												<th>Y</th>
+												<th>Z</th>
+											</tr>
+											<tr v-for="(dna,id) in enemy.arr">
+												<td>{{id+1}}</td>
+												<td>{{pn(dna.attack)}}</td>
+												<td>{{pn(dna.speed)}}</td>
+												<td>{{pn(dna.health)}}</td>
+												<td>{{pn(dna.defendx)}}</td>
+												<td>{{pn(dna.defendy)}}</td>
+												<td>{{pn(dna.defendz)}}</td>
+											</tr>
+										</tbody>
+									</table>
+									<div v-else>
+										<p>敌方基因继承器空空如也……</p>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="col" v-if="position>0">
 						<div class="area" v-if="position>0">
 							<h4>建设</h4>
-							<p>
-								(按钮现在还按不了)
-							</p>
 							<ul>
 								<li v-for="(t,id) in DEFENSE_BUILDING"
 								v-if="showDB(id)">
@@ -394,12 +489,12 @@
 													...(
 														t.cost().resource.map(
 															([id,value])=>SAVE_ITEMS[id]
-																.format.replace(/VALUE/g,value)
+																.format.replace(/VALUE/g,pn(value))
 														)
 													),
 													...(
 														t.cost().element.map(
-															([id,value])=>value+ELEMENTS[id].name+'元素'
+															([id,value])=>pn(value)+ELEMENTS[id].name+'元素'
 														)
 													)
 												].join(',')
@@ -412,55 +507,64 @@
 						</div>
 						<div class="area" v-if="position>0">
 							<h4>防御</h4>
-							阵地:{{0}}/{{pn(position)}}
-						</div>
-					</div>
-					<div class="col" v-if="position>0">
-						<h4>入侵</h4>
-						<div>
-							<!-- <progress class="ww"></progress> -->
-						</div>
-						<div>
-							<!-- <progress class="ww"></progress> -->
-						</div>
-						<table v-if="enemy.current.length>0" class="ww">
-							<tbody>
-								<tr>
-									<th colspan="2">敌人</th>
-									<th>生命</th>
-									<th>距离</th>
-									<th>攻击</th>
-									<th>速度</th>
-								</tr>
-								<tr>
-									<th>等级</th>
-									<th>功勋</th>
-									<th></th>
-									<th>意志</th>
-									<th>圣盾</th>
-									<th>护甲</th>
-								</tr>
-								<template v-for="(e,id) in enemy.current">
-									<tr :style="{background:id%2?'#f0f0f0':'#ffffff'}">
-										<td colspan="2">
-											{{getName(e.dna)}}
+							<strong>阵地:{{pn(defBuildings.length)}}/{{pn(position)}}</strong>
+							<table class="ww">
+								<tbody>
+									<tr>
+										<th>建筑</th>
+										<th>优先攻击</th>
+										<th colspan="3">状态</th>
+										<th></th>
+									</tr>
+									<tr v-for="(db,id) in defBuildings">
+										<th>{{DEFENSE_BUILDING[db.id].name}}</th>
+										<td>
+											<select v-model="db.priorityID">
+												<option v-for="(pf,id) in DB_PROI" :value="id">
+													{{pf.name}}
+												</option>
+											</select>
 										</td>
-										<td>{{pn(e.abbr.health)}}</td>
-										<td>{{pn(e.pos)}}</td>
-										<td>{{pn(e.abbr.attack)}}</td>
-										<td>{{pn(e.abbr.speed)}}</td>
+										<template v-if="db.buildTime>0">
+											<td>
+												□建造中
+											</td>
+											<td>
+												{{pn(db.buildTime)}}秒
+											</td>
+											<td>
+												<progress style="max-width:50px;" :max="DEFENSE_BUILDING[db.id].buildTime" :value="DEFENSE_BUILDING[db.id].buildTime-db.buildTime"></progress>
+											</td>
+										</template>
+										<template v-else>
+											<td>
+												<span v-if="typeof db.targetID==='undefined'">○等待中</span>
+												<span v-else-if="typeof enemy.current[db.targetID]!=='undefined'">
+													▷{{getName(enemy.current[db.targetID].dna)}}
+												</span>
+												<span v-else>
+													▷???
+												</span>
+											</td>
+											<template v-if="db.cooldown>0">
+												<td>
+													{{pn(db.cooldown)}}秒
+												</td>
+												<td>
+													<progress style="max-width:50px;" :max="db.lastCooldown" :value="db.cooldown"></progress>
+												</td>
+											</template>
+											<template v-else>
+												<td colspan="2">未处于冷却状态</td>
+											</template>
+										</template>
+										<td>
+											<button @click="defBuildings.splice(id,1)">拆除</button>
+										</td>
 									</tr>
-									<tr :style="{background:id%2?'#f0f0f0':'#ffffff'}">
-										<td>{{pn(Math.round(Math.log(e.strength)/Math.log(1.2)+1))}}</td>
-										<td>{{pn(e.score)}}☆</td>
-										<td><button>集火</button></td>
-										<td>{{pn(e.abbr.defendx)}}</td>
-										<td>{{pn(e.abbr.defendy)}}</td>
-										<td>{{pn(e.abbr.defendz)}}</td>
-									</tr>
-								</template>
-							</tbody>
-						</table>
+								</tbody>
+							</table>
+						</div>
 					</div>
 				</div>
 			</div>
