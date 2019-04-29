@@ -434,7 +434,7 @@
 									</template>
 								</tbody>
 							</table>
-							<div v-if="enemy.current.length>=2">
+							<div v-if="enemy.current.length>0">
 								<hr>
 								<button @click="salvation" :disabled="light&lt;0.5">
 									召唤拯救 [20%光明]

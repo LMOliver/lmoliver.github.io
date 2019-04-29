@@ -105,11 +105,12 @@ function dailyMessage(){
 		'Siyuan:“辣鸡，真辣鸡！”',
 		'Siyuan:“泥萌怎么这么菜 nya？”',
 		'Siyuan:“我就 D 你怎么了？”',
-		'Siyuan:“那场 ** CF 连样例解释都没有？”',
-		'Siyuan:“tourist 能过，那窝肯定也能过”',
+		'Siyuan:“哪场 ** CF 连样例解释都没有？”',
+		'Siyuan:“tourist 能过，那窝肯定也能过！”',
 		'萌新三连:“窝怎么立直了 nya？胡是什么 nya，可以跳过吗？自摸是不是每巡都有的，好烦 nya！”',
 		'[https://orzsiyuan.com](https://lmoliver.github.io/mosiyuan)',
-		'如果出现了至少两个敌人，你可以召唤光明扫清他们。什么？一个很强的敌人？我没听清楚……',
+		'如果出现了难以对付的敌人，你可以<strong>召唤拯救</strong>扫清他们。',
+		'祝贺 Siyuan ZJOI2019 Day2 40+40+50=130分 && 触发女装 Flag !',
 	];
 	try{
 		return msgs[Math.floor(Math.random()*msgs.length)]
@@ -558,10 +559,11 @@ const TECH={
 		},
 		windFazhen:{
 			name:'疾风阵',
-			description:'强劲的风力能使敌人倒退好几步，但也会吹跑正在飞向教堂的鸽子。',
+			description:'强劲的风力加上成块的碎土能使敌人倒退好几步，但也会吹跑正在飞向教堂的鸽子。',
 			require:[
 				['explore',3],
 				['fireFazhen',5],
+				['spellBird',8],
 				['warMindInduction',2],
 			],
 			cost(lv){
@@ -843,17 +845,20 @@ const DEFENSE_BUILDING={
 	},
 	windFazhen:{
 		name:'疾风阵',
-		description:'0.06距离(1.0s冷却) 0.01风元素/秒',
+		description:'0.15击退(1.0s冷却) 土、风元素各0.01/秒',
 		require:{
 			tech:[
 				['windFazhen',1],
+				['spellWind',5],
 			],
 			element:[
 				'wind',
+				'earth',
 			],
 		},
 		runCost:[
 			['wind',0.01],
+			['earth',0.01],
 		],
 		buildTime:40,
 		cost(){
@@ -864,11 +869,12 @@ const DEFENSE_BUILDING={
 				],
 				element:[
 					['wind',7],
+					['earth',7],
 				],
 			};
 		},
 		attack(e,s){
-			let dis=0.06;
+			let dis=0.15;
 			e.score-=dis/e.strength;
 			e.pos+=dis;
 			return {
@@ -876,9 +882,44 @@ const DEFENSE_BUILDING={
 			};
 		},
 	},
+	birdFazhen:{
+		name:'咕咕阵',
+		description:'[1.0/(距离+2)]精神伤害/秒 土、风元素各0.02/秒',
+		require:{
+			tech:[
+				['windFazhen',1],
+				['spellBird',5],
+			],
+			element:[
+				'wind',
+				'earth',
+			],
+		},
+		runCost:[
+			['wind',0.02],
+			['earth',0.02],
+		],
+		buildTime:45,
+		cost(){
+			return {
+				resource:[
+					['fazhen',1],
+					['hugeStone',5],
+				],
+				element:[
+					['wind',15],
+				],
+			};
+		},
+		attack(e,s){
+			let dmg=1/(2+e.pos);
+			damage(e,'x',dmg*s,dmg);
+			return {};
+		},
+	},
 	pureMagicTower:{
 		name:'纯魔巨炮',
-		description:'10.0魔法伤害(40~60s冷却) 水、火、土、风、魔元素各0.01/秒',
+		description:'15.0魔法伤害(40~60s冷却) 水、火、土、风、魔元素各0.01/秒',
 		require:{
 			tech:[
 				['fazhenBuilding',5],
@@ -907,7 +948,7 @@ const DEFENSE_BUILDING={
 			};
 		},
 		attack(e,s){
-			damage(e,'y',10,10);
+			damage(e,'y',15,15);
 			return {
 				cooldown:40+Math.random()*20,
 			};
@@ -956,7 +997,7 @@ const DB_PROI={
 	},
 	5:{
 		name:'速度最快',
-		func:(e,id)=>e.speed,
+		func:(e,id)=>e.abbr.speed,
 	},
 	6:{
 		name:'意志最低',
@@ -1502,7 +1543,7 @@ Vue.component('hint-message',{
 				});
 			},
 			getWarMind(){
-				this.warMind+=this.tech.warMindInduction**3*10;
+				this.warMind+=this.tech.warMindInduction**2*10;
 			},
 			salvation(){
 				this.warMind=0;
