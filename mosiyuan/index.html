@@ -9,7 +9,7 @@
 		<div id="global" class="global">
 			加载中……
 		</div>
-		<div id="app" :style="{filter:`brightness(${light**1.5})`}" style="display:none;">
+		<div id="app" style="display:none;">
 			<h1>膜拜<span class="siyuan"></span></h1>
 			<p v-html="dailyMessage"></p>
 			<div class="area">
@@ -315,7 +315,7 @@
 						<div v-if="techLevel('warMindInduction')>0">
 							<hr>
 							<button @click="getWarMind">战意</button>
-							<span :class="{danger:warMind>=1000}">强度:{{pn(warMind)}}</span>
+							<span :class="{danger:warMind>=warLevelUpgradeNeed}">强度:{{pn(warMind)}}</span>
 							<span>战争等级:{{pn(Math.ceil(warLevel))}}</span>
 						</div>
 					</div>
@@ -434,21 +434,35 @@
 									</template>
 								</tbody>
 							</table>
+							<div v-if="enemy.current.length>=2">
+								<hr>
+								<button @click="salvation" :disabled="light&lt;0.5">
+									召唤拯救 [20%光明]
+								</button>
+								<span>
+									拥有至少50%光明才可使用
+								</span>
+							</div>
 						</div>
 						<div class="area" v-if="enemy.arr.length+enemy.pop.length>0">
 							<h4>种群</h4>
-							<strong>敌方种群大小:{{pn(enemy.pop.length)}}</strong>
+							<div>
+								<strong>敌方种群大小:{{pn(enemy.pop.length)}}</strong>
+							</div>
+							<div>
+								<strong>基因继承器大小:{{enemy.arr.length}}</strong>
+							</div>
 							<div>
 								<button @click="showEnemyArr^=1">
-									基因继承器 (基因:{{enemy.arr.length}})
-									<span v-if="showEnemyArr">[+]</span>
-									<span v-else>[-]</span>
+									<span v-if="showEnemyArr">收起基因继承器</span>
+									<span v-else>展开基因继承器</span>
 								</button>
 								<div v-if="showEnemyArr">
+									<hr>
 									<table v-if="enemy.arr.length>0" class="ww">
 										<tbody>
 											<tr>
-												<th>#</th>
+												<th>N</th>
 												<th>A</th>
 												<th>S</th>
 												<th>H</th>
@@ -457,7 +471,7 @@
 												<th>Z</th>
 											</tr>
 											<tr v-for="(dna,id) in enemy.arr">
-												<td>{{id+1}}</td>
+												<td>{{getName(dna)}}</td>
 												<td>{{pn(dna.attack)}}</td>
 												<td>{{pn(dna.speed)}}</td>
 												<td>{{pn(dna.health)}}</td>
@@ -505,9 +519,14 @@
 								</li>
 							</ul>
 						</div>
-						<div class="area" v-if="position>0">
+						<div class="area" v-if="defBuildings.length>0">
 							<h4>防御</h4>
-							<strong>阵地:{{pn(defBuildings.length)}}/{{pn(position)}}</strong>
+							<div>
+								<strong>阵地:{{pn(defBuildings.length)}}/{{pn(position)}}</strong>
+								<button @click="defBuildings.sort((a,b)=>(a.id!==b.id)?(a.id>b.id?1:-1):(a.priorityID-b.priorityID))">
+									排序
+								</button>
+							</div>
 							<table class="ww">
 								<tbody>
 									<tr>
