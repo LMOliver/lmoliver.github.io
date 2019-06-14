@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Generals - JRNEOJ</title>
+		<link rel="stylesheet" href="../../../normalize.css">
+		<script src="../../../vue.js"></script>
+		<link rel="stylesheet" href="./generals.css">
+		<link rel="stylesheet" href="../../jrneoj.css">
+	</head>
+	<body>
+		<div id="app">
+			<nav>
+				<a href="../../index.html">
+					<h2 class="oj-title">JRNEOJ</h2>
+				</a>
+				<a href="../../index.html">首页</a>
+				<a href="../../problems.html">题库</a>
+			</nav>
+			<hr>
+			<div class="main">
+				<div>
+					<h1 class="problem-title">Generals</h1>
+					<span class="problem-subtitle">#2</span>
+				</div>
+
+<p>这是一道<strong>交互题</strong>。</p>
+<h2>题目背景</h2>
+<p>在某颗不知名行星的海岛上，小 A 与他的机器人们正在偷偷发起一场战争，试图打败其他敌人，成为这场战争的胜利者。</p>
+<h2>题目描述</h2>
+<p><a href="https://generals.io/"><img src="https://generals.io/favicon/android-icon-192x192.png" alt="https://generals.io/favicon/android-icon-192x192.png" /></a></p>
+<h2>输入输出格式</h2>
+<p>你的程序通过标准输入输出与交互库进行通信。</p>
+<h3>输入格式</h3>
+<p>输入由若干段组成。</p>
+<p>每段的第一行，一个字符串 type ，表示输入的事件类型。
+接下来若干行是该事件的附加信息，具体见下文。</p>
+<p><strong>请仔细阅读输入格式并完成所有事件的读入。</strong></p>
+<p>事件有如下几种:</p>
+<ul>
+<li>
+<p><code>connect</code>:连接建立，小 A 可以准备战斗了。没有附加信息。</p>
+</li>
+<li>
+<p><code>disconnect</code>:连接中断。没有附加信息。</p>
+<p><strong>在读入该事件后请立即结束程序运行。</strong></p>
+</li>
+<li>
+<p><code>game_start</code>:战争开始了！</p>
+<p>接下来一行，一个非负整数<code>playerIndex</code>，表示小 A 的编号。</p>
+<p>接下来一行，一个字符串<code>replay_id</code>，表示你可以在战争结束后于<code>http://bot.generals.io/replays/&lt;replay_id&gt;</code>处看到回放。</p>
+<p>接下来一行，一个字符串<code>chat_room</code>，表示公共聊天室标识符。</p>
+<p><strong>如果是团队模式</strong>，接下来一行，一个字符串<code>chat_room</code>，表示本阵营聊天室标识符。</p>
+<p>接下来一行，一个正整数<code>player_count</code>，表示玩家总数。</p>
+<p>接下来一行，<code>player_count</code>个字符串，第 i 个字符串表示编号为 i 的玩家的用户名。<strong>用户名有可能包含空白字符！</strong></p>
+<p>接下来一行，<code>player_count</code>个非负整数，第 i 个整数表示编号为 i 的玩家所处的阵营编号。</p>
+</li>
+<li>
+<p><code>game_update</code>:战场发生了变化，小 A 需要作出新的决策。</p>
+<p>接下来一行，一个非负整数<code>turn</code>，表示当前的<strong>轮</strong>数(2轮=1回合，空地每<strong>50</strong>轮生产一个兵)。</p>
+<p>接下来一行，两个正整数<code>height</code>和<code>width</code>，分别表示战场的高度和宽度。</p>
+<p>接下来<code>height</code>行，每行<code>width</code>个非负整数，表示对应位置的兵力数。</p>
+<p>接下来<code>height</code>行，每行<code>width</code>个整数，表示对应位置的占领情况。</p>
+<ul>
+<li>
+<p>非负整数:该位置被编号为该值的玩家占领。</p>
+</li>
+<li>
+<p><code>-1</code>:该位置无人占领。</p>
+</li>
+<li>
+<p><code>-2</code>:该位置是不可占领的山脉。</p>
+</li>
+<li>
+<p><code>-3</code>:该位置位于战争迷雾中，没有障碍。</p>
+</li>
+<li>
+<p><code>-4</code>:该位置位于战争迷雾中，可以探测到障碍。</p>
+</li>
+</ul>
+<p>接下来一行，一个非负整数<code>city_count</code>，表示视野中的城市个数。</p>
+<p>接下来<code>city_count</code>行，每行两个非负整数<code>x</code>和<code>y</code>，表示该城市位于第<code>x</code>行第<code>y</code>列。</p>
+<p>接下来<code>player_count</code>行，对于其中的第 i 行，有两个非负整数<code>x</code>和<code>y</code>，表示该王城位于第<code>x</code>行第<code>y</code>列。如果编号为 i 的玩家的王城处于战争迷雾中，<code>x</code>=<code>y</code>=-1。</p>
+<p>接下来<code>player_count</code>行，第 i 行有三个个非负整数<code>playerIndex</code>、<code>total</code>和<code>tiles</code>，分别表示排名为 i 的玩家的编号、总兵力和领土面积。如果该玩家已被淘汰，<code>total</code>=<code>tiles</code>=0。</p>
+</li>
+<li>
+<p><code>game_lost</code>:小 A 的王城被攻占。</p>
+<p>接下来一行，一个字符串<code>killer</code>，表示攻占者的编号。</p>
+</li>
+<li>
+<p><code>game_won</code>:小 A 获得了胜利！没有附加信息。</p>
+</li>
+</ul>
+<h3>输出格式</h3>
+<p>你输出的<strong>每一行</strong>表示你的一个操作。</p>
+<p>对于每一行，输出一个字符串和若干参数(格式中最后一个参数可含空格)，以<strong>单个</strong>空格分隔，表示你的操作。</p>
+<p><strong>输出参数的个数和顺序都必须和格式完全一致。</strong></p>
+<ul>
+<li>
+<p><code>set_username</code>:设置玩家名。</p>
+<p>参数:</p>
+<ul>
+<li>
+<p><code>user_id</code>:玩家 ID。</p>
+</li>
+<li>
+<p><code>user_name</code>:你要设置的玩家名。玩家名必须以<code>[Bot]</code>开头。</p>
+</li>
+</ul>
+</li>
+<li>
+<p><code>play</code>:进入 FFA 模式。</p>
+<p>参数:</p>
+<ul>
+<li><code>user_id</code>:玩家 ID。</li>
+</ul>
+</li>
+<li>
+<p><code>join_1v1</code>:进入 1v1 模式。</p>
+<p>参数:</p>
+<ul>
+<li><code>user_id</code>:玩家 ID。</li>
+</ul>
+</li>
+<li>
+<p><code>join_private</code>:进入自定义模式。</p>
+<p>参数:</p>
+<ul>
+<li>
+<p><code>custom_game_id</code>:房间 ID。</p>
+</li>
+<li>
+<p><code>user_id</code>:玩家 ID。</p>
+</li>
+</ul>
+</li>
+<li>
+<p><code>set_force_start</code>:设置强制开始倾向。</p>
+<p>参数:</p>
+<ul>
+<li>
+<p><code>queue_id</code>:队列 ID(不知道怎么用)。</p>
+</li>
+<li>
+<p><code>doForce</code>:是否选择强制开始。<code>true</code>表示是，<code>false</code>表示否。</p>
+</li>
+</ul>
+</li>
+<li>
+<p><code>attack</code>:在计划末尾新增一次移动兵力。</p>
+<p>参数:</p>
+<ul>
+<li>
+<p><code>startX</code>:起始位置的行号。</p>
+</li>
+<li>
+<p><code>startY</code>:起始位置的列号。</p>
+</li>
+<li>
+<p><code>endX</code>:终止位置的行号。</p>
+</li>
+<li>
+<p><code>endY</code>:终止位置的列号。</p>
+</li>
+<li>
+<p><code>is50</code>:是否只使用一半兵力移动。<code>true</code>表示是，<code>false</code>表示否。</p>
+</li>
+</ul>
+</li>
+<li>
+<p><code>clear_moves</code>:清空计划队列。没有参数。</p>
+</li>
+<li>
+<p><code>leave_game</code>:离开战场。没有参数。</p>
+<p><strong>在获得胜利或王城被攻破后，请进行该操作以正常离开战场。</strong></p>
+<p>可以在战争结束之前、小 A 仍存活时离开战场。若这么做，该战场上的小 A 所属军队、王城和塔如同小 A 未离开但不操作般工作(即使在此后小 A 断开连接)直至小 A 获胜或失败，不会变为中立。</p>
+<p>在离开战场之后，小 A 仍能收到<code>game_lost</code>或<code>game_won</code>事件。(正常情况下小 A 应该先收到它，然后离开。)</p>
+</li>
+<li>
+<p><code>chat_message</code>:发送聊天信息。</p>
+<p>参数:</p>
+<ul>
+<li>
+<p><code>chat_room</code>:聊天室标识符。</p>
+</li>
+<li>
+<p><code>text</code>:要发送的文本。</p>
+</li>
+</ul>
+</li>
+<li>
+<p><code>quit</code>:退出程序。没有参数。</p>
+<p><strong>在程序退出之前请进行<code>quit</code>操作以终止交互库运行！</strong></p>
+</li>
+<li>
+<p><code>#</code>:注释。</p>
+<p>参数:</p>
+<ul>
+<li><code>comment</code>:注释内容。</li>
+</ul>
+<p>注释会被输出到<code>io.log</code>中。</p>
+</li>
+</ul>
+<p><strong>在操作输出完毕后，必须在最后一行行末换行并使用<code>fflush(stdout)</code>刷新输出缓冲区！</strong></p>
+<h2>输入输出样例</h2>
+<pre><code class="language-plain">&lt; set_username 123456aaa [Bot] Xiao_A_AI
+&lt; play
+&lt; set_force_start ffa true
+&gt; game_start
+&gt; 0
+&gt; aa2333aa
+&gt; Game_chatroom_6666
+&gt; 2
+&gt; [Bot] Xiao_A_AI
+&gt; [Bot] LMcpptest
+&gt; 1 2
+&gt; game_lost
+&gt; 1
+&lt; leave_game
+&lt; quit
+</code></pre>
+<p>其中以<code>&lt;</code>开头的行是小 A 的输出，以<code>&gt;</code>开头的行是输入。</p>
+<h2>测试代码</h2>
+<ol>
+<li>
+<p>安装 <a href="https://nodejs.org/en/">node.js</a>；</p>
+</li>
+<li>
+<p><code>npm install --save socket.io-client</code>；</p>
+</li>
+<li>
+<p>下载 <a href="./main.js">main.js</a> 和 <a href="./io.js">io.js</a>；</p>
+</li>
+<li>
+<p>把你的 C++ 文件命名为<code>gen.cpp</code>，与前两个文件置于同一目录下；</p>
+</li>
+<li>
+<p>在该目录下运行<code>node main.js</code>，开始测试代码。</p>
+</li>
+</ol>
+<p>你可以下载<a href="./gen.cpp">示例程序</a>以了解更多细节。</p>
+
+<hr>
+				<h2>提交代码</h2>
+				<button>撤销</button>
+				<button>重做</button>
+				<button style="color:red;">清空</button>
+				<div>
+					<textarea cols="60" rows="10"></textarea>
+				</div>
+				<button style="color:green;">提交!</button>
+			</div>
+		</div>
+	</body>
+	<script src="./generals.js"></script>
+</html>

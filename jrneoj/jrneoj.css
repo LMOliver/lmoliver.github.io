@@ -42,10 +42,6 @@ table,th,td{
 	border: black solid 2px;
 }
 
-p{
-	text-indent: 40px;
-}
-
 pre{
 	max-width: 100%;
 	overflow-x: auto;
