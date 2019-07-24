@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Screeps 房间查看器</title>
+		<script src="../vue.js"></script>
+		<style>
+			.mappage{
+				width: 100%;
+				overflow: visible;
+			}
+			.roomline{
+				line-height: 0;
+			}
+			.room{
+				display: inline-block;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="mappage" id="app" :style="{width:`${RANGE*2*SIZE}px`}">
+			<div class="roomline" v-for="y in [...range].reverse()">
+				<div class="room" v-for="x in range">
+					<img :src="`https://d3os7yery2usni.cloudfront.net/map/shard3/${XY2RoomName(x,y)}.png`"
+						:style="{height:`${SIZE}px`,width:`${SIZE}px`}">
+				</div>
+			</div>
+		</div>
+		<script src="./rooms.js"></script>
+	</body>
+</html>

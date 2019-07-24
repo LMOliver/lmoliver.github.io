@@ -1,0 +1,27 @@
+html,body{
+	background-color: black;
+	color: white;
+}
+
+*{
+	margin: 0;
+	padding: 0;
+}
+
+#main{
+	height: 100vh;
+	width: 100%;
+}
+
+#window{
+	position: relative;
+	top: calc(50vh - 300px);
+	margin:0 auto;
+	width:600px;
+	height: 600px;
+}
+
+#arena{
+	height: 100%;
+	width: 100%;
+}

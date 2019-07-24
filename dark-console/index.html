@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>黑色控制台</title>
+		<link rel="stylesheet" href="../normalize.css">
+		<link rel="stylesheet" href="./dark-console.css">
+		<script src="../vue.js"></script>
+	</head>
+	<body>
+		<div id="app">
+			<div id="main">
+				<div id="window">
+					<svg xmlns="http://www.w3.org/2000/svg" version="1.1" id="arena">
+						<!-- <circle
+							v-for="point in points"
+							:cx="printX(point.pos)"
+							:cy="printY(point.pos)"
+							:r="10.0/dist(point.pos,camera.pos)"
+							fill="white"
+						/> -->
+						<polygon
+							v-for="poly in polys"
+							:points="printPoly(poly.map(p=>p.pos))"
+							style="stroke:white;stroke-width:1;"
+						/>
+						<path
+							v-for="path in paths"
+							:d="printPath(path.map(p=>p.pos))"
+							style="stroke:blue;stroke-width:1;fill:none;"
+						/>
+						<text
+							:x="convertX(0)-75/2"
+							:y="convertY(-1)"
+							:textLength="75"
+							style="fill:white;"
+						>
+							Loading...
+						</text>
+						<text
+							:x="convertX(0)-75/2"
+							:y="convertY(-1.2)"
+							:textLength="75"
+							style="fill:white;"
+						>
+							FPS:{{q.length}}
+						</text>
+					</svg>
+				</div>
+			</div>
+		</div>
+		<script src="./dark-console.js"></script>
+	</body>
+</html>

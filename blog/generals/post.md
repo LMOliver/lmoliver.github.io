@@ -4,10 +4,10 @@
 <fold-block title="脚本">
 
 ```js
-const username = 'Steps AK IOl';
-const user_id = 'Sk-TRL5SV';
-const gameType = 'FFA';
-const custom_game_id = 'pqlh';
+const username = '[Bot]LMcpptest';
+const user_id = 'HJeJbiJ1S';
+const gameType = 'Custom';
+const custom_game_id = 'bzoj';
 const doDebug = true;
 
 
