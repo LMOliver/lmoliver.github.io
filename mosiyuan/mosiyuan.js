@@ -1,4 +1,4 @@
-const VERSION='0.6.1';
+const VERSION='0.6.2';
 const VERSION_NAME='';
 const C=126-33+1;
 const ENCODE_P={33:125,34:84,35:44,36:102,37:57,38:68,39:50,40:69,41:59,42:83,43:100,44:72,45:116,46:35,47:108,48:89,49:92,50:51,51:65,52:73,53:124,54:119,55:90,56:45,57:47,58:75,59:60,60:95,61:96,62:91,63:63,64:111,65:46,66:101,67:36,68:120,69:104,70:97,71:42,72:55,73:99,74:113,75:53,76:112,77:122,78:114,79:106,80:33,81:79,82:74,83:121,84:61,85:85,86:76,87:49,88:93,89:82,90:40,91:117,92:105,93:62,94:94,95:39,96:78,97:86,98:109,99:41,100:66,101:70,102:48,103:58,104:88,105:103,106:64,107:115,108:80,109:81,110:43,111:123,112:67,113:56,114:107,115:110,116:52,117:118,118:77,119:126,120:87,121:98,122:34,123:71,124:38,125:37,126:54,};
@@ -1407,7 +1407,7 @@ function initData(data){
 
 	data.saveInput='';
 	
-	if(!('version' in data)||data.version<=VERSION){
+	if(!('version' in data)||data.version<VERSION){
 		data.showUpdate=true;
 	}
 	else{
@@ -2056,6 +2056,9 @@ Vue.component('model-alert',{
 				return Math.min(this.moCount/1000,1)+Math.floor(this.books*1.2*Math.pow(1+this.mysteryLevel,1.5));
 			},
 
+			exploreNeed(){
+				return 100+this.temple*10;
+			},
 			exploreTempleCost(){
 				return Math.pow(2,Math.pow(1.8,this.temple))*5e6;
 			},
@@ -2409,7 +2412,7 @@ Vue.component('model-alert',{
 			const maker=(obj)=>{
 				return {
 					get:()=>{
-						clearInterval(saver);
+						clearTimeout(saveSave);
 						this.$set(this,'debugging',true);
 						console.log(
 							translate(`膜拜 %cS%ciyuan%c 要真诚!\n%chttps://orzsiyuan.com/`),

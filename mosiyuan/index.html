@@ -14,7 +14,7 @@
 			<model-alert
 				v-if="showUpdate"
 				:title="translate(`膜拜{Siyuan} {0} {1}`,VERSION,translate(VERSION_NAME))"
-				:value="translate(`修复了一些小 bug。`)"></model-alert>
+				:value="translate(`修复了更多的小 bug。`)"></model-alert>
 			<h1 v-html="translate(`膜拜{Siyuan}`)"></h1>
 			<p v-html="translate(dailyMessage)"></p>
 			<div class="area">
@@ -95,13 +95,16 @@
 							</button>
 						</div>
 					</div>
-					<div>
-						
-					</div>
-					<div v-if="moers>=100+temple*10">
-						<hr>
-						<button @click="exploreTemple"
-						:disabled="XY<exploreTempleCost">{{translate(`探索遗迹 [{0}信仰]`,pn(this.exploreTempleCost))}}</button>	
+					<div v-if="spLevel>0">
+						<div v-if="moers>=exploreNeed">
+							<hr>
+							<button @click="exploreTemple"
+							:disabled="XY<exploreTempleCost">{{translate(`探索遗迹 [{0}信仰]`,pn(this.exploreTempleCost))}}</button>	
+						</div>
+						<div v-else>
+							<hr>
+							{{translate(`探索下一个遗迹需要{0}位信徒`,pn(exploreNeed))}}
+						</div>
 					</div>
 				</div>
 			</div>
