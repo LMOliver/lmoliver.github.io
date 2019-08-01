@@ -11,10 +11,10 @@
 			Loading……
 		</div>
 		<div id="app" style="display:none;">
-			<!-- <model-alert
+			<model-alert
 				v-if="showUpdate"
-				:title="translate(`膜拜{Siyuan} {0} - {1}`,VERSION,translate(VERSION_NAME))"
-				:value="translate(`欢迎各位信徒归来。\n本次更新重做了传教，降低了初期难度，新增了探索系统，对多语言进行了简陋的支持。\n祝各位愉快。`)"></model-alert> -->
+				:title="translate(`膜拜{Siyuan} {0} {1}`,VERSION,translate(VERSION_NAME))"
+				:value="translate(`修复了一些小 bug。`)"></model-alert>
 			<h1 v-html="translate(`膜拜{Siyuan}`)"></h1>
 			<p v-html="translate(dailyMessage)"></p>
 			<div class="area">
