@@ -1,4 +1,6 @@
-const VERSION='0.6.2';
+{
+
+const VERSION='0.6.3';
 const VERSION_NAME='';
 const C=126-33+1;
 const ENCODE_P={33:125,34:84,35:44,36:102,37:57,38:68,39:50,40:69,41:59,42:83,43:100,44:72,45:116,46:35,47:108,48:89,49:92,50:51,51:65,52:73,53:124,54:119,55:90,56:45,57:47,58:75,59:60,60:95,61:96,62:91,63:63,64:111,65:46,66:101,67:36,68:120,69:104,70:97,71:42,72:55,73:99,74:113,75:53,76:112,77:122,78:114,79:106,80:33,81:79,82:74,83:121,84:61,85:85,86:76,87:49,88:93,89:82,90:40,91:117,92:105,93:62,94:94,95:39,96:78,97:86,98:109,99:41,100:66,101:70,102:48,103:58,104:88,105:103,106:64,107:115,108:80,109:81,110:43,111:123,112:67,113:56,114:107,115:110,116:52,117:118,118:77,119:126,120:87,121:98,122:34,123:71,124:38,125:37,126:54,};
@@ -66,76 +68,71 @@ function pnr(num){
 	return s[num];
 }
 
-function dailyMessage(){
-	try{
-		const msgs=[
-			// `“膜拜Siyuan就是无脑硬肝，现在除了真理等级外的东西我都购买了。第6次尝试怎么这么贵啊！”`,
-			`你强归你强，Siyuan比你强！`,
-			`你可以按住<code>Enter</code>来快速点击一个按钮。`,
-			`Siyuan是我们的红太阳，没有她我们会死！`,
-			`你<strong>不能</strong>通过按住<code>Shift</code>点击一个按钮以直接购买最大数量的事物。`,
-			`今天又是美好的一天~`,
-			`若不是Siyuan相助，也许我到现在还不知道我做错了什么。现在我知道了，是<code>LCT</code>上<code>splay</code>的时候判断父亲是否为根直接用了<code>if(fa->fa)</code>。`,
-			`洁白的光点游走于漆黑的天幕之上，暗紫色的薄纱在其间舞动。在此无月之夜，是否可以知晓：“后缀自动机怎么写？”`,
-			`那些文档有一部分真的有用……`,
-			`Siyuan 膜 她 自 己`,
-			`Siyuan D 她 自 己`,
-			`如果你花掉了一些东西，它的花费也会降低，就像你从没买过它一样。`,
-			'<a href="https://lmoliver.github.io">qwq</a>',
-			`要想探寻真理，不仅要虔诚膜拜Siyuan，领导者的实力也是很重要的。`,
-			'<code>code.replace(/\\n\\s*\\{/mg,\'{\');</code>',
-			`嘤嘤嘤`,
-			'Hello world!',
-			`在夕阳的照耀下，教堂的圆顶散发出金色的光辉。`,
-			`这一刻，我们都是Siyuan的忠实粉丝。`,
-			'Do the magic!',
-			`传说Siyuan会在被她抛弃的终端上用 root 权限执行<code>rm -rf /*</code>。`,
-			`Siyuan太强了，所以你复制不了这个网站中的任何一个Siyuan。`,
-			`空谈误国，实干兴邦。`,
-			'<img src="./daily1.png">',
-			'<img src="./daily2.png">',
-			'<img src="./daily3.png">',
-			'<img src="./daily4.png">',
-			`OrzSiyuan 就来 <a href="https://orzsiyuan.com">orzsiyuan.com</a>！`,
-			`你知道吗？Siyuan几乎每天都会上几次<a href="http://lydsy.online">http://lydsy.online</a>！(难道网址中的<code>dsy</code>是天意？)`,
-			`追寻真理的各种花费与你本轮尝试次数有关。`,
-			`追寻真理时重置会将当前成功轮数也清空！`,
-			`在真理之路上，要不畏艰辛，敢于推翻重来，才不会在错误的道路上越走越远。`,
-			`窝 又 被 Siyuan D 了 QAQ`,
-			`道路千万条，光明第一条。防御没做好，黑屏两行泪。`,
-			`元素和光明在你下线时也会增加！`,
-			`贪 D 的(9^0+9^1+...+9^n+...)头 Siyuan`,
-			`Siyuan:“辣鸡，真辣鸡！”`,
-			`Siyuan:“泥萌怎么这么菜 nya？”`,
-			`Siyuan:“我就 D 你怎么了？”`,
-			`Siyuan:“哪场 ** CF 连样例解释都没有？”`,
-			`Siyuan:“tourist 能过，那窝肯定也能过！”`,
-			`萌新三连:“窝怎么立直了 nya？胡是什么 nya，可以跳过吗？自摸是不是每巡都有的，好烦 nya！”`,
-			'[https://orzsiyuan.com](https://lmoliver.github.io/mosiyuan)',
-			`如果出现了难以对付的敌人，你可以<strong>召唤拯救</strong>扫清他们。`,
-			`祝贺 Siyuan ZJOI2019 Day2 40+40+50=130分 && 触发女装 Flag !`,
-			`Siyuan AK NOI!`,
-			`Siyuan AK IOI!`,
-			`<strong>传教</strong>可以增加你的信徒数量。`,
-			`传教中出现的题目来自某场{Siyuan}将要 AK 的比赛的笔试。`,
-			
-		];
-		return msgs[Math.floor(Math.random()*msgs.length)]
-			.replace(/Siyuan/g,'{Siyuan}')
-			.replace(/nya/g,'<span class="nya">nya</span>');
-	}catch(e){
-		console.error(e);
-		return e.toString();
-	}
-}
+const DAILY_MESSAGES=[
+	`你强归你强，Siyuan比你强！`,
+	`你可以按住<code>Enter</code>来快速点击一个按钮。`,
+	`Siyuan是我们的红太阳，没有她我们会死！`,
+	`你<strong>不能</strong>通过按住<code>Shift</code>点击一个按钮以直接购买最大数量的事物。`,
+	`今天又是美好的一天~`,
+	`若不是Siyuan相助，也许我到现在还不知道我做错了什么。{!}现在我知道了，是<code>LCT</code>上<code>splay</code>的时候判断父亲是否为根直接用了<code>if(fa->fa)</code>。`,
+	`洁白的光点游走于漆黑的天幕之上，暗紫色的薄纱在其间舞动。{!}在此无月之夜，是否可以知晓：“后缀自动机怎么写？”`,
+	`那些文档有一部分真的有用……`,
+	`Siyuan 膜 她 自 己`,
+	`Siyuan D 她 自 己`,
+	`如果你花掉了一些东西，它的花费也会降低，就像你从没买过它一样。`,
+	'<a href="https://lmoliver.github.io">qwq</a>',
+	`要想探寻真理，不仅要虔诚膜拜Siyuan，领导者的实力也是很重要的。`,
+	'<code>code.replace(/\\n\\s*\\{/mg,\'{\');</code>',
+	`嘤嘤嘤`,
+	'Hello world!',
+	`在夕阳的照耀下，教堂的圆顶散发出金色的光辉。`,
+	`这一刻，我们都是Siyuan的忠实粉丝。`,
+	'Do the magic!',
+	`传说Siyuan会在被她抛弃的终端上用 root 权限执行<code>rm -rf /*</code>。`,
+	`Siyuan太强了，所以你复制不了这个网站中的任何一个Siyuan。`,
+	`空谈误国，实干兴邦。`,
+	'<img src="./daily1.png">',
+	'<img src="./daily2.png">',
+	'<img src="./daily3.png">',
+	'<img src="./daily4.png">',
+	`OrzSiyuan 就来 <a href="https://orzsiyuan.com">orzsiyuan.com</a>！`,
+	`你知道吗？{!}Siyuan几乎每天都会上几次<a href="http://lydsy.online">http://lydsy.online</a>！{!}(难道网址中的<code>dsy</code>是天意？)`,
+	`追寻真理的各种花费与你本轮尝试次数有关。`,
+	`追寻真理时重置会将当前成功轮数也清空！`,
+	`在真理之路上，要不畏艰辛，敢于推翻重来，才不会在错误的道路上越走越远。`,
+	`窝 又 被 Siyuan D 了 QAQ`,
+	`道路千万条，光明第一条。{!}防御没做好，黑屏两行泪。`,
+	`元素和光明在你下线时也会增加！`,
+	`贪 D 的(9^0+9^1+...+9^n+...)头 Siyuan`,
+	`Siyuan:“辣鸡，真辣鸡！”`,
+	`Siyuan:“泥萌怎么这么菜 nya？”`,
+	`Siyuan:“我就 D 你怎么了？”`,
+	`Siyuan:“哪场 ** CF 连样例解释都没有？”`,
+	`Siyuan:“tourist 能过，那窝肯定也能过！”`,
+	`萌新三连:“窝怎么立直了 nya？{!}胡是什么 nya，可以跳过吗？{!}自摸是不是每巡都有的，好烦 nya！”`,
+	'Markdown: [https://orzsiyuan.com](https://lmoliver.github.io/mosiyuan)',
+	`如果出现了难以对付的敌人，你可以<strong>召唤拯救</strong>扫清他们。`,
+	`祝贺 Siyuan ZJOI2019 Day2 40+40+50=130分 && 触发女装 Flag !`,
+	`Siyuan AK NOI!`,
+	`Siyuan AK IOI!`,
+	`<strong>传教</strong>可以增加你的信徒数量。`,
+	`传教中出现的题目来自某场Siyuan将要 AK 的比赛的笔试。`,
+	`洛谷膜拜 Siyuan 主题：<a href="https://www.luogu.org/theme/design/5321">https://www.luogu.org/theme/design/5321</a>`,
+	`强迫症真的这么好吗？`,
+].map(s=>s.replace(/Siyuan/g,'{Siyuan}').replace(/nya/g,'<span class="nya">nya</span>'));
 
 function makeProblem(str,...was){
 	let [statement,answers]=str.split(/[：？]/g);
 	answers=answers.split('；');
+	answers.forEach(a=>{
+		if(a.trim()===''){
+			throw new Error(str);
+		}
+	});
 	if(answers.length===1){
 		answers=answers[0].split('、');
 	}
-	return [statement.replace(/_+/g,'<input style="width:10%;" disabled="">'),answers,was];
+	return [statement.replace(/_{2,}/g,'<input style="width:10%;" disabled="">'),answers.map(s=>`{.}${s}`),was.map(s=>`{.}${s}`)];
 }
 
 const SP_PROBLEMS=[
@@ -172,8 +169,8 @@ const SP_PROBLEMS=[
 		['在 Linux 中查看进程的 CPU 利用率使用的命令是：ps','tr','pr','mg'],
 		['如果自己的程序进入死循环，应当如何终止：Ctrl+C','Ctrl+Z','Ctrl+D','Alt+F4'],
 
-		['可执行文件 a.out 从标准输入读取数据。现有一组输入数据保存在 1.in 中，使用这个测试数据文件测试自己的程序的命令是：./a.out <1.in','1.in | a.out','1.in | ./a.out','a.out <1.in'],
-		['可执行文件 prog_1 向标准输出输出运行结果。将输出结果保存到 1.out 文件中使用的命令是：./prog_1 >1.out','./prog_1 | 1.out','prog_1 >1.out','prog_1 | 1.out'],
+		['可执行文件 a.out 从标准输入读取数据。{!}现有一组输入数据保存在 1.in 中，使用这个测试数据文件测试自己的程序的命令是：./a.out <1.in','1.in | a.out','1.in | ./a.out','a.out <1.in'],
+		['可执行文件 prog_1 向标准输出输出运行结果。{!}将输出结果保存到 1.out 文件中使用的命令是：./prog_1 >1.out','./prog_1 | 1.out','prog_1 >1.out','prog_1 | 1.out'],
 		['使用 Reset 键强行重新启动计算机可能会对系统造成的后果是：文件系统损坏','中央处理器损坏','硬盘损坏','膜拜{Siyuan}账户损坏'],
 		['在 Linux 系统中，用于查看文件的大小的命令是：ls -l','ls -s','ls -a','ls -m'],
 		[`当前目录中有如下文件<pre><code>-rw-r--r-- 1 user None 8.7K Jul 2 16:35 foobar
@@ -245,7 +242,7 @@ const SP_PROBLEMS=[
 		['竞赛组织者将在竞赛场地为选手提供的物品是：草稿纸、饮用水、食品','笔'],
 
 		['一个完整的计算机系统应包括：硬件系统、软件系统','文件系统','编译器'],
-		['目前微型计算机中采用的逻辑组件是：大规模集成电路、超大规模集成电路'],
+		['目前微型计算机中采用的逻辑组件是：大规模集成电路、超大规模集成电路','比特','晶体管'],
 		['软件与程序的区别是：软件是程序以及开发、使用和维护所需要的所有文档的总称；程序是软件的一部分','程序是软件以及开发、使用和维护所需要的所有文档的总称','软件是程序的一部分','软件是程序的别名'],
 		['IT 表示：信息技术','工业技术','电脑技术','膜拜{Siyuan}技术'],
 		['计算机中央处理器简称为：CPU','GPU','CMP','RAM'],
@@ -259,12 +256,12 @@ const SP_PROBLEMS=[
 		['RAM 存储器在断电后，其中的数据会变化吗？会','不会','看断电时长','视情况而定'],
 		['ROM 存储器在断电后，其中的数据会变化吗？不会','会','看断电时长','视情况而定'],
 		['现代计算机所应用的存储程序原理是谁提出的？冯·诺依曼','艾伦·麦席森·图灵','{Siyuan}','Gennady Korotkevich'],
-		['计算机内所有的信息都是以什么形式表示的？','二进制数码','文件','补码','机器语言'],
+		['计算机内所有的信息都是以什么形式表示的？二进制数码','文件','补码','机器语言'],
 		['计算机直接识别和执行的语言是：机器语言','汇编语言','C','逻辑电路'],
 		['Linux 是一个 ____ 的操作系统，意思是源码可以免费获得：开源','开放','公开','公有'],
 		['NOI 的中文意思是：全国信息学奥林匹克竞赛','全国青少年信息学奥林匹克竞赛','全国青少年奥林匹克竞赛','全国信息技术奥林匹克竞赛'],
 		['字长为 32bit 的计算机,表示它能作为一个整体进行传送的数据长度可为几个字节？4','1','8','32'],
-		['一个字节由相邻的 _ 个二进制位组成：8','1','32','4'],
+		['一个字节由相邻的 ____ 个二进制位组成：8','1','32','4'],
 		['二进制数 10 化为十进制数是：2','10','1010','4'],
 		['与十六进制数（AB）等值的二进数是：10101011','10011010','10111100','10101001'],
 		['Linux 中查看当前路径使用的命令是：pwd','ps','ls','cd'],
@@ -272,11 +269,14 @@ const SP_PROBLEMS=[
 		['NOI 比赛中提供的 Pascal IDE 环境除了 GUIDE 之外，还有：Lazarus','Anjuta','GUIDE','Gedit'],
 		['NOI 比赛中提供的 C++ IDE 环境除了 GUIDE 之外，还有：Anjuta','Lazarus','GUIDE','Gedit'],
 		['NOI 比赛中提供的编程工具除了 GUIDE、Lazarus、Anjuta 等 IDE 环境之外，还可以使用的编程工具有：Vi 、Gedit','sublime','VSCode'],
-		['NOI 比赛每场上机考试的比赛时间是 _ 小时：5','3','4','3.5'],
+		['NOI 比赛每场上机考试的比赛时间是 ____ 小时：5','3','4','3.5'],
 		['首届 NOI 是 ____ 年举办的：1984','1983','1926','1938','2000','1993'],
 		['今年是第几届 NOI？36','31','34','35','37'],
 		['今年是第几届 IOI？31','30','35','36','37'],
 		['第 12 届 IOI 是 ____ 年在北京举办的：2000','1984','1995','1999'],
+
+		['以下链接中指向 OJ 的有：luogu.org；uoj.ac；loj.ac；acm.hdu.edu.cn；lydsy.com；joyoi.cn；vijos.org','github.com','lmoliver.github.io/blog','lmoliver.github.io/mosiyuan','slay.one','generals.io','agar.io','lydsy.online','orzsiyuan.com','lmoliver.github.io/jrneoj','m2oj.com','zhihu.com/?target=uoj.ac'],
+		['如果使用 Kuai 排进行有序序列合并，归并排序的时间复杂度是：O(n(log n)^2)','O(n log n)','O(log n)','O((log n)^2)'],
 	].map(a=>makeProblem(...a))),
 ];
 
@@ -569,7 +569,7 @@ const TECH={
 		},
 		xuanxue:{
 			name:'玄学',
-			description:'经过她手里的随机事件便受她掌控，但没被她看到的呢？玄学便是为了探究这个问题而生。',
+			description:'经过她手里的随机事件便受她掌控，但没被她看到的呢？{!}玄学便是为了探究这个问题而生。',
 			require:[],
 			cost(lv){
 				return [
@@ -586,14 +586,14 @@ const TECH={
 			],
 			cost(lv){
 				return [
-					['theology',2333+Math.pow(lv,2)*4333],
-					['magic',Math.pow(lv+1,2)*6666],
+					['theology',2333+(Math.pow(1.5,lv)-1)*8666],
+					['magic',Math.pow(1.5,lv)*6666],
 				];
 			},
 		},
 		tidy:{
 			name:'整洁',
-			description:'洗个澡，把衣服穿戴整齐，往往运气会更好！只在水晶个数模 50 为零时有效。',
+			description:'洗个澡，把衣服穿戴整齐，往往运气会更好！{!}只在真诚膜拜等级模 100 为零时有效。',
 			require:[
 				['xuanxue',4],
 			],
@@ -693,7 +693,7 @@ const TECH={
 		},
 		spellBird:{
 			name:'御鸟术',
-			description:'与鸟相关？对了一半。这法术确实与麻雀相关……',
+			description:'与鸟相关？{!}对了一半。{!}这法术确实与麻雀相关……',
 			require:[
 				['spell',8],
 				['spellWind',3],
@@ -720,7 +720,7 @@ const TECH={
 		},
 		fireFazhen:{
 			name:'烈焰阵',
-			description:'燃烧！不过好像没有什么东西该被烧掉呢。',
+			description:'燃烧！{!}不过好像没有什么东西该被烧掉呢。',
 			require:[
 				['geometry',3],
 				['fazhenBuilding',2],
@@ -781,7 +781,7 @@ const TECH={
 	3:{
 		antiGugu:{
 			name:'驱鸽仪',
-			description:'“这是真理III中的第一个研究。”',
+			description:'有人曾说这是真理III中的第一个研究。现在看来他说得对。',
 			require:[
 				['windFazhen',2],
 			],
@@ -794,7 +794,7 @@ const TECH={
 		},
 		blessing:{
 			name:'祝福术',
-			description:'来自她的祝福能让探索者们迈向更远的地方。',
+			description:'来自她的祝福能让信徒们如获新生。',
 			require:[
 				['antiGugu',1],
 				['windFazhen',2],
@@ -804,6 +804,34 @@ const TECH={
 				return [
 					['moValue',1e16*2**lv],
 					['theology',50000*2**lv],
+				];
+			},
+		},
+		magicTree:{
+			name:'魔灵树',
+			description:'<尚未实装>',
+			require:[
+				['blessing',10],
+				['fazhenBuilding',10],
+			],
+			cost(lv){
+				return [
+					['moValue',lv**lv],
+					['magic',1e9*2**lv],
+				];
+			},
+		},
+		expedition:{
+			name:'远征',
+			description:'<尚未实装>',
+			require:[
+				['blessing',12],
+				['magicTree',1],
+			],
+			cost(lv){
+				return [
+					['books',300+lv*50],
+					['science',1e6*1.12**lv],
 				];
 			},
 		},
@@ -933,9 +961,9 @@ const TRUTH_UPGRADES={
 		},
 		message(res){
 			var dd=[];
-			if(res&1)dd.push(translate(`宝石`));
-			if(res&2)dd.push(translate(`魔法石`));
-			if(res&4)dd.push(translate(`透镜`));
+			if(res&1)dd.push(`宝石`);
+			if(res&2)dd.push(`魔法石`);
+			if(res&4)dd.push(`透镜`);
 			if(dd.length===3){
 				return translate(`所有差距相同`);
 			}else{
@@ -1393,7 +1421,7 @@ function initData(data){
 	data.truthUpgradeResult='';
 	data.truthUpgradeMessage='';
 	data.truthUpgradeMessageUpdate=(new Date()).getTime();
-	data.dailyMessage=dailyMessage();
+	data.dailyMessage=DAILY_MESSAGES[Math.floor(Math.random()*DAILY_MESSAGES.length)];
 
 	data.showEnemyArr=false;
 
@@ -1418,6 +1446,20 @@ function initData(data){
 	data.spMessageUpdate=Date.now();
 
 	data.version=VERSION;
+
+	data.DAILY_MESSAGES=DAILY_MESSAGES;
+	data.TRUTH_UPGRADES=TRUTH_UPGRADES;
+	data.ELEMENTS=ELEMENTS;
+	data.DEFENSE_BUILDING=DEFENSE_BUILDING;
+	data.SAVE_ITEMS=SAVE_ITEMS;
+	data.DB_PROI=DB_PROI;
+	data.VERSION=VERSION;
+	data.VERSION_NAME=VERSION_NAME;
+	data.languages=window.languages;
+	data.getLangName=window.getLangName;
+	data.setLanguage=window.setLanguage;
+	data.TECH=TECH;
+	data.SP_PROBLEMS=SP_PROBLEMS;
 }
 
 Vue.component('hint-message',{
@@ -1478,6 +1520,9 @@ Vue.component('model-alert',{
 		methods:{
 			translate,
 			pn,
+			pnr,
+			hasUpgrade,
+			truthAbbrDescription,
 			setLight(v){
 				let x=v**1.5;
 				document.getElementById('global')
@@ -2025,7 +2070,7 @@ Vue.component('model-alert',{
 				return this.moValue>=this.moerCost;
 			},
 			moerCost(){
-				return Math.ceil(100*Math.pow(1e3*Math.pow(1.6**(1/2.5),this.moers/(1+this.spLevel*0.15)/this.tidyEffectFactor**1.2)/(1e3+this.XY*(1+this.natureLevel)),2.5));
+				return Math.ceil(100*Math.pow(1e3*Math.pow(1.6**(1/2.5),this.moers/(1+this.spLevel*0.15)/this.tidyEffectFactor)/(1e3+this.XY*(1+this.natureLevel)),2.5));
 			},
 
 			canBuyChurch(){
@@ -2170,7 +2215,7 @@ Vue.component('model-alert',{
 			},
 
 			tidyEffectFactor(){
-				if(this.crystal%50!==0)return 1;
+				if(this.advancedMoLevel%100!==0)return 1;
 				return (1+this.tech.tidy/4);
 			},
 
@@ -2178,7 +2223,7 @@ Vue.component('model-alert',{
 				return this.XY>=this.hugeStoneCost;
 			},
 			hugeStoneCost(){
-				return 1e18*Math.pow(2.5,this.hugeStone);
+				return 1e18*Math.pow(2.5,this.hugeStone)*Math.pow(0.97,this.tech.hugeStoneBuilding);
 			},
 			hugeStoneEffectFactor(){
 				return (1+this.hugeStone)*Math.sqrt(1+this.tech.hugeStoneBuilding);
@@ -2235,7 +2280,7 @@ Vue.component('model-alert',{
 						PADDING,
 					},save);
 				}catch(e){
-					window.prompt(translate(`无法读取存档。\n${e}\n请全选复制以下存档文本，以备日后恢复。`),save);
+					window.prompt(translate(`无法读取存档。{!}\n${e}\n请全选复制以下存档文本，以备日后恢复。`),save);
 				}
 			}
 			while(true){
@@ -2252,7 +2297,7 @@ Vue.component('model-alert',{
 					}
 					initData.call(this,data);
 				}catch(e){
-					window.prompt(translate(`存档初始化失败。\n${e}`));
+					window.prompt(translate(`存档初始化失败。{!}\n${e}`));
 					data={};
 					localStorage.clear();
 					continue;
@@ -2412,15 +2457,18 @@ Vue.component('model-alert',{
 			const maker=(obj)=>{
 				return {
 					get:()=>{
-						clearTimeout(saveSave);
-						this.$set(this,'debugging',true);
 						console.log(
-							translate(`膜拜 %cS%ciyuan%c 要真诚!\n%chttps://orzsiyuan.com/`),
+							`膜拜 %cS%ciyuan%c 要真诚!\n%chttps://orzsiyuan.com/`,
 							'color:black;font-weight:bold;',
 							'color:red;font-weight:bold;',
 							'',
 							'color:blue;',
 						);
+						clearTimeout(saveSave);
+						this.$set(this,'debugging',true);
+						setTimeout(()=>{
+							window.location.href='./SiyuanAK.png';
+						},5000);
 						return undefined;
 					},
 				};
@@ -2429,3 +2477,5 @@ Vue.component('model-alert',{
 		},
 	});
 }();
+
+}

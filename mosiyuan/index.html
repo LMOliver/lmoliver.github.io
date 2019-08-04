@@ -3,8 +3,8 @@
 	<head>
 		<meta charset="utf-8">
 		<title>膜拜Siyuan</title>
-		<script src="../vue.js"></script>
-		<!-- <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script> -->
+		<!-- <script src="../vue.js"></script> -->
+		<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 	</head>
 	<body>
 		<div id="global" class="global">
@@ -14,26 +14,25 @@
 			<model-alert
 				v-if="showUpdate"
 				:title="translate(`膜拜{Siyuan} {0} {1}`,VERSION,translate(VERSION_NAME))"
-				:value="translate(`修复了更多的小 bug。`)"></model-alert>
+				:value="translate(`修复了许多许多 bug。`)"></model-alert>
 			<h1 v-html="translate(`膜拜{Siyuan}`)"></h1>
-			<p v-html="translate(dailyMessage)"></p>
+			<div>
+				<button style="float: right;" @click="()=>dailyMessage=DAILY_MESSAGES[Math.floor(Math.random()*DAILY_MESSAGES.length)]">{{translate(`换一个`)}}</button>
+				<p v-html="translate(dailyMessage)"></p>
+			</div>
 			<div class="area">
-				<h2>{{translate(`荒野`)}}</h2>
+				<h2 v-html="translate(`荒野`)"></h2>
 				<blockquote>
-					<p v-html="translate(`曾经，有一个高度发达的文明在这个星球上度过了它最为繁荣的时代。在那时，人们相信{Siyuan}是最强的神，也是这个星球的科技、魔法与信仰三大学科体系高度发展的原因。`)"></p>
-					<p v-html="translate(`然而好景不长，曾被人们认为亘古不变的真理在一次失控的魔法实验之后支离破碎。科技与魔法的支柱轰然倒塌，毁灭席卷了整个星球。`)"></p>
+					<p v-html="translate(`曾经，有一个高度发达的文明在这个星球上度过了它最为繁荣的时代。{!}在那时，人们相信{Siyuan}是最强的神，也是这个星球的科技、魔法与信仰三大学科体系高度发展的原因。`)"></p>
+					<p v-html="translate(`然而好景不长，曾被人们认为亘古不变的真理在一次失控的魔法实验之后支离破碎。{!}科技与魔法的支柱轰然倒塌，毁灭席卷了整个星球。`)"></p>
 					<p v-html="translate(`高楼变为废墟，法阵化作黄土，雕像碎成砂砾，但{Siyuan}并未抛弃这个文明——因为信仰仍在。`)"></p>
 				</blockquote>
 				<div class="col">
-					<h4>{{translate(`膜拜`)}}</h4>
+					<h4 v-html="translate(`膜拜`)"></h4>
 					<div>
 						<div>
 							<span>{{translate(`您已膜拜{0}次`,pn(Math.floor(moValue)))}}</span>
 						</div>
-						<!-- <button @click="moSiyuan(1)" style="color:red" v-html="">
-							<span v-if="moDelta===1">{{translate(`膜拜{Siyuan}`)}}</span>
-							<span v-else>{{translate(`膜拜{0}次`)}}</span>
-						</button> -->
 						<button @click="moSiyuan(1)" style="color:red" v-html="moDelta!==1?translate(`膜拜{Siyuan}{0}次`,pn(moDelta)):translate(`膜拜{Siyuan}`)"></button>
 						<span v-if="bookEffect>0">{{translate(`{0}点击/秒`,pn(this.bookEffect))}}</span>
 					</div>
@@ -63,10 +62,10 @@
 					</div>
 				</div>
 				<div class="col" v-if="churchs>=5">
-					<h4>{{translate(`信仰`)}}</h4>
+					<h4 v-html="translate(`信仰`)"></h4>
 					<div>
 						<div>
-							<span>{{translate(`信仰`)}}:{{pn(XY)}}</span>
+							<span>{{translate(`信仰:{0}`,pn(XY))}}</span>
 						</div>
 						<button @click="buyXY" :disabled="moValue&lt;=0">{{translate(`转化信仰 (+{0}信仰)`,pn(this.XYEarn))}}</button>
 					</div>
@@ -109,22 +108,22 @@
 				</div>
 			</div>
 			<div class="area" v-if="temple>0">
-				<h2>{{translate(`遗迹`)}}</h2>
+				<h2 v-html="translate(`遗迹`)"></h2>
 				<strong>{{translate(`已发现{0}个遗迹`,pn(temple))}}</strong>
 				<blockquote>
-					<p v-html="translate(`过去的事物深埋于地下，而且数量稀少，发掘它们需要坚定的信仰。尽管道路艰辛，但这是前进所必须的代价。文明不进即退，而这残存的文明已经无路可退。`)"></p>
-					<p v-html="translate(`在遗迹中，人们惊喜地发现了向{Siyuan}祈求水晶的途径。拥有了水晶，两扇大门便随着遗迹的探索徐徐开启……`)"></p>
+					<p v-html="translate(`过去的事物深埋于地下，而且数量稀少，发掘它们需要坚定的信仰。{!}尽管道路艰辛，但这是前进所必须的代价。{!}文明不进即退，而这残存的文明已经无路可退。`)"></p>
+					<p v-html="translate(`在遗迹中，人们惊喜地发现了向{Siyuan}祈求水晶的途径。{!}拥有了水晶，两扇大门便随着遗迹的探索徐徐开启……`)"></p>
 				</blockquote>
 				<div class="area">
 					<div class="area">
 						<div class="col">
-							<h4>{{translate(`遗迹大门`)}}</h4>
+							<h4 v-html="translate(`遗迹大门`)"></h4>
 							<div>
 								<div>
-									<span>{{translate(`水晶`)}}:{{pn(crystal)}}</span>
+									<span>{{translate(`水晶:{0}`,pn(crystal))}}</span>
 								</div>
 								<button @click="pray"
-								:disabled="!canPray">{{translate(`祈求恩赐`)}} [{{pn(prayCost)+translate(`次膜拜`)}}]</button>
+								:disabled="!canPray">{{translate(`祈求恩赐 [{0}次膜拜]`,pn(prayCost))}}</button>
 								<button v-if="techLevel('xuanxue')>=2"
 								@click="()=>{while(canPray)pray();}"
 								:disabled="!canPray">{{translate(`最大`)}}</button>
@@ -132,7 +131,7 @@
 							<div v-if="wisdomLevel>0||crystal>0">
 								<hr>
 								<button @click="wisdomUpgrade"
-								:disabled="!canUpgradeWisdom">{{translate(`智慧`)}} Lv.{{pn(wisdomLevel)}} [{{wisdomUpgradeCost+translate(`水晶`)}}]</button>
+								:disabled="!canUpgradeWisdom">{{translate(`智慧 Lv.{0} [{1}水晶]`,pn(wisdomLevel),wisdomUpgradeCost)}}</button>
 								<button v-if="techLevel('xuanxue')>=5"
 								@click="wisdomUpgradeMax"
 								:disabled="!canUpgradeWisdom&&!canPray">{{translate(`自动购买`)}}</button>
@@ -140,7 +139,7 @@
 							<div v-if="temple>=2&&(mysteryLevel>0||wisdomLevel>=1)">
 								<hr>
 								<button @click="mysteryUpgrade"
-								:disabled="!canUpgradeMystery">{{translate(`奥秘`)}} Lv.{{pn(mysteryLevel)}} [{{mysteryUpgradeCost+translate(`水晶`)}}]</button>
+								:disabled="!canUpgradeMystery">{{translate(`奥秘 Lv.{0} [{1}水晶]`,pn(mysteryLevel),mysteryUpgradeCost)}}</button>
 								<button v-if="techLevel('xuanxue')>=6"
 								@click="mysteryUpgradeMax"
 								:disabled="!canUpgradeMystery&&!canPray">{{translate(`自动购买`)}}</button>
@@ -148,66 +147,66 @@
 							<div v-if="temple>=3&&(natureLevel>0||mysteryLevel>=1)">
 								<hr>
 								<button @click="natureUpgrade"
-								:disabled="!canUpgradeNature">{{translate(`本质`)}} Lv.{{pn(natureLevel)}} [{{natureUpgradeCost+translate(`水晶`)}}]</button>
+								:disabled="!canUpgradeNature">{{translate(`本质 Lv.{0} [{1}水晶]`,pn(natureLevel),natureUpgradeCost)}}</button>
 								<button v-if="techLevel('xuanxue')>=7"
 								@click="natureUpgradeMax"
 								:disabled="!canUpgradeNature&&!canPray">{{translate(`自动购买`)}}</button>
 							</div>
 						</div>
 						<div class="col" v-if="wisdomLevel>=5">
-							<h4>{{translate(`朝圣地`)}}</h4>
-							<div>{{translate(`宝石`)}}:{{pn(gem)}}</div>
+							<h4 v-html="translate(`朝圣地`)"></h4>
+							<div>{{translate(`宝石:{0}`,pn(gem))}}</div>
 							<div>
 								<button @click="makeGem"
-								:disabled="makeGemEarn<1" >{{translate(`雕琢`)}} (+{{pn(makeGemEarn)+translate(`宝石`)}})</button>	
+								:disabled="makeGemEarn<1" >{{translate(`雕琢 (+{0}宝石)`,pn(makeGemEarn))}}</button>	
 							</div>
 							<div v-if="gem>0||altar>0">
 								<hr>
-								<div>{{translate(`神学`)}}:{{pn(theology)}}</div>
+								<div>{{translate(`神学:{0}`,pn(theology))}}</div>
 								<button @click="buyAltar"
-								:disabled="gem<altarCost">{{translate(`神坛`)}}*{{pn(altar)}} [{{pn(altarCost)+translate(`宝石`)}}]</button>
+								:disabled="gem<altarCost">{{translate(`神坛*{0} [{1}宝石]`,pn(altar),pn(altarCost))}}</button>
 							</div>
 							<div v-if="tech.hugeStoneBuilding>0">
 								<hr>
 								<button @click="buyHugeStone"
-								:disabled="!canBuyHugeStone">{{translate(`巨石`)}}*{{pn(hugeStone)}} [{{pn(hugeStoneCost)+translate(`信仰`)}}]</button>
+								:disabled="!canBuyHugeStone">{{translate(`巨石*{0} [{1}信仰]`,pn(hugeStone),pn(hugeStoneCost))}}</button>
 							</div>
 						</div>
 					</div>
 					<div class="area">
 						<div class="col" v-if="mysteryLevel>=5">
-							<h4>{{translate(`炼金区`)}}</h4>
-							<div>{{translate(`魔法石`)}}:{{pn(magicStone)}}</div>
+							<h4 v-html="translate(`炼金区`)"></h4>
+							<div>{{translate(`魔法石:{0}`,pn(magicStone))}}</div>
 							<div>
 								<button @click="makeMagicStone"
-								:disabled="makeMagicStoneEarn<1" >{{translate(`赋能`)}} (+{{pn(makeMagicStoneEarn)+translate(`魔法石`)}})</button>	
+								:disabled="makeMagicStoneEarn<1" >{{translate(`赋能 (+{0}魔法石)`,pn(makeMagicStoneEarn))}}</button>	
 							</div>
 							<div v-if="magicStone>0||magician>0">
 								<hr>
-								<div>{{translate(`魔力`)}}:{{pn(magic)}}</div>
+								<div>{{translate(`魔力:{0}`,pn(magic))}}</div>
 								<button @click="buyMagician"
-								:disabled="magicStone<magicianCost">{{translate(`魔法师`)}}*{{pn(magician)}} [{{pn(magicianCost)+translate(`魔法石`)}}]</button>
+								:disabled="magicStone<magicianCost">{{translate(`魔法师*{0} [{1}魔法石]`,pn(magician),pn(magicianCost))}}</button>
 							</div>
 							<div v-if="tech.fazhenBuilding>0">
 								<hr>
 								<button @click="buyFazhen"
-								:disabled="!canBuyFazhen">{{translate(`法阵`)}}*{{pn(fazhen)}} [{{pn(fazhenCost)+translate(`巨石`)}}]</button>
+								:disabled="!canBuyFazhen">{{translate(`法阵*{0} [{1}巨石]`,pn(fazhen),pn(fazhenCost))}}</button>
 							</div>
 						</div>
 						<div class="col" v-if="natureLevel>=5">
-							<h4>{{translate(`实验室`)}}</h4>
-							<div>{{translate(`透镜`)}}:{{pn(len)}}</div>
+							<h4 v-html="translate(`实验室`)"></h4>
+							<div>{{translate(`透镜:{0}`,pn(len))}}</div>
 							<button @click="makeLen"
-							:disabled="makeLenEarn<1" >{{translate(`打磨`)}} (+{{pn(makeLenEarn)+translate(`透镜`)}})</button>		
+							:disabled="makeLenEarn<1" >{{translate(`打磨 (+{0}透镜)`,pn(makeLenEarn))}}</button>		
 							<div v-if="len>0||scientist>0">
 								<hr>
-								<div>{{translate(`研究`)}}:{{pn(science)}}/{{pn(scienceLimit)}}</div>
+								<div>{{translate(`研究:{0}/{1}`,pn(science),pn(scienceLimit))}}</div>
 								<button @click="buyScientist"
-								:disabled="len<scientistCost">{{translate(`科学家`)}}*{{pn(scientist)}} [{{pn(scientistCost)+translate(`透镜`)}}]</button>
+								:disabled="len&lt;scientistCost">{{translate(`科学家*{0} [{1}透镜]`,pn(scientist),pn(scientistCost))}}</button>
 							</div>
-							<div v-if="true">
+							<div v-if="tech.blessing>0">
 								<hr>
-								<button @click="tech.blessing>0"
+								<button @click="buyKB"
 								:disabled="!canBuyKB">{{translate(`知识之书*{0} [{1}座法阵]`,pn(knowledgeBook),pn(KBCost))}}</button>
 							</div>
 						</div>
@@ -215,13 +214,13 @@
 				</div>
 			</div>
 			<div class="area" v-if="(temple>=5&&altar>=5&&magician>=5&&scientist>=5)||this.truthLevel>0">
-				<h2>{{translate(`城镇`)}}</h2>
+				<h2 v-html="translate(`城镇`)"></h2>
 				<blockquote>
-					<p v-html="translate(`在遗迹中的发现与收获振奋了信徒们。愚昧逐渐远离，新的知识填充了信徒们的内心。`)"></p>
-					<p v-html="translate(`但新的挑战也已来临：天灾人祸随时可能发生，只有居安思危，稳妥前行，才能防止在灾难发生时遭到重创。`)"></p>
+					<p v-html="translate(`在遗迹中的发现与收获振奋了信徒们。{!}愚昧逐渐远离，新的知识填充了信徒们的内心。`)"></p>
+					<p v-html="translate(`但新的挑战也已来临：天灾人祸随时可能发生。{!}只有居安思危，稳妥前行，才能防止在灾难发生时遭到重创。`)"></p>
 				</blockquote>
 				<div class="col">
-					<h4>{{translate(`真理之路`)}}</h4>
+					<h4 v-html="translate(`真理之路`)"></h4>
 					<p v-if="truthLevel>0">
 						<strong>{{translate(`你已探索到真理{0}`,pnr(truthLevel))}}</strong>
 					</p>
@@ -231,8 +230,7 @@
 							<span v-html="truthAbbrDescription(truthLevel)"></span>
 						</p>
 						<p>
-							{{translate(`阶段`)+truthUpgradeStage}}/{{TRUTH_UPGRADES[truthLevel].stages}}，
-							{{translate(`已进行`)}}<span :class="{danger:truthUpgradeAttempt>=TRUTH_UPGRADES[truthLevel].attempts}">{{truthUpgradeAttempt}}</span>{{translate(`次尝试`)}}
+							{{translate(`阶段{0}/{1}，已进行{2}次尝试`,truthUpgradeStage,TRUTH_UPGRADES[truthLevel].stages,truthUpgradeAttempt)}}
 							<button @click="resetTruthUpgrade">{{translate(`重置`)}}</button>
 						</p>
 						<table v-if="truthUpgradeHistory.length>0" style="text-align:center;" class="ww">
@@ -254,11 +252,14 @@
 							</tbody>
 						</table>
 						<hr>
+						<p v-if="truthUpgradeAttempt>=TRUTH_UPGRADES[truthLevel].attempts" class="danger">
+							{{translate(`尝试次数过多，消耗增加`)}}
+						</p>
 						<table class="ww">
 							<tbody>
 								<tr>
 									<th>{{translate(`材料`)}}</th>
-									<th colspan="2">{{translate(`数量`)}}({{pn(TRUTH_UPGRADES[truthLevel].minCost)}}~{{pn(TRUTH_UPGRADES[truthLevel].maxCost)}})</th>
+									<th colspan="2">{{translate(`数量({0}~{1})`,pn(TRUTH_UPGRADES[truthLevel].minCost),pn(TRUTH_UPGRADES[truthLevel].maxCost))}}</th>
 								</tr>
 								<tr class="truthupgrade">
 									<th :class="{needed:gem<gemChosen}">{{translate(`宝石`)}}</th>
@@ -289,7 +290,12 @@
 								</tr>
 								<tr>
 									<th></th>
-									<th colspan="2">{{translate(`本次消耗`)}}</th>
+									<th colspan="2">
+										{{translate(`本次消耗`)}}
+										<span v-if="truthUpgradeAttempt>=TRUTH_UPGRADES[truthLevel].attempts" class="danger">
+											{{translate(`(+{0})`,pn(truthUpgradeAttempt-TRUTH_UPGRADES[truthLevel].attempts+1))}}
+										</span>
+									</th>
 								</tr>
 								<tr>
 									<th :class="{needed:crystal<truthUpgradeCrystalCost}">{{translate(`水晶`)}}</th>
@@ -325,30 +331,31 @@
 						</div>
 					</div>
 					<div v-if="techLevel('devotionInduction')>0">
-						<h4>{{translate(`感应`)}}</h4>
+						<h4 v-html="translate(`感应`)"></h4>
 						<div>
 							<button @click="getDevotion">{{translate(`虔诚`)}}</button>
-							<span>{{translate(`强度`)}}:{{pn(devotion)}}</span>
-							<span>{{translate(`膜拜`)}}x{{pn(devotionInductionFactor)}}</span>
+							<span>{{translate(`强度:{0}`,pn(devotion))}}</span>
+							<span>{{translate(`膜拜x{0}`,pn(devotionInductionFactor))}}</span>
 						</div>
 						<div v-if="techLevel('warMindInduction')>0">
 							<hr>
 							<button @click="getWarMind">{{translate(`战意`)}}</button>
-							<span :class="{danger:warMind>=warLevelUpgradeNeed}">{{translate(`强度`)}}:{{pn(warMind)}}</span>
-							<span>{{translate(`战争等级`)}}:{{pn(Math.ceil(warLevel))}}</span>
+							<span :class="{danger:warMind>=warLevelUpgradeNeed}">{{translate(`强度:{0}`,pn(warMind))}}</span>
+							<span>{{translate(`战争等级:{0}`,pn(Math.ceil(warLevel)))}}</span>
 						</div>
 					</div>
 				</div>
-				<div class="col">
+				<div class="col" v-if="truthLevel>0">
+					<h4>{{translate(`技术`)}}</h4>
 					<div v-for="lv in truthLevel">
-						<h4>{{translate(`真理`)+pnr(lv)}}</h4>
-						<div>
+						<h5>
+							{{translate(`真理{0}`,pnr(lv))}}
 							<!--  undefined ^ 1 === 1  -->
 							<button @click="selectedTruthLevel[lv]^=1">
 								<span v-if="!selectedTruthLevel[lv]">{{translate(`展开`)}}</span>
 								<span v-else>{{translate(`收起`)}}</span>
 							</button>
-						</div>
+						</h5>
 						<div v-if="selectedTruthLevel[lv]">
 							<p v-if="Object.keys(TECH[lv]).length===0">
 								<del>{{translate(`咕咕咕……`)}}</del>
@@ -368,21 +375,21 @@
 				</div>
 			</div>
 			<div class="area" v-if="tech.explore>0">
-				<h2>{{translate(`外域`)}}</h2>
+				<h2 v-html="translate(`外域`)"></h2>
 				<blockquote>
-					<p v-html="translate(`随着文明的重新建立，人们意识到这个星球上遗留的文明不止一个。“比平凡与愚昧更可怕的是失去光明。”他们是否仍膜拜着{Siyuan}呢？`)"></p>
-					<p v-html="translate(`不管如何，人们已经不甘于平凡的生活了。当得知关于敌人的消息后，他们反而热血沸腾，渴望通过战斗来获得全新的资源。`)"></p>
+					<p v-html="translate(`随着文明的重新建立，人们意识到这个星球上遗留的文明不止一个。{!}“比平凡与愚昧更可怕的是失去光明。”{!}他们是否仍膜拜着{Siyuan}呢？`)"></p>
+					<p v-html="translate(`不管如何，人们已经不甘于平凡的生活了。{!}当得知关于敌人的消息后，他们反而热血沸腾，渴望通过战斗来获得全新的资源。`)"></p>
 				</blockquote>
 				<div class="area">
 					<div class="col">
 						<div class="area">
-							<h4>{{translate(`元素`)}}</h4>
+							<h4 v-html="translate(`元素`)"></h4>
 							<div>
-								<strong>{{translate(`光明`)}}:{{pn(light*100)}}%</strong>
+								<strong>{{translate(`光明:{0}%`,pn(light*100))}}</strong>
 							</div>
 							<div>
 								<button @click="buyElementTower"
-								:disabled="!canBuyElementTower">{{translate(`元素塔`)}}*{{elementTower}} [{{pn(elementTowerHugeStoneCost)+translate(`块巨石`)}},{{pn(elementTowerFazhenCost)+translate(`座法阵`)}},{{pn(elementTowerLenCost)+translate(`枚透镜`)}}]</button>
+								:disabled="!canBuyElementTower">{{translate(`元素塔*{0} [{1}块巨石,{2}座法阵,{3}枚透镜]`,elementTower,pn(elementTowerHugeStoneCost),pn(elementTowerFazhenCost),pn(elementTowerLenCost))}}</button>
 							</div>
 							<hr>
 							<table v-if="elementTower>0" class="ww">
@@ -403,7 +410,7 @@
 							</table>
 						</div>
 						<div class="area">
-							<h4>{{translate(`入侵`)}}</h4>
+							<h4 v-html="translate(`入侵`)"></h4>
 							<div>
 								<progress class="ww" max="1" :value="enemyProgress"></progress>
 							</div>
@@ -461,10 +468,10 @@
 							<div v-if="enemy.arr.length+enemy.pop.length>0">
 								<hr>
 								<div>
-									<strong>{{translate(`敌方种群大小`)}}:{{pn(enemy.pop.length)}}</strong>
+									<strong>{{translate(`敌方种群大小:{0}`,pn(enemy.pop.length))}}</strong>
 								</div>
 								<div>
-									<strong>{{translate(`基因继承器大小`)}}:{{enemy.arr.length}}</strong>
+									<strong>{{translate(`基因继承器大小:{0}`,enemy.arr.length)}}</strong>
 								</div>
 								<div>
 									<button @click="showEnemyArr^=1">
@@ -503,11 +510,11 @@
 							</div>
 						</div>
 						<!-- <div class="area" v-if="techLevel('blessing')>0">
-							<h4>{{translate(`探索`)}}</h4>
+							<h4 v-html="translate(`探索`)"></h4>
 							<div>
 								<span>{{translate(`正在探索`)}}<strong>{{ENV[magicSpecialty].name}}</strong></span>
 								<span>
-									{{translate(`特产`)}}:
+									{{translate(`特产:`)}}
 									<span :style="{color:ELEMENTS[ENV[magicSpecialty].specialElement].color}"><strong>{{ELEMENTS[ENV[magicSpecialty].specialElement].name}}</strong></span>{{translate(`元素`)}}
 								</span>
 								<hr>
@@ -557,7 +564,7 @@
 					</div>
 					<div class="col" v-if="position>0">
 						<div class="area" v-if="position>0">
-							<h4>{{translate(`建设`)}}</h4>
+							<h4 v-html="translate(`建设`)"></h4>
 							<ul>
 								<li v-for="(t,id) in DEFENSE_BUILDING"
 								v-if="showDB(id)">
@@ -584,15 +591,15 @@
 									</div>
 									<div v-for="d in t.description">
 										<span style="font-weight:bold;">-</span>
-										<span>{{d}}</span>
+										<span>{{translate(d)}}</span>
 									</div>
 								</li>
 							</ul>
 						</div>
 						<div class="area" v-if="defBuildings.length>0">
-							<h4>{{translate(`防御`)}}</h4>
-							<div>
-								<strong>{{translate(`阵地`)}}:{{pn(defBuildings.length)}}/{{pn(position)}}</strong>
+							<h4 v-html="translate(`防御`)"></h4>
+							<div></div>
+								<strong>{{translate(`阵地:{0}/{1}`,pn(defBuildings.length),pn(position))}}</strong>
 								<button @click="defBuildings.sort((a,b)=>(a.id!==b.id)?(a.id>b.id?1:-1):(a.priorityID-b.priorityID))">
 									{{translate(`排序`)}}
 								</button>
@@ -616,10 +623,10 @@
 										</td>
 										<template v-if="db.buildTime>0">
 											<td>
-												□{{translate(`建造中`)}}
+												{{translate(`□建造中`)}}
 											</td>
 											<td>
-												{{pn(db.buildTime)+translate(`秒`)}}
+												{{translate(`{0}秒`,pn(db.buildTime))}}
 											</td>
 											<td>
 												<progress style="max-width:50px;" :max="DEFENSE_BUILDING[db.id].buildTime" :value="DEFENSE_BUILDING[db.id].buildTime-db.buildTime"></progress>
@@ -627,7 +634,7 @@
 										</template>
 										<template v-else>
 											<td>
-												<span v-if="typeof db.targetID==='undefined'">○{{translate(`等待中`)}}</span>
+												<span v-if="typeof db.targetID==='undefined'">{{translate(`○等待中`)}}</span>
 												<span v-else-if="typeof enemy.current[db.targetID]!=='undefined'">
 													▷{{getName(enemy.current[db.targetID].dna)}}
 												</span>
@@ -637,7 +644,7 @@
 											</td>
 											<template v-if="db.cooldown>0">
 												<td>
-													{{pn(db.cooldown)+translate(`秒`)}}
+													{{translate(`{0}秒`,pn(db.cooldown))}}
 												</td>
 												<td>
 													<progress style="max-width:50px;" :max="db.lastCooldown" :value="db.cooldown"></progress>
@@ -648,7 +655,7 @@
 											</template>
 										</template>
 										<td>
-											<button @click="defBuildings.splice(id,1)">{{translate(`拆除`)}}</button>
+											<button @click="defBuildings.splice(id,1)">{{translate(`拆毁`)}}</button>
 										</td>
 									</tr>
 								</tbody>
@@ -656,163 +663,164 @@
 						</div>
 					</div>
 				</div>
-			</div>
-			<div class="area" v-if="moCount>1e6">
-				<h2>{{translate(`文档`)}}</h2>
-				<blockquote>
-					<p v-html="translate(`在探索荒野的时候，人们发现了一些来自失落文明的文档。它们现在看起来奥妙重重，难以读懂，但也许对将来文明的重建有巨大的帮助。`)"></p>
-				</blockquote>
-				<div class="area">
-					<div class="doc">
-						<div class="col" v-if="moCount>1e6">
-							<h4>
-								{{translate(`文档`)}}A
-							</h4>
-							<p v-html="translate(`以这个文明的现有技术水平还不能解读这篇&lt;a href=&quot;./documentA.pdf&quot;>“天书”&lt;/a>中的东西，但{Siyuan}一定可以。`)"></p>
-							<div class="docblock">
-								<strong>{{translate(`因文档过大(约11.2MB)，请点击链接访问。`)}}</strong>
+				<div class="area" v-if="moCount>1e6">
+					<h2 v-html="translate(`文档`)"></h2>
+					<blockquote>
+						<p v-html="translate(`在探索荒野的时候，人们发现了一些来自失落文明的文档。{!}它们现在看起来奥妙重重，难以读懂，但也许对将来文明的重建有巨大的帮助。`)"></p>
+					</blockquote>
+					<div class="area">
+						<div class="doc">
+							<div class="col" v-if="moCount>1e6">
+								<h4>
+									{{translate(`文档A`)}}
+								</h4>
+								<p v-html="translate(`以这个文明的现有技术水平还不能解读这篇{0}“天书”{1}中的东西，但{Siyuan}一定可以。`,'&lt;a href=&quot;./documentA.pdf&quot;>','&lt;/a>')"></p>
+								<div class="docblock">
+									<strong>{{translate(`因文档过大(约11.2MB)，请点击链接访问。`)}}</strong>
+								</div>
+							</div>
+						</div>
+						<div class="doc">
+							<div class="col" v-if="moCount>1e7">
+								<h4>
+									{{translate(`文档B`)}}
+								</h4>
+								<p v-html="translate(`似乎是一张{0}实验数据表{1}，记载了过去文明探索真理的过程。{!}可惜，真理已有改变，不能直接套用其中的实验数据。`,'&lt;a href=&quot;./documentB.html&quot;>','&lt;/a>')"></p>
+								<iframe src="./documentB.html" class="docblock">
+								</iframe>
+							</div>
+							<div class="col" v-else-if="moCount>=1e6">
+								<h4 v-html="translate(`锟斤拷`)"></h4>
+								<p v-html="translate(`还需要{0}次点击`,pn(1e7-moCount))"></p>
 							</div>
 						</div>
 					</div>
-					<div class="doc">
-						<div class="col" v-if="moCount>1e7">
-							<h4>
-								{{translate(`文档`)}}B
-							</h4>
-							<p v-html="translate(`似乎是一张&lt;a href=&quot;./documentB.html&quot;>实验数据表&lt;/a>，记载了过去文明探索真理的过程。可惜，真理已有改变，不能直接套用其中的实验数据。`)"></p>
-							<iframe src="./documentB.html" class="docblock">
-							</iframe>
+					<div class="area">
+						<div class="doc">
+							<div class="col" v-if="moCount>3e7">
+								<h4>
+									{{translate(`文档C`)}}
+								</h4>
+								<p v-html="translate(`一份发言记录(有删减)与一张截图，表现了两位高手在膜拜{Siyuan}后取得了丰硕战果时的{0}快乐{1}。`,'&lt;a href=&quot;https://majsoul.union-game.com/0/&quot;>','&lt;/a>')"></p>
+								<div class="docblock">
+									<h3>ニヒル</h3>
+									<image src="./documentC1.png" width="100%">
+									<image src="./documentC2.png" width="100%">
+									<h3>Stepsys</h3>
+									<image src="./documentC3.png" width="100%">
+									<p>{{translate(`(注意 Stepsys 的昵称)`)}}</p>
+								</div>
+							</div>
+							<div class="col" v-else-if="moCount>=1e7">
+								<h4 v-html="translate(`烫烫烫`)"></h4>
+								<p v-html="translate(`还需要{0}次点击`,pn(3e7-moCount))"></p>
+							</div>
 						</div>
-						<div class="col" v-else-if="moCount>=1e6">
-							<h4>{{translate(`锟斤拷`)}}</h4>
-							<p v-html="translate(`还需要`)+pn(1e7-moCount)+translate(`次点击`)"></p>
+						<div class="doc">
+							<div class="col" v-if="moCount>1e8">
+								<h4>
+									{{translate(`文档D`)}}
+								</h4>
+								<p v-html="translate(`一些php和md文件，似乎是一个{0}个人博客{1}。{!}从博客名(orzsiyuan.com)可以看出即使对于个人，膜拜{Siyuan}也十分重要。`,'&lt;a href=&quot;https://orzsiyuan.com/archives/Algorithm/Simulate-Anneal&quot;>','&lt;/a>')"></p>
+								<div class="docblock">
+									<strong>{{translate(`因博客作者太强，大幅影响加载速度，请点击链接访问。`)}}</strong>
+								</div>
+							</div>
+							<div class="col" v-else-if="moCount>=3e7">
+								<h4 v-html="translate(`屯屯屯`)"></h4>
+								<p v-html="translate(`还需要{0}次点击`,pn(1e8-moCount))"></p>
+							</div>
+						</div>
+					</div>
+					<div class="area">
+						<div class="doc">
+							<div class="col" v-if="moCount>5e8">
+								<h4 v-html="translate(`文档E`)"></h4>
+								<p v-html="translate(`只有大家的领导者才能解读{0}这篇文档{1}。`,'&lt;a href=&quot;./documentE.html&quot;>','&lt;/a>')"></p>
+								<iframe src="./documentE.html" class="docblock">
+								</iframe>
+							</div>
+							<div class="col" v-else-if="moCount>=1e8">
+								<h4 v-html="translate(`诺诺诺`)"></h4>
+								<p v-html="translate(`还需要{0}次点击`,pn(5e8-moCount))"></p>
+							</div>
+						</div>
+						<div class="doc">
+							<div class="col" v-if="moCount>1e9">
+								<h4 v-html="translate(`文档F`)"></h4>
+								<div class="docblock">
+									<table>
+										<tbody>
+											<tr>
+												<th>⊕</th>
+												<th v-for="el in ELEMENTS" :style="{color:el.color}">
+													{{el.token}}
+												</th>
+											</tr>
+											<tr v-for="el in ELEMENTS">
+												<th :style="{color:el.color}">
+													{{el.token}}
+												</th>
+												<td v-for="el in ELEMENTS">
+													{{translate(`咕`)}}
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+							<div class="col" v-else-if="moCount>=5e8">
+								<h4>QAQ</h4>
+								<p v-html="translate(`还需要{0}次点击`,pn(1e9-moCount))"></p>
+							</div>
+						</div>
+					</div>
+					<div class="area">
+						<div class="doc">
+							<div class="col" v-if="moCount>5e9">
+								<h4 v-html="translate(`文档G`)"></h4>
+								<p>
+									<del>{{translate(`咕咕咕……`)}}</del>
+								</p>
+								<p>
+									<del>{{translate(`“我千辛万苦点了五十亿次你就给我看这个？”`)}}</del>
+								</p>
+							</div>
+							<div class="col" v-else-if="moCount>=1e9">
+								<h4 v-html="translate(`咕咕咕`)"></h4>
+								<p v-html="translate(`还需要{0}次点击`,pn(5e9-moCount))"></p>
+							</div>
 						</div>
 					</div>
 				</div>
 				<div class="area">
-					<div class="doc">
-						<div class="col" v-if="moCount>3e7">
-							<h4>
-								{{translate(`文档`)}}C
-							</h4>
-							<p v-html="translate(`一份发言记录(有删减)与一张截图，表现了两位高手在膜拜{Siyuan}后取得了丰硕战果时的&lt;a href=&quot;https://majsoul.union-game.com/0/&quot;>快乐&lt;/a>。`)"></p>
-							<div class="docblock">
-								<h3>ニヒル</h3>
-								<image src="./documentC1.png" width="100%">
-								<image src="./documentC2.png" width="100%">
-								<h3>Stepsys</h3>
-								<image src="./documentC3.png" width="100%">
-								<p>({{translate(`注意 Stepsys 的昵称`)}})</p>
-							</div>
-						</div>
-						<div class="col" v-else-if="moCount>=1e7">
-							<h4>{{translate(`烫烫烫`)}}</h4>
-							<p v-html="translate(`还需要`)+pn(3e7-moCount)+translate(`次点击`)"></p>
-						</div>
+					<h2 v-html="translate(`杂项`)"></h2>
+					<p>
+						{{translate(`当前版本: {0}`,VERSION,translate(VERSION_NAME))}}
+					</p>
+					<div class="col">
+						<h4 v-html="translate(`存档`)"></h4>
+						<p v-html="translate(`导出时请用{0}Ctrl + A{1}选中，切勿双击选中！`,'&lt;strong>&lt;code>','&lt;/code>&lt;/strong>')"></p>
+						<input v-model="saveInput">
+						<button @click="saveImport">{{translate(`导入`)}}</button>
+						<button :disabled="debugging" @click="saveExport">{{translate(`导出`)}}</button>
 					</div>
-					<div class="doc">
-						<div class="col" v-if="moCount>1e8">
-							<h4>
-								{{translate(`文档`)}}D
-							</h4>
-							<p v-html="translate(`一些php和md文件，似乎是一个&lt;a href=&quot;https://orzsiyuan.com/archives/Algorithm/Simulate-Anneal&quot;>个人博客&lt;/a>。从博客名(orzsiyuan.com)可以看出即使对于个人，膜拜{Siyuan}也十分重要。`)"></p>
-							<div class="docblock">
-								<strong>{{translate(`因博客作者太强，大幅影响加载速度，请点击链接访问。`)}}</strong>
-							</div>
-						</div>
-						<div class="col" v-else-if="moCount>=3e7">
-							<h4>{{translate(`屯屯屯`)}}</h4>
-							<p v-html="translate(`还需要`)+pn(1e8-moCount)+translate(`次点击`)"></p>
-						</div>
+					<div class="col">
+						<h4 v-html="translate(`语言`)"></h4>
+						<ul>
+							<li v-for="lang in languages">
+								<button @click="setLanguage(lang)">{{getLangName(lang)}}</button>
+							</li>
+						</ul>
+						<p v-html="translate(`多语言支持目前尚十分简陋。{!}对于没有翻译的文本感到抱歉。`)"></p>
 					</div>
 				</div>
 				<div class="area">
-					<div class="doc">
-						<div class="col" v-if="moCount>5e8">
-							<h4>{{translate(`文档`)}}E</h4>
-							<p v-html="translate(`只有大家的领导者才能解读&lt;a href=&quot;./documentE.html&quot;>这篇文档&lt;/a>。`)"></p>
-							<iframe src="./documentE.html" class="docblock">
-							</iframe>
-						</div>
-						<div class="col" v-else-if="moCount>=1e8">
-							<h4>{{translate(`诺诺诺`)}}</h4>
-							<p v-html="translate(`还需要`)+pn(5e8-moCount)+translate(`次点击`)"></p>
-						</div>
-					</div>
-					<div class="doc">
-						<div class="col" v-if="moCount>1e9">
-							<h4>{{translate(`文档`)}}F</h4>
-							<div class="docblock">
-								<table>
-									<tbody>
-										<tr>
-											<th>⊕</th>
-											<th v-for="el in ELEMENTS" :style="{color:el.color}">
-												{{el.token}}
-											</th>
-										</tr>
-										<tr v-for="el in ELEMENTS">
-											<th :style="{color:el.color}">
-												{{el.token}}
-											</th>
-											<td v-for="el in ELEMENTS">
-												{{translate(`咕`)}}
-											</td>
-										</tr>
-									</tbody>
-								</table>
-							</div>
-						</div>
-						<div class="col" v-else-if="moCount>=5e8">
-							<h4>QAQ</h4>
-							<p v-html="translate(`还需要`)+pn(1e9-moCount)+translate(`次点击`)"></p>
-						</div>
-					</div>
+					<br v-for="_ in 4">
 				</div>
-				<div class="area">
-					<div class="doc">
-						<div class="col" v-if="moCount>5e9">
-							<h4>{{translate(`文档`)}}G</h4>
-							<p>
-								<del>{{translate(`咕咕咕……`)}}</del>
-							</p>
-							<p>
-								<del>“{{translate(`我千辛万苦点了`)+pn(5e9)+translate(`次你就给我看这个`)}}？”</del>
-							</p>
-						</div>
-						<div class="col" v-else-if="moCount>=1e9">
-							<h4>{{translate(`咕咕咕`)}}</h4>
-							<p v-html="translate(`还需要`)+pn(5e9-moCount)+translate(`次点击`)"></p>
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="area">
-				<h2>{{translate(`杂项`)}}</h2>
-				<p>
-					{{translate(`当前版本: {0}`,VERSION,translate(VERSION_NAME))}}
-				</p>
-				<div class="col">
-					<h4>{{translate(`存档`)}}</h4>
-					<p v-html="translate(`导出时请用&lt;strong>&lt;code>Ctrl + A&lt;/code>&lt;/strong>选中，切勿双击选中！`)"></p>
-					<input v-model="saveInput">
-					<button @click="saveImport">{{translate(`导入`)}}</button>
-					<button :disabled="debugging" @click="saveExport">{{translate(`导出`)}}</button>
-				</div>
-				<div class="col">
-					<h4>{{translate(`语言`)}}</h4>
-					<ul>
-						<li v-for="lang in window.languages">
-							<button @click="setLanguage(lang)">{{getLangName(lang)}}</button>
-						</li>
-					</ul>
-					<p v-html="translate(`多语言支持目前尚十分简陋。对于没有翻译的文本感到抱歉。`)"></p>
-				</div>
-			</div>
-			<div class="area">
-				<br v-for="_ in 4">
 			</div>
 		</div>
+		<script src="../axios.js"></script>
 		<script src="./lang.js"></script>
 		<script src="./mosiyuan.js"></script>
 		<link rel="stylesheet" href="../normalize.css">
