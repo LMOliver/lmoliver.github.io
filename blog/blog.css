@@ -65,6 +65,7 @@ pre code{
 }
 
 pre{
+	box-shadow: 0 0 8px rgba(192, 192, 192, 0.8);
 	border-radius: 5px;
 	padding: 10px;
 	margin: 10px 0;
@@ -94,6 +95,7 @@ pre{
 }
 
 header{
+	font-family: 'Consolas', 'Courier New', 'Courier', 'monospace';
 	position: sticky;
 	top:0;
 	background-color: rgba(255, 255, 255,0.8);
@@ -127,7 +129,6 @@ button{
 }
 button:hover{
 	background: whitesmoke;
-
 }
 button:active{
 	background: lightgray;

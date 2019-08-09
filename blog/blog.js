@@ -50,12 +50,12 @@ function copyText(text){
 }
 
 Vue.component('fold-block',{
-	props:['title','initshow'],
+	props:['title','initshow','nocopy'],
 	template:`
 		<div :class="classObj" style="">
 			<strong v-if="title" style="display:inline-block">{{title}}</strong>
 			<button @click="show = !show" :style="btnStyle">{{show?'收起':'展开'}}</button>
-			<button @click="copy()" :style="btnStyle">复制</button>
+			<button v-if="nocopy===undefined" @click="copy()" :style="btnStyle">复制</button>
 			<div v-show="show" ref="block"><slot></slot></div>
 		</div>`,
 	methods:{
@@ -125,7 +125,7 @@ Vue.component('post-refence',{
 			data:{
 				title:'Loading...',
 				time:undefined,
-				description:'正在加载QAQ',
+				description:'正在加载 QAQ',
 			},
 			classObj:{
 				contains:true,
