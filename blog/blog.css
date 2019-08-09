@@ -2,7 +2,7 @@ body,html{
 	margin: 0;
 	height: 100%;
 	font-family:sans-serif;
-	background:#eeeeee url(https://api.ixiaowai.cn/api/api.php?SiyuanTQL) fixed;
+	background:#eeeeee url(https://acg.toubiec.cn/random) fixed;
 	background-size: cover;
 }
 
@@ -52,13 +52,35 @@ h1,h2,h3,h4,h5,h6{
 	padding: 30px 8% calc(30px + 60px) 8%;
 }
 
+code{
+	font-family: 'Consolas', 'Courier New', 'Courier', 'monospace';
+	border-radius: 3px;
+	background-color: rgba(216, 216, 255, 0.8);
+	padding: 0 3px;
+}
+
+pre code{
+	background: none !important;
+	padding: 0 !important;
+}
+
+pre{
+	border-radius: 5px;
+	padding: 10px;
+	margin: 10px 0;
+	/* border:2px solid rgb(96,96,96); */
+	background-color: rgba(255, 255, 255,0.8);
+}
+
 .contains{
 	background-color: rgba(255, 255, 255,0.8);
 	padding:10px;
-	border:2px solid grey;
+	/* border:2px solid rgb(96,96,96); */
 	border-radius:5px;
 	margin: 10px 0;
-	/* box-shadow: 0 0 100px gray; */
+	box-shadow: 0 0 8px rgba(192, 192, 192, 0.8);
+	/* box-shadow: 0 0 3px rgba(0, 0, 0, 0.8); */
+	/* box-shadow: 0 0 8px rgba(255, 255, 255, 0.8); */
 }
 
 .cf-black-red{
@@ -74,10 +96,10 @@ h1,h2,h3,h4,h5,h6{
 header{
 	position: sticky;
 	top:0;
-	background-color: white;
-	border:solid darkblue;
-	border-width: 0 0 2px;
-	box-shadow: 0 0 3px black;
+	background-color: rgba(255, 255, 255,0.8);
+	/* border:solid white; */
+	/* border-width: 0 0 2px; */
+	box-shadow: 0 0 8px rgba(192, 192, 192, 0.8);
 	padding: 0 10%;
 	z-index: 1;
 }
@@ -87,8 +109,37 @@ footer{
 	background-color: rgba(255, 255, 255,0.8);
 	text-align: center;
 	padding-top: 8px;
-	border-top: 2px solid grey;
+	box-shadow: 0 0 8px rgba(192, 192, 192, 0.8);
+	/* border-top: 2px solid rgb(96,96,96); */
 	position: absolute;
 	bottom: 0;
 	width: 100%;
+}
+
+button{
+	border: none;
+	/* border: 1px rgb(96,96,96) solid; */
+	border-radius: 5px;
+	background: rgb(240, 240, 240);
+	color:black;
+	padding: 4px 8px;
+	line-height: 18px;
+}
+button:hover{
+	background: whitesmoke;
+
+}
+button:active{
+	background: lightgray;
+}
+button:disabled{
+	border: 1px rgba(0,0,0,0) solid;
+	background-color:rgb(96,96,96) !important;
+	cursor: not-allowed;
+}
+
+hr{
+	background-color: rgb(192,192,192);
+	border: none;
+	height: 2px;
 }

@@ -1,10 +1,12 @@
+**UPD：**<span class=".cf-black-red">Siyuan</span> 教会我 LCT 了！（现在又不会了）
+
 [WA+TLE 30](https://www.luogu.org/recordnew/show/16694154)
 
 有没有大佬帮我查查错啊QAQ
 
 [洛谷模板题](https://www.luogu.org/problemnew/show/P3690)
 
-<fold-block title="无法AC的LCT" initshow>
+<fold-block title="无法AC的LCT">
 
 ```cpp
 #include<bits/stdc++.h>

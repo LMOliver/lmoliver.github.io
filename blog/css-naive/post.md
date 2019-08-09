@@ -17,4 +17,4 @@ document.body.style.background='#ffffff';
 
 <br v-for="i in 50">
 
-我还是太菜了QAQ
+我还是太菜了 QAQ

@@ -55,7 +55,7 @@ Vue.component('fold-block',{
 		<div :class="classObj" style="">
 			<strong v-if="title" style="display:inline-block">{{title}}</strong>
 			<button @click="show = !show" :style="btnStyle">{{show?'收起':'展开'}}</button>
-			<button @click="copy()" :style="btnStyle">贺</button>
+			<button @click="copy()" :style="btnStyle">复制</button>
 			<div v-show="show" ref="block"><slot></slot></div>
 		</div>`,
 	methods:{
@@ -161,17 +161,13 @@ Vue.component('blog-list',{
 	mounted(){
 		axios({
 			method:'get',
-			url:'https://api.github.com/repos/LMOliver/lmoliver.github.io/contents/blog?\
-client_id=a5ff5dd0495db47c22ab\
-&client_secret=da88951dfa058ac808f6032320cb0d7b01e1a936',
+			url:'./blog-list.json',
 			responseType:'json',
 		}).then(({data})=>{
-			this.list=data
-				.filter(f=>f.type==='dir')
-				.map(d=>d.name);
+			this.list=data;
 		}).catch((reason)=>{
 			console.error('blog-post',reason);
-		})
+		});
 	},
 })
 
@@ -299,7 +295,7 @@ Vue.component('blog-context',{
 				render:res.render,
 				staticRenderFns:res.staticRenderFns,
 				parent:this,
-			})
+			});
 		},
 	},
 });
@@ -353,7 +349,7 @@ function renderMetadata(data){
 			<h1 style="display:inline">${title}</h1>
 			<span>${time}</span>
 		</div>
-		<p><em>${description}</em></p>
+		<p>${description}</p>
 		<hr>`
 }
 
