@@ -1,6 +1,6 @@
 _CF 1174F 是 Div.2 F，而非 Div.1 F。_
 
-## [题面](https://codeforces.com/problemset/problem/1174/F)
+[题目链接](https://codeforces.com/problemset/problem/1174/F)
 
 **这是一道交互题。**
 
@@ -18,9 +18,7 @@ _CF 1174F 是 Div.2 F，而非 Div.1 F。_
 
 ----
 
-## 题解
-
-<fold-block nocopy>
+<fold-block title="题解" nocopy>
 
 首先发现 `d 1` 是好东西，它能让我们知道神秘点的深度。知道了神秘点的深度，就可以用 `d` 询问知道某个点与神秘点的 $\operatorname{LCA}$。
 
@@ -39,8 +37,6 @@ _CF 1174F 是 Div.2 F，而非 Div.1 F。_
 - `d` 询问点 $h$ 所在的重链**上**的点：看似和询问重链外的点一样，但是如果求得的 $\operatorname{LCA}$  在点 $h$ 所在的重链上且是询问点的祖先，那么下一次 `s` 询问一定能让我们走一条轻边！
 
 所以，我们只需要每次 `d` 询问点 $h$ 所在重链的链底，如果发现点 $x$ 在重链上就直接作答，否则 `s` 询问 $\operatorname{LCA}$。此时，`s` 询问一定会走轻边，使 $h$ 所在子树大小减半。因此，我们用 $2 \log n+O(1)$ 次询问解决了问题。
-
-<fold-block title="代码">
 
 ```cpp
 #include<bits/stdc++.h>
@@ -129,8 +125,6 @@ int main(){
 	return 0;
 }
 ```
-
-</fold-block>
 
 [提交记录](https://codeforces.com/contest/1174/submission/58433150)
 

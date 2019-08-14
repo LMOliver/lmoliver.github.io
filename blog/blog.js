@@ -141,8 +141,8 @@ Vue.component('post-refence',{
 			this.data={
 				title:'Error!',
 				time:undefined,
-				description:reason,
-			}
+				description:`在获取文章时出现错误：${reason.status} ${reason.statusText}`,
+			};
 		})
 	},
 });
