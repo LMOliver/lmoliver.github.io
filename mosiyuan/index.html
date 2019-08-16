@@ -21,8 +21,8 @@
 		<div id="app"></div>
 		<script>
 			{
-				Object.defineProperty(window,'LOCAL',{get:()=>true});
 				'use strict';
+				Object.defineProperty(window,'LOCAL',{get:()=>false});
 				function toAbsLoc(loc){
 					let a=document.createElement('a');
 					a.href=loc;
