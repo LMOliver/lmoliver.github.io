@@ -4,9 +4,6 @@
 	<head>
 		<meta charset="utf-8">
 		<title>文档B</title>
-		<link rel="stylesheet" href="../normalize.css">
-		<link rel="stylesheet" href="../default.css">
-		<link rel="stylesheet" href="./mosiyuan.css">
 	</head>
 
 <!--
@@ -305,6 +302,25 @@ _Utilisez [Google Translate](https://translate.google.cn/).(Mon français n'est 
 		</table>
 		<hr>
 		<p><em>Utilisez <a href="https://translate.google.cn/">Google Translate</a>.(Mon français n’est pas bon, ne vous moquez pas de moi!)</em></p>
-		<p><strong>%%%<span class="siyuan"></span></strong>!</p>			
+		<p><strong>%%%<span class="siyuan"></span></strong>!</p>
+		<script>
+			function loadCSS(href,...backUps){
+				let element=document.createElement('link');
+				element.setAttribute('rel','stylesheet');
+				element.setAttribute('href',href);
+				element.addEventListener('error',(e)=>{
+					if(backUps.length>0){
+						loadCSS(...backUps);
+					}
+					else{
+						throw e;
+					}
+				});
+				document.body.appendChild(element);
+			}
+			loadCSS('https://cdn.jsdelivr.net/gh/lmoliver/lmoliver.github.io@master/normalize.min.css','../normalize.css');
+			loadCSS('https://cdn.jsdelivr.net/gh/lmoliver/lmoliver.github.io@master/default.min.css','../default.css');
+			loadCSS('https://cdn.jsdelivr.net/gh/lmoliver/lmoliver.github.io@master/mosiyuan/mosiyuan.min.css','./mosiyuan.css');
+		</script>
 	</body>
 </html>

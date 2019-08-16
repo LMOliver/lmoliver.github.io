@@ -1,10 +1,68 @@
+'use strict';
 {
-
-const VERSION='0.6.3';
+const VERSION='0.6.4';
 const VERSION_NAME='';
 const C=126-33+1;
 const ENCODE_P={33:125,34:84,35:44,36:102,37:57,38:68,39:50,40:69,41:59,42:83,43:100,44:72,45:116,46:35,47:108,48:89,49:92,50:51,51:65,52:73,53:124,54:119,55:90,56:45,57:47,58:75,59:60,60:95,61:96,62:91,63:63,64:111,65:46,66:101,67:36,68:120,69:104,70:97,71:42,72:55,73:99,74:113,75:53,76:112,77:122,78:114,79:106,80:33,81:79,82:74,83:121,84:61,85:85,86:76,87:49,88:93,89:82,90:40,91:117,92:105,93:62,94:94,95:39,96:78,97:86,98:109,99:41,100:66,101:70,102:48,103:58,104:88,105:103,106:64,107:115,108:80,109:81,110:43,111:123,112:67,113:56,114:107,115:110,116:52,117:118,118:77,119:126,120:87,121:98,122:34,123:71,124:38,125:37,126:54,};
 const DECODE_P={125:33,84:34,44:35,102:36,57:37,68:38,50:39,69:40,59:41,83:42,100:43,72:44,116:45,35:46,108:47,89:48,92:49,51:50,65:51,73:52,124:53,119:54,90:55,45:56,47:57,75:58,60:59,95:60,96:61,91:62,63:63,111:64,46:65,101:66,36:67,120:68,104:69,97:70,42:71,55:72,99:73,113:74,53:75,112:76,122:77,114:78,106:79,33:80,79:81,74:82,121:83,61:84,85:85,76:86,49:87,93:88,82:89,40:90,117:91,105:92,62:93,94:94,39:95,78:96,86:97,109:98,41:99,66:100,70:101,48:102,58:103,88:104,103:105,64:106,115:107,80:108,81:109,43:110,123:111,67:112,56:113,107:114,110:115,52:116,118:117,77:118,126:119,87:120,98:121,34:122,71:123,38:124,37:125,54:126,};
+function encode_compress(obj){
+	obj=JSON.parse(JSON.stringify(obj));
+	let data=[];
+	let dataMap=new Map();
+	function getData(d){
+		let index=JSON.stringify(d);
+		if(!dataMap.has(index)){
+			let id=data.length;
+			data.push(d);
+			dataMap.set(index,id);
+		}
+		return dataMap.get(index);
+	}
+	function transverse(obj){
+		if(obj!==null&&typeof obj==='object'){
+			if(obj instanceof Array){
+				return getData(obj.map(transverse));
+			}
+			else{
+				let keys=getData([{},...(Object.keys(obj).map(transverse))]);
+				return getData([keys,...(Object.values(obj).map(transverse))]);
+			}
+		}
+		else{
+			return getData(obj);
+		}
+	}
+	transverse(obj);
+	return data;
+}
+function decode_compress(data){
+	data=JSON.parse(JSON.stringify(data));
+	function isKeys(arr){
+		return (arr instanceof Array)&&(typeof arr[0]==='object')&&(!(arr[0] instanceof Array));
+	}
+	function getObj(index){
+		let x=data[index];
+		if(x instanceof Array){
+			if(x.length>0&&isKeys(data[x[0]])){
+				let [,...keys]=getObj(x[0]);
+				let [,...values]=x;
+				values=values.map(getObj);
+				let f=Object.create(null);
+				for(let i=0;i<keys.length;i++){
+					f[keys[i]]=values[i];
+				}
+				return f;
+			}
+			else{
+				return x.map(getObj);
+			}
+		}
+		else{
+			return x;
+		}
+	}
+	return getObj(data.length-1);
+}
 function encodeArr(arr){
 	function encodeChar(x){
 		return String.fromCharCode(ENCODE_P[x+33]);
@@ -17,23 +75,33 @@ function decodeArr(str){
 	}
 	return str.split('').map((ch,i)=>(decodeChar(ch)+Number(i)*21)%C);
 }
+const FLAG_COMPRESS='-';
 function encode(x){
-	var arr=decodeArr(JSON.stringify(x));
+	var arr=decodeArr(JSON.stringify(encode_compress(x)));
 	var l=arr.length;
 	for(let i=l-1;i>0;i--){
 		arr[i]=(arr[i]-arr[i-1]+C)%C;
 	}
 	return this.PADDING
 		+encodeArr(arr)
-		+this.PADDING;
+		+this.PADDING
+		+FLAG_COMPRESS;
 }
 function decode(x){
+	let compressed=false;
+	if(x[x.length-1]===FLAG_COMPRESS){
+		x=x.slice(0,-1);
+		compressed=true;
+	}
 	var arr=decodeArr(x.slice(this.PADDING.length,-this.PADDING.length));
 	var l=arr.length;
 	for(let i=1;i<l;i++){
 		arr[i]=(arr[i]+arr[i-1])%C;
 	}
-	return JSON.parse(encodeArr(arr));
+	let result=JSON.parse(encodeArr(arr));
+	// console.log(JSON.parse(JSON.stringify(result)));
+	if(compressed)result=decode_compress(result);
+	return result;
 }
 
 const EXP_BASE=10;
@@ -46,9 +114,10 @@ function pn(num){
 	var [val,exp]=num.toExponential(2).split('e').map(parseFloat);
 	if(exp<5){
 		if(Number.isSafeInteger(num))return num.toString();
-		else if(exp<-4)return num.toExponential(3);
-		else if(exp<0)return num.toFixed(3);
-		else return num.toFixed(2);
+		for(let i=2;i<=4;i++){
+			if(exp>=-i)return num.toFixed(i);
+		}
+		return num.toExponential(2);
 	}else if(exp>3*EXP_BASE**2){
 		return num.toExponential(2);
 	}
@@ -56,8 +125,7 @@ function pn(num){
 	let elv=Math.floor(exp/3)-1;
 	let suf=elv<=2?
 		FIRSTS[elv]
-	:
-		(NUM_HEADS[elv%EXP_BASE]+NUM_TAILS[Math.floor(elv/EXP_BASE)]).slice(0,2);
+		:(NUM_HEADS[elv%EXP_BASE]+NUM_TAILS[Math.floor(elv/EXP_BASE)]).slice(0,2);
 	return `${val.toPrecision(3)}${suf}`;
 }
 function pnr(num){
@@ -113,12 +181,15 @@ const DAILY_MESSAGES=[
 	'Markdown: [https://orzsiyuan.com](https://lmoliver.github.io/mosiyuan)',
 	`如果出现了难以对付的敌人，你可以<strong>召唤拯救</strong>扫清他们。`,
 	`祝贺 Siyuan ZJOI2019 Day2 40+40+50=130分 && 触发女装 Flag !`,
-	`Siyuan AK NOI!`,
-	`Siyuan AK IOI!`,
+	`Siyuan AK NOI！`,
+	`Siyuan AK IOI！`,
+	`Siyuan 女装！`,
 	`<strong>传教</strong>可以增加你的信徒数量。`,
 	`传教中出现的题目来自某场Siyuan将要 AK 的比赛的笔试。`,
 	`洛谷膜拜 Siyuan 主题：<a href="https://www.luogu.org/theme/design/5321">https://www.luogu.org/theme/design/5321</a>`,
 	`强迫症真的这么好吗？`,
+	`JRNEOJ 不是 OJ！`,
+	`当世界速度达到上限时，会触发<strong>时间震荡</strong>，使你失去一些世界速度。`,
 ].map(s=>s.replace(/Siyuan/g,'{Siyuan}').replace(/nya/g,'<span class="nya">nya</span>'));
 
 function makeProblem(str,...was){
@@ -319,7 +390,7 @@ const SAVE_ITEMS={
 	},
 	spCombo:{
 		name:'连续正确数',
-		format:'Combo * {VALUE}',
+		format:'Combo : {VALUE}',
 		default:0,
 	},
 	spingProblem:{
@@ -433,8 +504,8 @@ const SAVE_ITEMS={
 		default:{},
 	},
 	devotion:{
-		name:'虔诚',
-		format:'VALUE虔诚',
+		name:'虔诚感应强度',
+		format:'VALUE虔诚感应强度',
 	},
 	light:{
 		name:'亮度',
@@ -480,8 +551,8 @@ const SAVE_ITEMS={
 		},
 	},
 	warMind:{
-		name:'战意',
-		format:'VALUE战意',
+		name:'战意感应强度',
+		format:'VALUE战意感应强度',
 		default:0,
 	},
 	warLevel:{
@@ -499,20 +570,40 @@ const SAVE_ITEMS={
 		format:'VALUE',
 		default:false,
 	},
-	magicSpecialty:{
-		name:'魔法特产',
-		format:'VALUE',
-		default:Math.floor(Math.random()*4),
-	},
+	// magicSpecialty:{
+	// 	name:'魔法特产',
+	// 	format:'VALUE',
+	// 	default:Math.floor(Math.random()*4),
+	// },
 	version:{
 		name:'版本',
 		format:'VALUE版本',
-		default:'0.5',
+		default:VERSION,
 	},
-	adventure:{
-		name:'冒险',
-		format:'...',
-		default:false,
+	// adventure:{
+	// 	name:'冒险',
+	// 	format:'...',
+	// 	default:false,
+	// },
+	magicTreeSeed:{
+		name:'魔灵树树苗',
+		format:'VALUE株魔灵树树苗',
+		default:0,
+	},
+	magicTree:{
+		name:'魔灵树',
+		format:'VALUE株魔灵树',
+		default:0,
+	},
+	timeIDC:{
+		name:'时间感应强度',
+		format:'VALUE时间感应强度',
+		default:0,
+	},
+	worldSpeed:{
+		name:'世界速度',
+		format:'VALUE世界速度',
+		default:1,
 	},
 };
 
@@ -593,7 +684,7 @@ const TECH={
 		},
 		tidy:{
 			name:'整洁',
-			description:'洗个澡，把衣服穿戴整齐，往往运气会更好！{!}只在真诚膜拜等级模 100 为零时有效。',
+			description:'洗个澡，把衣服穿戴整齐，往往运气会更好！{!}效果与真诚膜拜等级的质因数分解中 2 的数量有关。',
 			require:[
 				['xuanxue',4],
 			],
@@ -644,7 +735,7 @@ const TECH={
 	2:{
 		pscience:{
 			name:'科普',
-			description:'用一些神秘的小东西唤起孩子们对科学的好奇。',
+			description:'用一些不科学的小东西反而能唤起孩子们对科学的好奇。',
 			require:[],
 			cost(lv){
 				return [
@@ -781,7 +872,7 @@ const TECH={
 	3:{
 		antiGugu:{
 			name:'驱鸽仪',
-			description:'有人曾说这是真理III中的第一个研究。现在看来他说得对。',
+			description:'有人曾说这是真理 III 中的第一个研究。现在看来他说得对。',
 			require:[
 				['windFazhen',2],
 			],
@@ -807,9 +898,24 @@ const TECH={
 				];
 			},
 		},
+		timeInduction:{
+			name:'时间感应',
+			description:'数百双眼睛盯着法阵中幽蓝色的光芒，向她祈求永恒的瞬间。',
+			require:[
+				['antiGugu',2],
+				['fazhenBuilding',9],
+				['glasses',40],
+			],
+			cost(lv){
+				return [
+					['worldSpeed',(1-1/(lv+2))*(1+0.2*lv)],
+					['knowledgeBook',Math.floor(lv/4+0.5)],
+				];
+			},
+		},
 		magicTree:{
 			name:'魔灵树',
-			description:'<尚未实装>',
+			description:'魔灵树的果实天生自带保护魔法，这使这些果实为敌人所觊觎。',
 			require:[
 				['blessing',10],
 				['fazhenBuilding',10],
@@ -889,7 +995,7 @@ const TRUTH_UPGRADES={
 	},
 	2:{
 		stages:3,
-		attempts:15,
+		attempts:18,
 		minCost:100,
 		maxCost:160,
 		gen(){
@@ -989,6 +1095,7 @@ const ELEMENTS={
 		color:'black',
 		token:'☉',
 	},
+
 	water:{
 		name:'水',
 		color:'lightblue',
@@ -1009,14 +1116,22 @@ const ELEMENTS={
 		color:'#dddd00',
 		token:'δ',
 	},
+
 	magic:{
 		name:'魔',
 		color:'purple',
 		token:'λ',
 	},
+
+	ice:{
+		name:'冰',
+		color:'skyblue',
+		token:'I',
+	},
+
 	air:{
 		name:'气',
-		color:'skyblue',
+		color:'#ccccff',
 		token:'ε',
 	},
 	rain:{
@@ -1031,7 +1146,7 @@ const ELEMENTS={
 	},
 	coal:{
 		name:'炭',
-		color:'#666644',
+		color:'#886644',
 		token:'θ',
 	},
 };
@@ -1050,6 +1165,10 @@ const ENEMY_ABBR=[
 function damage(e,tp,val,st){
 	e.abbr.health-=Math.min(1,st/(st+e.abbr['defend'+tp]))*val;
 }
+
+const SPECIAL_ENEMIES={
+
+};
 
 const DEFENSE_BUILDING={
 	waterArrowTower:{
@@ -1293,6 +1412,7 @@ const DB_PROI={
 		priority:(e,id)=>-Infinity,
 	},
 };
+
 const magic1=x=>Math.cos((1-x)*Math.PI)*0.5+0.5;
 const magic2=x=>magic1(magic1(x));
 const magic3=x=>magic2(magic1(x));
@@ -1393,6 +1513,18 @@ function initData(data){
 	if(data.debugging){
 		throw new Error('debugger detected!');
 	}
+	
+	for(let resName in SAVE_ITEMS){
+		let dd=data[resName];
+		if(typeof dd==='undefined'||(typeof dd==='number'&&Math.abs(dd)>1e100)){
+			if(typeof SAVE_ITEMS[resName].default!=='undefined'){
+				data[resName]=SAVE_ITEMS[resName].default;
+			}else{
+				data[resName]=0;
+			}
+		}
+	}
+
 	data.PADDING=PADDING;
 	if(hasUpgrade(data.truthLevel)){
 		data.gemChosen=TRUTH_UPGRADES[data.truthLevel].minCost;
@@ -1445,6 +1577,9 @@ function initData(data){
 	data.spMessage='';
 	data.spMessageUpdate=Date.now();
 
+	data.timeShockHint='';
+	data.timeShockHintUpdate=Date.now();
+
 	data.version=VERSION;
 
 	data.DAILY_MESSAGES=DAILY_MESSAGES;
@@ -1455,6 +1590,8 @@ function initData(data){
 	data.DB_PROI=DB_PROI;
 	data.VERSION=VERSION;
 	data.VERSION_NAME=VERSION_NAME;
+	data.ENEMY_ABBR=ENEMY_ABBR;
+	data.BASIC_ELEMENTS=BASIC_ELEMENTS;
 	data.languages=window.languages;
 	data.getLangName=window.getLangName;
 	data.setLanguage=window.setLanguage;
@@ -1512,6 +1649,7 @@ Vue.component('model-alert',{
 !function(){
 	let app=new Vue({
 		el:'#app',
+		template:window.GAME_UI,
 		watch:{
 			light(v){
 				this.setLight(v);
@@ -1580,6 +1718,7 @@ Vue.component('model-alert',{
 							this.sping=false;
 							this.spLevel+=1;
 							this.spMessage='传教成功！';
+							this.spingProblem=[];
 							this.spMessageUpdate=Date.now();
 						}
 						else{
@@ -1592,6 +1731,7 @@ Vue.component('model-alert',{
 					this.spCombo=0;
 					this.sping=false;
 					this.spMessage='传教失败！';
+					this.spingProblem=[];
 					let acs=chooses.filter(c=>c.ac).map(c=>this.PCtoString(pid,c)).map(this.translate);
 					this.spMessage=translate(`传教失败，正确答案是${new Array(acs.length).fill(0).map((_,i)=>`<strong>{${i}}</strong>`).join('、')}。`,...acs);
 				}
@@ -1847,7 +1987,7 @@ Vue.component('model-alert',{
 					this.saveInput=translate(`在调试模式下无法导出存档。`);
 					return;
 				}
-				var save={};
+				let save={};
 				for(let name in SAVE_ITEMS){
 					save[name]=this[name];
 				}
@@ -1863,17 +2003,29 @@ Vue.component('model-alert',{
 
 			genEnemyDNA(...parentsDNA){
 				let dna={};
-				let r=0.02*Math.pow(10,Math.random());
 				for(let abbr of ENEMY_ABBR){
-					dna[abbr]=Math.random()*r;
+					let value=Math.random();
+					let weight=-1;
 					for(let e of parentsDNA){
-						dna[abbr]+=e[abbr];
+						let r=Math.random();
+						if(r>weight){
+							value=e[abbr];
+							weight=r;
+						}
 					}
-					dna[abbr]/=(parentsDNA.length+r);
-					if(Math.random()<0.05){
-						dna[abbr]*=2*Math.random();
+					dna[abbr]=value;
+				}
+				let TBWeight=Math.random()<1?1:0.1;
+				let TBAbbr;
+				let weight=-1;
+				for(let abbr in dna){
+					let r=Math.random();
+					if(r>weight){
+						TBAbbr=abbr;
+						weight=r;
 					}
 				}
+				dna[TBAbbr]*=(1+TBWeight)**(2*Math.random()-1);
 				return dna;
 			},
 			getEnemyAbbr(dna,strength){
@@ -1946,7 +2098,7 @@ Vue.component('model-alert',{
 					e.arr.push(this.genEnemyDNA());
 				}
 				var dnas=[e.arr.shift()];
-				for(let i=0;i<e.arr.length&&Math.random()<0.5;i++){
+				for(let i=0;i<e.arr.length&&Math.random()<0.3;i++){
 					dnas.push(e.arr[i]);
 				}
 				var dna=this.genEnemyDNA(...dnas);
@@ -2053,6 +2205,20 @@ Vue.component('model-alert',{
 			endAdventure(){
 				this.adventure=false;
 			},
+			buyMagicTreeSeed(){
+				if(this.canBuyMagicTreeSeed){
+					this.element.magic-=this.magicTreeSeedCost;
+					this.magicTreeSeed+=1;
+				}
+			},
+			getTimeIDC(){
+				this.timeIDC+=this.tech.timeInduction*2;
+			},
+			calcTimeUnstablity(){
+				let now=new Date();
+				if(now.getDate()%10!==now.getMonth()%9)return 1;
+				return (2+Math.abs(now.getMinutes()-30)/15)**1.2;
+			},
 		},
 		computed:{
 			moDelta(){
@@ -2070,7 +2236,7 @@ Vue.component('model-alert',{
 				return this.moValue>=this.moerCost;
 			},
 			moerCost(){
-				return Math.ceil(100*Math.pow(1e3*Math.pow(1.6**(1/2.5),this.moers/(1+this.spLevel*0.15)/this.tidyEffectFactor)/(1e3+this.XY*(1+this.natureLevel)),2.5));
+				return Math.ceil(Math.max(100*Math.pow(1e3*Math.pow(1.6**(1/2.5),this.moers/(1+this.spLevel*0.15)/this.tidyEffectFactor)/(1e3+this.XY*(1+this.natureLevel)),2.5),this.moers**2));
 			},
 
 			canBuyChurch(){
@@ -2215,8 +2381,10 @@ Vue.component('model-alert',{
 			},
 
 			tidyEffectFactor(){
-				if(this.advancedMoLevel%100!==0)return 1;
-				return (1+this.tech.tidy/4);
+				if(this.advancedMoLevel<=0)return 1;
+				let lowbit=(this.advancedMoLevel)&-(this.advancedMoLevel);
+				let x=Math.log2(lowbit);
+				return 1+Math.max(x-100/(50+this.tech.tidy),0);
 			},
 
 			canBuyHugeStone(){
@@ -2270,6 +2438,17 @@ Vue.component('model-alert',{
 			adventurerInitHealth(){
 				return this.tech.blessing*5+50*this.knowledgeBook;
 			},
+
+			magicTreeSeedCost(){
+				return 7.2e3/(this.tech.magicTree+10/(this.magicTreeSeed+1));
+			},
+			canBuyMagicTreeSeed(){
+				return this.element.magic>=this.magicTreeSeedCost;
+			},
+
+			worldSpeedLimit(){
+				return 1+this.tech.timeInduction*0.2;
+			},
 		},
 		data:function(){
 			let save=localStorage.getItem('game-mosiyuan-save');
@@ -2285,16 +2464,6 @@ Vue.component('model-alert',{
 			}
 			while(true){
 				try{
-					for(let resName in SAVE_ITEMS){
-						let dd=data[resName];
-						if(typeof dd==='undefined'||(typeof dd==='number'&&Math.abs(dd)>1e100)){
-							if(typeof SAVE_ITEMS[resName].default!=='undefined'){
-								data[resName]=SAVE_ITEMS[resName].default;
-							}else{
-								data[resName]=0;
-							}
-						}
-					}
 					initData.call(this,data);
 				}catch(e){
 					window.prompt(translate(`存档初始化失败。{!}\n${e}`));
@@ -2312,7 +2481,7 @@ Vue.component('model-alert',{
 		mounted(){
 			const saveSave=()=>{
 				if(!this.debugging){
-					save={};
+					let save={};
 					for(let resName in SAVE_ITEMS){
 						save[resName]=this[resName];
 					}
@@ -2324,7 +2493,7 @@ Vue.component('model-alert',{
 			this.solvePTL();
 			const loop=()=>{
 				var nt=Date.now();
-				var s=(nt-this.lastTime)/1000;
+				var s=(nt-this.lastTime)/1000*Math.max(1e-2,this.worldSpeed);
 
 				this.moSiyuan(s*this.bookEffect);
 				
@@ -2354,11 +2523,26 @@ Vue.component('model-alert',{
 
 				if(this.warLevel!==0){
 					let tt=Math.max(this.warLevel,1);
-					this.enemyProgress+=wd/(100*Math.sqrt(tt));
+					this.enemyProgress+=wd/(50*Math.sqrt(tt));
 					while(this.enemyProgress>=1){
 						this.enemyProgress-=1;
 						this.spawnEnemy(tt);
 					}
+				}
+
+				let td=Math.min(this.timeIDC,s*Math.max(this.timeIDC*0.01,0.1)*this.calcTimeUnstablity());
+				this.timeIDC-=td;
+
+				this.worldSpeed+=td/1500;
+				if(this.worldSpeed>this.worldSpeedLimit){
+					let shock=Math.min(Math.max(0.1,this.worldSpeedLimit*Math.random()*0.3)*this.calcTimeUnstablity(),this.worldSpeed-(Math.random()*0.1+0.1));
+					this.worldSpeed-=shock;
+					this.timeShockHint=`${pn(-shock)}`;
+					this.timeShockHintUpdate=Date.now();
+				}
+
+				if(this.timeIDC<=0&&this.worldSpeed>1){
+					this.worldSpeed=Math.max(1,this.worldSpeed-s*0.0015*this.calcTimeUnstablity());
 				}
 
 				this.passTimeLoop(s);
@@ -2422,23 +2606,24 @@ Vue.component('model-alert',{
 				// enemy action
 				for(let e of this.enemy.current.filter(e=>e.abbr.health>0)){
 					if(!isFinite(e.score))e.score=0;
-					let p=e.pos-e.abbr.speed*s;
-					p=Math.max(p,0);
-					let dis=e.pos-p;
+					let time=s;
+					let newPos=e.pos-e.abbr.speed*time;
+					newPos=Math.max(newPos,0);
+					let dis=e.pos-newPos;
+					time-=dis/e.abbr.speed;
 					e.score+=dis/e.strength;
-					e.pos=p;
-					if(p===0){
-						let ss=dis===0?s:(s-dis/e.abbr.speed);
-						let dmg=e.abbr.attack*ss;
+					e.pos=newPos;
+					if(e.pos<=0){
+						let dmg=e.abbr.attack*time;
 						this.light-=dmg/1e4;
 						if(this.light<0)this.light=0;
-						e.score+=dmg/e.strength;
+						e.score+=3*dmg/e.strength;
 					}
 				}
 
 				// kill dead enemies
 				for(let db of this.defBuildings){
-					if(typeof db.targetID!=='undefined'&&cur[db.targetID].abbr.health<=0){
+					if(typeof db.targetID!=='undefined'&&(cur[db.targetID].abbr===undefined||cur[db.targetID].abbr.health<=0)){
 						delete db.targetID;
 					}
 				}
@@ -2452,11 +2637,12 @@ Vue.component('model-alert',{
 				this.lastTime=nt;
 			};
 			setInterval(loop);
-			this.$el.style.display='block';
-			document.getElementById('global').innerText='';
 			const maker=(obj)=>{
 				return {
 					get:()=>{
+						if(window.LOCAL){
+							return obj;
+						}
 						console.log(
 							`膜拜 %cS%ciyuan%c 要真诚!\n%chttps://orzsiyuan.com/`,
 							'color:black;font-weight:bold;',
