@@ -115,7 +115,7 @@
 						.then(
 							()=>Promise.all([
 								loadScript(['https://cdn.jsdelivr.net/gh/lmoliver/lmoliver.github.io@master/mosiyuan/lang.min.js','./lang.js']),
-								loadText(['./ui.html']).then((result)=>{window.GAME_UI=result;}),
+								loadText(['https://cdn.jsdelivr.net/gh/lmoliver/lmoliver.github.io@master/mosiyuan/ui.html','./ui.html']).then((result)=>{window.GAME_UI=result;}),
 							])
 						),
 					])
