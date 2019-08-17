@@ -2,6 +2,7 @@
 <html>
 	<head>
 		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">
 		<link rel="shortcut icon" type="image/ico" href="./favicon.ico"/>
 		<title>膜拜Siyuan</title>
 	</head>
@@ -22,6 +23,7 @@
 		<script>
 			{
 				'use strict';
+				const VERSION='0.6.4';
 				Object.defineProperty(window,'LOCAL',{get:()=>false});
 				function toAbsLoc(loc){
 					let a=document.createElement('a');
@@ -47,10 +49,7 @@
 				}
 				async function loadByElement(tagName,defaultAttr,attrName,urls){
 					urls=urls.map(toAbsLoc);
-					let score=
-						window.location.hostname.includes('.github.io')?
-						(url)=>(url.includes('cdn')?1:0)
-						:(url)=>(url.includes('cdn')?0:1);
+					let score=(url)=>(url.includes('cdn')^LOCAL?1:0);
 					urls.sort((x,y)=>score(y)-score(x));
 					let handler=loadTag('');
 					for(let url of urls){
@@ -114,15 +113,15 @@
 						loadScript(['https://cdn.jsdelivr.net/npm/axios@0.19.0/dist/axios.min.js','../axios.js'])
 						.then(
 							()=>Promise.all([
-								loadScript(['https://cdn.jsdelivr.net/gh/lmoliver/lmoliver.github.io@master/mosiyuan/lang.min.js','./lang.js']),
-								loadText(['https://cdn.jsdelivr.net/gh/lmoliver/lmoliver.github.io@master/mosiyuan/ui.html','./ui.html']).then((result)=>{window.GAME_UI=result;}),
+								loadScript([`https://cdn.jsdelivr.net/gh/LMOliver/mosiyuan@${VERSION}/lang.min.js`,'../../mosiyuan/lang.js']),
+								loadText([`https://cdn.jsdelivr.net/gh/LMOliver/mosiyuan@${VERSION}/ui.html`,'../../mosiyuan/ui.html']).then((result)=>{window.GAME_UI=result;}),
 							])
 						),
 					])
-					.then(()=>loadScript(['https://cdn.jsdelivr.net/gh/lmoliver/lmoliver.github.io@master/mosiyuan/mosiyuan.min.js','./mosiyuan.js'])),
-					loadCSS(['https://cdn.jsdelivr.net/gh/lmoliver/lmoliver.github.io@master/normalize.min.css','../normalize.css']),
-					loadCSS(['https://cdn.jsdelivr.net/gh/lmoliver/lmoliver.github.io@master/default.min.css','../default.css']),
-					loadCSS(['https://cdn.jsdelivr.net/gh/lmoliver/lmoliver.github.io@master/mosiyuan/mosiyuan.min.css','./mosiyuan.css']),
+					.then(()=>loadScript([`https://cdn.jsdelivr.net/gh/LMOliver/mosiyuan@${VERSION}/mosiyuan.min.js`,'../../mosiyuan/mosiyuan.js'])),
+					loadCSS(['https://cdn.jsdelivr.net/gh/LMOliver/lmoliver.github.io/normalize.min.css','../normalize.css']),
+					loadCSS(['https://cdn.jsdelivr.net/gh/LMOliver/lmoliver.github.io/default.min.css','../default.css']),
+					loadCSS([`https://cdn.jsdelivr.net/gh/LMOliver/mosiyuan@${VERSION}/mosiyuan.min.css`,'../../mosiyuan/mosiyuan.css']),
 				])
 				.then(()=>{
 					document.getElementById('global').innerHTML='';
