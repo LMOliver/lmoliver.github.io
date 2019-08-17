@@ -2384,7 +2384,7 @@ Vue.component('model-alert',{
 				if(this.advancedMoLevel<=0)return 1;
 				let lowbit=(this.advancedMoLevel)&-(this.advancedMoLevel);
 				let x=Math.log2(lowbit);
-				return 1+Math.max(x-100/(50+this.tech.tidy),0);
+				return 1+Math.max(x-10/this.tech.tidy**0.5,0);
 			},
 
 			canBuyHugeStone(){
