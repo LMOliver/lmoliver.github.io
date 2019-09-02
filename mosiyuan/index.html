@@ -4,7 +4,7 @@
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">
 		<link rel="shortcut icon" type="image/ico" href="./favicon.ico"/>
-		<title>膜拜Siyuan</title>
+		<title>膜拜 Siyuan</title>
 	</head>
 	<body>
 		<style>
@@ -23,16 +23,17 @@
 		<script>
 			{
 				'use strict';
-				const VERSION='0.6.4';
-				Object.defineProperty(window,'LOCAL',{get:()=>false});
+				const VERSION='0.6.4.1';
+				const LOCAL=window.location.hostname.includes('localhost');
+				Object.defineProperty(window,'LOCAL',{get:()=>LOCAL});
 				function toAbsLoc(loc){
 					let a=document.createElement('a');
 					a.href=loc;
 					return a.href;
 				}
-				function loadTag(text){
+				function loadTag(url){
 					let qaq=document.createElement('div');
-					qaq.innerHTML=text;
+					qaq.innerHTML=`Loading <code>${url.split('/').slice(-1)[0]}</code>...`;
 					let element=document.getElementById('global');
 					element.appendChild(qaq);
 					return {
@@ -42,35 +43,41 @@
 						set text(newText){
 							qaq.innerHTML=newText;
 						},
+						done(){
+							qaq.innerHTML+=` <span style="color:green;">Done.</span><br>`;
+						},
+						failed(){
+							qaq.innerHTML+=` <span style="color:red;">Failed.</span><br>`;
+						},
 						remove(){
 							element.removeChild(qaq);
 						},
 					};
 				}
+				function urlScore(url){
+					return url.includes('cdn')^LOCAL?1:0;
+				}
 				async function loadByElement(tagName,defaultAttr,attrName,urls){
 					urls=urls.map(toAbsLoc);
-					let score=(url)=>(url.includes('cdn')^LOCAL?1:0);
-					urls.sort((x,y)=>score(y)-score(x));
-					let handler=loadTag('');
+					urls.sort((x,y)=>urlScore(y)-urlScore(x));
 					for(let url of urls){
 						let element=document.createElement(tagName);
 						for(let name in defaultAttr){
 							element.setAttribute(name,defaultAttr[name]);
 						}
 						element.setAttribute(attrName,url);
-						handler.text+=`Loading <span style="font-family:monospace;">${url}</span> ...`;
+						let handler=loadTag(url);
 						try{
 							await new Promise((resolve,reject)=>{
 								element.addEventListener('load',resolve);
 								element.addEventListener('error',reject);
 								document.body.appendChild(element);
 							});
-							handler.text+=` <span style="color:green;">Done.</span><br>`;
-							// handler.remove();
+							handler.done();
 							return url;
 						}
 						catch(_){
-							handler.text+=` <span style="color:red;">Failed.</span><br>`;
+							handler.failed();
 							document.body.removeChild(element);
 						}
 						first=false;
@@ -85,21 +92,16 @@
 				}
 				async function loadText(urls){
 					urls=urls.map(toAbsLoc);
-					let score=
-						window.location.hostname==='lmoliver.github.io'?
-						(url)=>(url.includes('cdn')?1:0)
-						:(url)=>(url.includes('cdn')?0:1);
-					urls.sort((x,y)=>score(y)-score(x));
-					let handler=loadTag('');
+					urls.sort((x,y)=>urlScore(y)-urlScore(x));
 					for(let url of urls){
-						handler.text+=`Loading <span style="font-family:monospace;">${url}</span> ...`;
-						try{
+							let handler=loadTag(url);
+							try{
 							let result=(await axios.get(url)).data;
-							handler.text+=` <span style="color:green;">Done.</span><br>`;
+							handler.done();
 							return result;
 						}
 						catch(e){
-							handler.text+=` <span style="color:red;">Failed.</span><br>`;
+							handler.failed();
 							continue;
 						}
 					}

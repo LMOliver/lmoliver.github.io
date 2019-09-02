@@ -12,13 +12,11 @@ Vue.component('header-title',{
 });
 
 Vue.component('side-bar',{
-	template:'<aside :style="style"><slot></slot></aside>',
+	template:'<aside :style="style" class="sidebar"><slot></slot></aside>',
 	props:['pos'],
 	data:function(){
 		return {
 			style:{
-				width:'15%',
-				margin:'0 1.5%',
 				float:this.pos,
 			},
 		};
@@ -26,17 +24,10 @@ Vue.component('side-bar',{
 });
 
 Vue.component('side-block',{
-	template:'<div :style="style" :class="classObj"><strong>{{title}}</strong><hr><slot></slot></div>',
+	template:'<div class="contains sideblock"><strong>{{title}}</strong><hr><slot></slot></div>',
 	props:['title'],
 	data:function(){
-		return {
-			style:{
-				width:'calc(100% - 24px)',
-			},
-			classObj:{
-				contains:true,
-			},
-		};
+		return {};
 	},
 });
 
@@ -52,7 +43,7 @@ function copyText(text){
 Vue.component('fold-block',{
 	props:['title','initshow','nocopy'],
 	template:`
-		<div :class="classObj" style="">
+		<div class="contains" style="">
 			<strong v-if="title" style="display:inline-block">{{title}}</strong>
 			<button @click="show = !show" :style="btnStyle">{{show?'收起':'展开'}}</button>
 			<button v-if="nocopy===undefined" @click="copy()" :style="btnStyle">复制</button>
@@ -65,9 +56,6 @@ Vue.component('fold-block',{
 	},
 	data:function(){
 		return {
-			classObj:{
-				contains:true,
-			},
 			btnStyle:{
 				'margin-left':'auto',
 			},
@@ -92,7 +80,7 @@ function loadInfo(href){
 
 Vue.component('post-refence',{
 	template:`
-		<a :href="'#!'+href" :style="style" :class="classObj" v-if="!data.hidden">
+		<a :href="'#!'+href" :style="style" class="contains" v-if="!data.hidden">
 			<template v-if="size==='small'">
 				<span>{{data.title}}</span>
 				<span>{{data.description}}</span>
@@ -127,9 +115,6 @@ Vue.component('post-refence',{
 				time:undefined,
 				description:'正在加载 QAQ',
 			},
-			classObj:{
-				contains:true,
-			},
 		}
 	},
 	mounted(){
@@ -150,7 +135,7 @@ Vue.component('post-refence',{
 Vue.component('blog-list',{
 	template:`
 		<div>
-			<post-refence v-for="id in list" size="large" :href="id"></post-refence>
+			<post-refence v-for="id in list" size="large" :href="id" :key="id"></post-refence>
 		</div>
 	`,
 	data(){
@@ -274,28 +259,44 @@ Vue.component('life-canvas',{
 });
 
 Vue.component('blog-context',{
-	template:'<article :style="style" :class="classObj"><div></div></article>',
 	props:['context'],
 	data:function(){
 		return {
-			style:{
+			renderer:function(...args){
+				this.setContext(this.context);
+				this.renderer(...args);
 			},
-			classObj:{
-				contains:true,
-			},
-			vue:null,
+			cache:Object.create(null),
 		};
+	},
+	methods:{
+		setContext(text){
+			text=`<article class="contains">${text}</article>`;
+			let {render,staticRenderFns}=Vue.compile(text);
+			let staticCodes=staticRenderFns
+				.map(f=>f.toString().slice('function anonymous(\n) {\nwith(this){return '.length,-'}\n}'.length));
+			render=render
+				.toString()
+				.slice('function anonymous() {\n'.length,-'\n}'.length)
+				.replace(/_m\((\d+)(,true)?\)/mg,(_,x,t)=>{
+					let code=staticCodes[x];
+					if(t){
+						return code;
+					}
+					else{
+						return code;
+						// return `(cache[${x}]?cache[${x}]:cache[${x}]=${code})`;
+					}
+				});
+			this.renderer=new Function(render);
+		}
+	},
+	render(...args){
+		return this.renderer(...args);
 	},
 	watch:{
 		context(text){
-			var res=Vue.compile('<div>'+text+'</div>');
-			if(this.vue)this.vue.$destroy();
-			this.vue=new Vue({
-				el:this.$el.children[0],
-				render:res.render,
-				staticRenderFns:res.staticRenderFns,
-				parent:this,
-			});
+			this.setContext(text);
 		},
 	},
 });
@@ -342,15 +343,15 @@ Vue.component('comment-area',{
 	}
 });
 
-function renderMetadata(data){
-	var {title='无标题',time='',description=''}=data;
+function renderMetadata({title='无标题',time='',description=''}){
 	return `
 		<div>
 			<h1 style="display:inline">${title}</h1>
 			<span>${time}</span>
 		</div>
 		<p>${description}</p>
-		<hr>`
+		<hr>
+	`;
 }
 
 function renderMarkdown(md){
@@ -360,9 +361,9 @@ function renderMarkdown(md){
 				throwOnError: false
 			})
 		),{
-			highlight: function (code,type) {
-				if(type==="")return code;
-				return hljs.highlightAuto(code).value;
+			highlight: function (code,lang) {
+				if(lang==="")return code;
+				return hljs.highlightAuto(lang).value;
 			}
 		}
 	);

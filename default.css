@@ -1,5 +1,12 @@
-body{
-	padding:4% 20% 4% 20%;
+@media screen and (min-width:1000px){
+	body{
+		padding:4% 20% 4% 20%;
+	}
+}
+@media screen and (max-width:1000px){
+	body{
+		padding:4% 4% 4% 4%;
+	}
 }
 
 h1,h2,h3,h4,h5,h6{
@@ -42,7 +49,7 @@ del{
 code{
 	color:#222222;
 	border-radius: 2px;
-	background: #cccccc;
+	background: #eeeeee;
 	padding: 0 2px;
 }
 pre{
@@ -67,7 +74,7 @@ blockquote{
 }
 
 p{
-	text-indent: 40px;
+	text-indent: 32px;
 }
 
 p span{
@@ -112,6 +119,10 @@ button:disabled{
 	border: 1px rgba(0,0,0,0) solid;
 	background-color:gray !important;
 	cursor: not-allowed;
+}
+
+blockquote{
+	margin-inline-end: 5px;
 }
 
 li{

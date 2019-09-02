@@ -2,7 +2,6 @@ body,html{
 	margin: 0;
 	height: 100%;
 	font-family:sans-serif;
-	background:#eeeeee url(https://acg.toubiec.cn/random) fixed;
 	background-size: cover;
 }
 
@@ -32,10 +31,6 @@ img,canvas{
 	max-width: calc(100%);
 }
 
-pre{
-	overflow-x: auto;
-}
-
 h1,h2,h3,h4,h5,h6{
 	text-decoration: none;
 }
@@ -44,12 +39,73 @@ h1,h2,h3,h4,h5,h6{
     position:relative;
 	min-height: 100%;
 }
-#main{
-	width:64%;
-	margin: 0 auto; 
+@media screen and (max-width: 1000px){
+	body{
+		background: #eeeeee;
+	}
+	#main{
+		width: 100%;
+	}
+	.sidebar{
+		display: inline-block;
+		float: none !important;
+		width: 100%;
+		margin: 0 auto;
+	}
+	.sideblock{
+		width:auto;
+	}
+	#page{
+		padding: 0 0 60px 0;
+	}
+	.contains{
+		margin: 5px 0;
+	}
+	header{
+		padding: 0;
+	}
 }
-#page{
-	padding: 30px 8% calc(30px + 60px) 8%;
+@media screen and (min-width: 1000px){
+	body{
+		background:#eeeeee url(https://acg.toubiec.cn/random) fixed;
+	}
+	#main{
+		width:64%;
+		margin: 0 auto; 
+	}
+	.sidebar{
+		width:15%;
+		margin:0 1.5%;
+	}
+	.sideblock{
+		width:calc(100% - 24px);
+	}
+	#page{
+		padding: 30px 8% calc(30px + 60px) 8%;
+	}
+	.contains{
+		margin: 10px 0;
+	}
+	header{
+		padding: 0 8%;
+	}
+}
+
+header{
+	font-family: 'Consolas', 'Courier New', 'Courier', 'monospace';
+	position: sticky;
+	top:0;
+	background-color: rgba(255, 255, 255,0.8);
+	box-shadow: 0 0 8px rgba(192, 192, 192, 0.8);
+	z-index: 1;
+}
+
+.contains{
+	background-color: rgba(255, 255, 255,0.8);
+	padding:10px;
+	border-radius:5px;
+	box-shadow: 0 0 8px rgba(192, 192, 192, 0.8);
+	overflow-x: hidden;
 }
 
 code{
@@ -69,20 +125,10 @@ pre{
 	border-radius: 5px;
 	padding: 10px;
 	margin: 10px 0;
-	/* border:2px solid rgb(96,96,96); */
 	background-color: rgba(255, 255, 255,0.8);
+	overflow-x: auto;
 }
 
-.contains{
-	background-color: rgba(255, 255, 255,0.8);
-	padding:10px;
-	/* border:2px solid rgb(96,96,96); */
-	border-radius:5px;
-	margin: 10px 0;
-	box-shadow: 0 0 8px rgba(192, 192, 192, 0.8);
-	/* box-shadow: 0 0 3px rgba(0, 0, 0, 0.8); */
-	/* box-shadow: 0 0 8px rgba(255, 255, 255, 0.8); */
-}
 
 .cf-black-red{
 	color:red !important;
@@ -94,25 +140,12 @@ pre{
 	color:black !important;
 }
 
-header{
-	font-family: 'Consolas', 'Courier New', 'Courier', 'monospace';
-	position: sticky;
-	top:0;
-	background-color: rgba(255, 255, 255,0.8);
-	/* border:solid white; */
-	/* border-width: 0 0 2px; */
-	box-shadow: 0 0 8px rgba(192, 192, 192, 0.8);
-	padding: 0 10%;
-	z-index: 1;
-}
-
 footer{
 	height: 60px;
 	background-color: rgba(255, 255, 255,0.8);
 	text-align: center;
 	padding-top: 8px;
 	box-shadow: 0 0 8px rgba(192, 192, 192, 0.8);
-	/* border-top: 2px solid rgb(96,96,96); */
 	position: absolute;
 	bottom: 0;
 	width: 100%;
@@ -121,7 +154,6 @@ footer{
 button{
 	box-shadow: 0 0 8px rgba(192, 192, 192, 0.8);
 	border: none;
-	/* border: 1px rgb(96,96,96) solid; */
 	border-radius: 5px;
 	background: rgb(240, 240, 240);
 	color:black;

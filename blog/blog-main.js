@@ -17,11 +17,10 @@ function updateHref(){
 	this.context='<p>Loading...</p>';
 	this.commentId=undefined;
 	makeTitle('Loading...');
-	loadInfo(href).then(({data})=>{
-		makeTitle(data.title);
-		// console.log(data);
-		this.commentId=data.comment?('blog-'+href):undefined;
-		this.context=renderMetadata(data);
+	loadInfo(href).then(({data:{title,time,description,comment=true}})=>{
+		makeTitle(title);
+		this.commentId=comment?('blog-'+href):undefined;
+		this.context=renderMetadata({title,time,description});
 		return loadContext(href);
 	}).then(({data})=>{
 		this.context+=renderMarkdown(data);
