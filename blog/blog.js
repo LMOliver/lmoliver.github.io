@@ -363,7 +363,7 @@ function renderMarkdown(md){
 		),{
 			highlight: function (code,lang) {
 				if(lang==="")return code;
-				return hljs.highlightAuto(lang).value;
+				return hljs.highlight(lang,code).value;
 			}
 		}
 	);
